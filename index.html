@@ -399,6 +399,20 @@ table.escala td{font-family:var(--f-body)}
 .dor-res b{color:var(--ink);font-weight:700}
 .dor-res .melhor{color:var(--ok);font-weight:700;font-size:12px}
 .dor-res .pior{color:var(--crit);font-weight:700;font-size:12px}
+/* ---- v20: observação do treino ---- */
+#tr-obs[hidden]{display:none}
+.obs-t{display:grid;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow-sm)}
+.obs-t.pede{border:1.5px solid var(--brand);background:color-mix(in srgb,var(--brand) 10%,var(--surface))}
+.obs-t label{display:grid;gap:3px}
+.obs-t label b{font-family:var(--f-display);font-weight:800;font-size:16px;color:var(--ink)}
+.obs-t label span{font-size:13px;font-weight:400;color:var(--muted);line-height:1.4}
+.obs-t textarea{width:100%;min-height:84px;font:inherit;font-size:15px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);resize:vertical}
+.obs-t .acoes-o{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px}
+.obs-t .msg{font-size:13px;color:var(--ok)} .obs-t .msg.erro{color:var(--crit)}
+.obs-lista{list-style:none;margin:0;padding:0;display:grid}
+.obs-lista li{padding:10px 0;border-top:1px solid var(--line)} .obs-lista li:first-child{border-top:0;padding-top:0}
+.obs-lista .q{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.obs-lista p{margin:3px 0 0;font-size:14px;color:var(--ink);white-space:pre-wrap}
 /* ---- v18: CMJ fora ---- */
 .panel:has(#c-semj){display:none}
 </style>
@@ -518,6 +532,7 @@ table.escala td{font-family:var(--f-body)}
     <div class="panel"><div class="head"><h2>Esta semana x semana anterior</h2><span class="sub" id="res-sem-sub"></span></div><div class="kpis" id="res-sem"></div></div>
     <div class="panel"><div class="head"><h2>Carga por semana</h2><span class="sub">esforço da semana (UA) e volume load</span></div><div class="chartbox"><canvas id="c-res" aria-label="Carga por semana"></canvas></div></div>
     <div class="panel"><div class="head"><h2>Dor por região</h2><span class="sub">intensidade (0-10) em cada sessão registrada</span></div><div id="dor-box"></div></div>
+    <div class="panel"><div class="head"><h2>Observações dos treinos</h2><span class="sub">o que o aluno escreveu no fim de cada treino</span></div><div id="obs-box"></div></div>
   </div>
 </section>
 <section data-view="cargas" hidden>
@@ -994,6 +1009,7 @@ function limpar(d){
   const dt={}; Object.keys(d.ext.dates).forEach(t=>dt[esc(t)]=d.ext.dates[t]); d.ext.dates=dt;
   d.sessoes.forEach(s=>{s.local=esc(s.local||""); s.treino=esc(s.treino);});
   d.cardio=Array.isArray(d.cardio)?d.cardio:[];
+  d.obsTreino=Array.isArray(d.obsTreino)?d.obsTreino:[];
   d.__limpo=true; return d;
 }
 
@@ -1161,7 +1177,7 @@ async function atualizar(forcar){
     const r=await api({acao:"aluno",token:TOKEN,nome,forcar:!!forcar});
     if(nome!==ALUNO||NA_HOME) return;
     limpar(r.dados);
-    const mudou=JSON.stringify([r.dados.ext,r.dados.sessoes,r.dados.cardio||[]])!==JSON.stringify([ALUNOS[nome].ext,ALUNOS[nome].sessoes,ALUNOS[nome].cardio||[]]);
+    const mudou=JSON.stringify([r.dados.ext,r.dados.sessoes,r.dados.cardio||[],r.dados.obsTreino||[]])!==JSON.stringify([ALUNOS[nome].ext,ALUNOS[nome].sessoes,ALUNOS[nome].cardio||[],ALUNOS[nome].obsTreino||[]]);
     ALUNOS[nome]=limpar(r.dados); aplicarDados(false);
     if(mudou && !(SUJO && view==="treino")) renderAll();
   }catch(e){
@@ -1342,7 +1358,7 @@ function renderTreino(){
     const sessao={data:v("#s-data"),dur:v("#s-dur"),pse:v("#s-pse"),psr:v("#s-psr"),sono:v("#s-sono"),qual:v("#s-qual"),fad:v("#s-fad"),dorm:v("#s-dorm"),est:v("#s-est"),hum:v("#s-hum"),local:v("#s-local"),dor:v("#s-dor"),cmj1:v("#s-cmj1"),cmj2:v("#s-cmj2"),cmj3:v("#s-cmj3")};
     if(!sessao.data){msg.className="msg erro";msg.textContent="Preencha a data.";return;}
     b.disabled=true; msg.className="msg"; msg.textContent="Salvando na planilha…";
-    try{ await api({acao:"salvarSessao",token:TOKEN,nome:ALUNO,treino:TR_T,semana:TR_W,sessao}); SUJO=false; const fim=POS_ENCERRAR; POS_ENCERRAR=null; await recarregarAluno(fim?`Treino encerrado: ${fim} min salvos. Daqui a 15 a 30 minutos, responda a PSE.`:"Registro da sessão salvo."); }
+    try{ await api({acao:"salvarSessao",token:TOKEN,nome:ALUNO,treino:TR_T,semana:TR_W,sessao}); SUJO=false; const fim=POS_ENCERRAR; POS_ENCERRAR=null; if(fim) PEDIR_OBS=true; await recarregarAluno(fim?`Treino encerrado: ${fim} min salvos. Daqui a 15 a 30 minutos, responda a PSE.`:"Registro da sessão salvo."); }
     catch(e){ if(e&&e.erro==="sessao"){sairDoApp();return;} msg.className="msg erro"; msg.textContent=msgDe(e); }
     b.disabled=false;
   });
@@ -1409,12 +1425,12 @@ function renderTreino(){
 }
 // ---------- cronômetro do treino ----------
 let CRON=null; try{ CRON=JSON.parse(guardar.get("eb_cron")||"null"); }catch(e){ CRON=null; }
-let cronTick=null, POS_ENCERRAR=null;
+let cronTick=null, POS_ENCERRAR=null, PEDIR_OBS=false;
 const fmtTempo=ms=>{const t=Math.max(0,Math.floor(ms/1000)),h=Math.floor(t/3600),m=Math.floor(t%3600/60),s=t%60;return (h?h+":"+String(m).padStart(2,"0"):String(m).padStart(2,"0"))+":"+String(s).padStart(2,"0");};
 function renderCron(){
   const el=$("#tr-cron"); if(!el) return;
   clearInterval(cronTick); cronTick=null;
-  renderAvisoCron();
+  renderAvisoCron(); renderObsTreino();
   const meu=CRON&&CRON.aluno===ALUNO;
   let fim=null; try{ fim=JSON.parse(guardar.get("eb_fim")||"null"); }catch(e){}
   if(fim&&(Date.now()-fim.ts>3*3600e3||fim.aluno!==ALUNO)) { if(Date.now()-fim.ts>3*3600e3) guardar.del("eb_fim"); fim=null; }
@@ -1475,6 +1491,39 @@ function renderAvisoCron(){
   avisoTick=setInterval(()=>{const r=$("#aviso-rel"); if(r&&CRON) r.textContent=fmtTempo(Date.now()-CRON.inicio); else {clearInterval(avisoTick);avisoTick=null;}},1000);
   $("#aviso-ir").addEventListener("click",()=>{ TR_T=CRON.treino; TR_W=CRON.semana; show("treino"); const c=$("#tr-cron"); if(c) c.scrollIntoView({block:"center",behavior:"smooth"}); if(longo){ const f=$("#cron-fim"); if(f) f.click(); } });
   const bc=$("#aviso-cancel"); if(bc) bc.addEventListener("click",()=>{ CRON=null; guardar.del("eb_cron"); clearInterval(cronTick); cronTick=null; renderAvisoCron(); renderTreino(); });
+}
+
+// ---------- observação do aluno sobre o treino ----------
+const obsDe=(t,w)=>(ALUNOS[ALUNO].obsTreino||[]).find(o=>o.treino===t&&+o.semana===+w)||null;
+function renderObsTreino(){
+  const cron=$("#tr-cron"); if(!cron) return;
+  let el=$("#tr-obs"); if(!el){ el=document.createElement("div"); el.id="tr-obs"; cron.parentNode.insertBefore(el,cron.nextSibling); }
+  const o=obsDe(TR_T,TR_W), feito=treinoFeito(TR_T,TR_W), rodando=CRON&&CRON.aluno===ALUNO&&CRON.treino===TR_T&&CRON.semana===TR_W;
+  if(!o&&!feito&&!rodando){ el.hidden=true; el.innerHTML=""; return; }
+  el.hidden=false;
+  const pede=feito&&!o, comoAluno=MODO_ALUNO||!podeEditarTreinador();
+  el.innerHTML=`<div class="obs-t${pede?" pede":""}">
+    <label for="obs-txt"><b>${comoAluno?"Como foi o treino? Conte pro Eduardo":"Observação do aluno sobre o treino"}</b>
+    <span>Treino ${esc(TR_T)}, semana ${TR_W}. Qualquer coisa: desconforto em algum exercício, troca ou exercício que ficou de fora, como você se sentiu, se gostou…</span></label>
+    <textarea id="obs-txt" rows="3" maxlength="1000" placeholder="Ex.: senti desconforto no ombro no supino; troquei a extensora pelo leg press; dormi mal e rendi menos.">${esc(o?o.texto:"")}</textarea>
+    <div class="acoes-o"><button type="button" class="btn" id="obs-salvar">${o?"Salvar alteração":"Enviar observação"}</button><span class="msg" id="obs-msg" role="status" aria-live="polite">${o?"Enviada para o Eduardo.":""}</span></div>
+  </div>`;
+  $("#obs-txt").addEventListener("input",()=>{ SUJO=true; });
+  $("#obs-salvar").addEventListener("click",async ev=>{
+    const b=ev.currentTarget, m=$("#obs-msg"), texto=$("#obs-txt").value.trim();
+    if(!texto&&!o){ m.className="msg erro"; m.textContent="Escreva algo antes de enviar."; return; }
+    b.disabled=true; m.className="msg"; m.textContent="Enviando…";
+    const s=sessaoDe(TR_T,TR_W)||{};
+    try{ await api({acao:"salvarObsTreino",token:TOKEN,nome:ALUNO,treino:TR_T,semana:TR_W,data:s.data||dataDe(TR_T,TR_W)||new Date().toLocaleDateString("sv-SE"),texto}); SUJO=false; await recarregarAluno(texto?"Observação enviada para o Eduardo.":"Observação apagada."); }
+    catch(e){ if(e&&e.erro==="sessao"){sairDoApp();return;} m.className="msg erro"; m.textContent=msgDe(e); b.disabled=false; }
+  });
+  if(PEDIR_OBS&&pede){ PEDIR_OBS=false; setTimeout(()=>{ el.scrollIntoView({block:"center",behavior:"smooth"}); },150); }
+  else PEDIR_OBS=false;
+}
+function renderObsLista(){
+  const box=$("#obs-box"); if(!box) return;
+  const l=[...(ALUNOS[ALUNO].obsTreino||[])].sort((a,b)=>(b.data||"")<(a.data||"")?-1:(b.data||"")>(a.data||"")?1:b.linha-a.linha).slice(0,10);
+  box.innerHTML=l.length?`<ul class="obs-lista">${l.map(o=>`<li><span class="q">${o.data?fmtD(o.data):"–"} · Treino ${esc(o.treino)} · S${num(o.semana)}</span><p>${esc(o.texto)}</p></li>`).join("")}</ul>`:'<p class="sub" style="margin:0">Nenhuma observação ainda. Ela aparece aqui quando o aluno escreve no fim do treino.</p>';
 }
 
 // ---------- progressão dupla: sugestão de carga e recorde ----------
@@ -1672,7 +1721,7 @@ async function recarregarAluno(aviso){
 
 // a aba Treino entra no ciclo de desenho dos painéis
 const _renderAllBase=renderAll;
-renderAll=function(){ _renderAllBase(); if(!NA_HOME&&view==="treino") renderTreino(); if(!NA_HOME&&view==="cardio") renderCardio(); if(!NA_HOME&&view==="resumo") renderDor(); if(!NA_HOME) renderAvisoCron(); else { const a=$("#aviso-cron"); if(a) a.hidden=true; } };
+renderAll=function(){ _renderAllBase(); if(!NA_HOME&&view==="treino") renderTreino(); if(!NA_HOME&&view==="cardio") renderCardio(); if(!NA_HOME&&view==="resumo"){ renderDor(); renderObsLista(); } if(!NA_HOME) renderAvisoCron(); else { const a=$("#aviso-cron"); if(a) a.hidden=true; } };
 
 
 // ---------- abas reorganizadas: Resumo e Esforço e recuperação ----------
