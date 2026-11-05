@@ -389,6 +389,16 @@ table.escala td{font-family:var(--f-body)}
 .vazio-c{margin:0;color:var(--muted);font-size:14px}
 @media (max-width:560px){.tabs{gap:0;justify-content:space-between}.tabs button{padding:10px 6px;font-size:12px;letter-spacing:.03em}}
 @media (max-width:360px){.tabs button{padding:10px 4px;font-size:11px;letter-spacing:.01em}}
+/* ---- v19: sugestão de carga, recorde, dor ---- */
+.ex .sug{margin:0;font-size:13px;line-height:1.4;padding:8px 12px;border-radius:10px;background:var(--surface-2);color:var(--ink-2)}
+.ex .sug b{color:var(--ink)}
+.ex .sug-sobe{background:color-mix(in srgb,var(--brand) 18%,var(--surface));border-left:3px solid var(--brand)}
+.ex .pr{display:inline-block;vertical-align:middle;font-family:var(--f-body,inherit);font-size:11.5px;font-weight:700;letter-spacing:.03em;padding:2px 8px;border-radius:999px;background:color-mix(in srgb,var(--warn) 25%,var(--surface));color:var(--ink);white-space:nowrap}
+#dor-box{display:grid;gap:10px}
+.dor-res{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13.5px;color:var(--ink-2)}
+.dor-res b{color:var(--ink);font-weight:700}
+.dor-res .melhor{color:var(--ok);font-weight:700;font-size:12px}
+.dor-res .pior{color:var(--crit);font-weight:700;font-size:12px}
 /* ---- v18: CMJ fora ---- */
 .panel:has(#c-semj){display:none}
 </style>
@@ -507,6 +517,7 @@ table.escala td{font-family:var(--f-body)}
     <div class="int-has" style="display:grid;gap:12px"><h2 id="ultimaSub"></h2><div class="kpis" id="kpis"></div></div>
     <div class="panel"><div class="head"><h2>Esta semana x semana anterior</h2><span class="sub" id="res-sem-sub"></span></div><div class="kpis" id="res-sem"></div></div>
     <div class="panel"><div class="head"><h2>Carga por semana</h2><span class="sub">esforço da semana (UA) e volume load</span></div><div class="chartbox"><canvas id="c-res" aria-label="Carga por semana"></canvas></div></div>
+    <div class="panel"><div class="head"><h2>Dor por região</h2><span class="sub">intensidade (0-10) em cada sessão registrada</span></div><div id="dor-box"></div></div>
   </div>
 </section>
 <section data-view="cargas" hidden>
@@ -1358,7 +1369,9 @@ function renderTreino(){
         <td class="vs">${a?`${num(a[0])} × ${fmtKg(a[1])}`:"–"}</td></tr>`;}).join("");
     const linkOk=e.link&&/^https?:\/\//i.test(e.link);
     const vl=ss.length?vlSets(ss):null;
-    return `<article class="ex" data-i="${EXT.ex.indexOf(e)}"><header><span class="num">${rotulo||i+1}</span><div style="min-width:0"><h3>${e.ex}</h3><div class="tags">${e.g.filter(g=>g!=="Não classificado").map(g=>`<span class="tag">${g}</span>`).join("")}</div></div></header>
+    const sug=sugestaoCarga(e,TR_W), pr=recordeNaSemana(e,TR_W);
+    return `<article class="ex" data-i="${EXT.ex.indexOf(e)}"><header><span class="num">${rotulo||i+1}</span><div style="min-width:0"><h3>${e.ex}${pr?' <span class="pr" title="Maior carga já registrada neste exercício">🏆 Recorde</span>':""}</h3><div class="tags">${e.g.filter(g=>g!=="Não classificado").map(g=>`<span class="tag">${g}</span>`).join("")}</div></div></header>
+      ${sug?`<p class="sug sug-${sug.tipo}"><b>${sug.tipo==="sobe"?"↑ Sugestão de carga":"Sugestão de carga"}:</b> ${sug.txt}</p>`:""}
       <div class="presc"><div><b>${pw.reps?esc(pw.reps):"–"}</b><span>repetições</span></div><div><b>${pw.int?esc(pw.int):"–"}</b><span>intervalo</span></div><div><b>${vl!=null?num(vl):"–"}</b><span>volume load</span></div></div>
       <div class="tablewrap"><table class="series"><tr><th>Série</th><th>Repetições</th><th>Carga (kg)</th><th>${ant?"Sem. "+ant.w:"Sem. anterior"}</th></tr>${linhas}</table></div>
       ${!ss.length?`<p class="dica-pre">${ant?`Valores em cinza repetem a semana ${ant.w}. Ajuste se precisar e salve.`:"Preencha repetições e carga de cada série e salve."} Carga 1 = peso corporal.</p>`:""}
@@ -1463,6 +1476,49 @@ function renderAvisoCron(){
   $("#aviso-ir").addEventListener("click",()=>{ TR_T=CRON.treino; TR_W=CRON.semana; show("treino"); const c=$("#tr-cron"); if(c) c.scrollIntoView({block:"center",behavior:"smooth"}); if(longo){ const f=$("#cron-fim"); if(f) f.click(); } });
   const bc=$("#aviso-cancel"); if(bc) bc.addEventListener("click",()=>{ CRON=null; guardar.del("eb_cron"); clearInterval(cronTick); cronTick=null; renderAvisoCron(); renderTreino(); });
 }
+
+// ---------- progressão dupla: sugestão de carga e recorde ----------
+function faixaReps(t){
+  if(t==null||t==="") return null; const x=String(t).toLowerCase();
+  const m=x.match(/(\d+)\s*(?:a|à|-|–|até)\s*(\d+)/); if(m){ const a=+m[1],b=+m[2]; return a<=b?{min:a,max:b}:{min:b,max:a}; }
+  const n=x.match(/^\s*(\d+)\s*$/); return n?{min:+n[1],max:+n[1]}:null;
+}
+function sugestaoCarga(e,w){
+  let ant=null; for(let k=w-1;k>=1;k--) if(e.sets[k]&&e.sets[k].length){ ant={w:k,ss:e.sets[k]}; break; }
+  if(!ant) return null;
+  const f=faixaReps(((e.p&&e.p[ant.w])||{}).reps); if(!f) return null;
+  const mx=Math.max(...ant.ss.map(x=>x[1])); if(!(mx>1)) return null; // peso corporal: sem sugestão de carga
+  const reps=ant.ss.map(x=>x[0]);
+  if(reps.every(r=>r>=f.max)){ const novo=Math.max(mx+1,Math.round(mx*1.05)); return {tipo:"sobe",txt:`na semana ${ant.w} você fez ${f.max} ou mais repetições em todas as séries. Suba para cerca de ${fmtKg(novo)}.`}; }
+  if(reps.some(r=>r<f.min)) return {tipo:"mantem",txt:`na semana ${ant.w} alguma série ficou abaixo de ${f.min} repetições. Mantenha ${fmtKg(mx)}.`};
+  return {tipo:"faixa",txt:`na semana ${ant.w} você ficou dentro da faixa. Mantenha ${fmtKg(mx)} e busque ${f.max} repetições em todas as séries.`};
+}
+function recordeNaSemana(e,w){
+  const ss=e.sets[w]||[]; if(!ss.length) return false;
+  const kg=Math.max(...ss.map(x=>x[1])); if(!(kg>1)) return false;
+  let antes=null; Object.keys(e.sets).forEach(k=>{ if(+k<w) (e.sets[k]||[]).forEach(x=>{ antes=antes==null?x[1]:Math.max(antes,x[1]); }); });
+  return antes!=null&&kg>antes;
+}
+
+// ---------- evolução da dor por região ----------
+function renderDor(){
+  const box=$("#dor-box"); if(!box) return;
+  const ss=S.filter(s=>!s.cardio&&s.data).sort((a,b)=>a.data<b.data?-1:a.data>b.data?1:0);
+  const reg=s=>s.pse!=null||s.psr!=null||s.dor!=null||s.local;
+  const locais=[...new Set(ss.filter(s=>s.local).map(s=>s.local))];
+  if(!locais.length){ box.innerHTML='<p class="sub" style="margin:0">Nenhuma dor registrada até agora.</p>'; if(charts["c-dor"]){charts["c-dor"].destroy();delete charts["c-dor"];} return; }
+  const pts=ss.filter(reg);
+  const serie=l=>pts.map(s=>s.local===l?(s.dor!=null?s.dor:null):0);
+  const resumo=locais.map(l=>{ const v=pts.filter(s=>s.local===l&&s.dor!=null); if(!v.length) return `<li><b>${l}</b> registrada sem intensidade</li>`;
+    const ultimo=pts[pts.length-1], atual=ultimo.local===l?(ultimo.dor??v[v.length-1].dor):0;
+    return `<li><b>${l}</b> ${num(v[0].dor)} → ${num(atual)}${atual<v[0].dor?' <span class="melhor">melhorou</span>':atual>v[0].dor?' <span class="pior">piorou</span>':""}</li>`; }).join("");
+  box.innerHTML=`<ul class="dor-res">${resumo}</ul><div class="chartbox"><canvas id="c-dor" aria-label="Intensidade da dor por região ao longo das sessões"></canvas></div>`;
+  const cores=[css("--pse"),css("--load"),css("--brand"),css("--psr"),css("--dur"),css("--ink-2")];
+  const o=baseOpts(); o.scales.y.min=0; o.scales.y.max=10; o.scales.y.title={display:true,text:"Intensidade (0-10)",color:css("--muted"),font:{family:"Work Sans",size:11}};
+  draw("c-dor",{type:"line",data:{labels:pts.map(s=>fmtD(s.data)),datasets:locais.map((l,i)=>({label:l,data:serie(l),borderColor:cores[i%cores.length],backgroundColor:cores[i%cores.length],borderWidth:2.5,pointRadius:4,spanGaps:true,tension:0,datalabels:{display:false}}))},options:o});
+}
+
+new MutationObserver(()=>{ if(!NA_HOME&&view==="resumo") renderDor(); }).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
 
 // ---------- cardio ----------
 const PSE_CARDIO={Leve:3,Moderado:5,Pesado:8};
@@ -1616,7 +1672,7 @@ async function recarregarAluno(aviso){
 
 // a aba Treino entra no ciclo de desenho dos painéis
 const _renderAllBase=renderAll;
-renderAll=function(){ _renderAllBase(); if(!NA_HOME&&view==="treino") renderTreino(); if(!NA_HOME&&view==="cardio") renderCardio(); if(!NA_HOME) renderAvisoCron(); else { const a=$("#aviso-cron"); if(a) a.hidden=true; } };
+renderAll=function(){ _renderAllBase(); if(!NA_HOME&&view==="treino") renderTreino(); if(!NA_HOME&&view==="cardio") renderCardio(); if(!NA_HOME&&view==="resumo") renderDor(); if(!NA_HOME) renderAvisoCron(); else { const a=$("#aviso-cron"); if(a) a.hidden=true; } };
 
 
 // ---------- abas reorganizadas: Resumo e Esforço e recuperação ----------
