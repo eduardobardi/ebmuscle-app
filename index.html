@@ -1179,7 +1179,7 @@ async function atualizar(forcar){
     limpar(r.dados);
     const mudou=JSON.stringify([r.dados.ext,r.dados.sessoes,r.dados.cardio||[],r.dados.obsTreino||[]])!==JSON.stringify([ALUNOS[nome].ext,ALUNOS[nome].sessoes,ALUNOS[nome].cardio||[],ALUNOS[nome].obsTreino||[]]);
     ALUNOS[nome]=limpar(r.dados); aplicarDados(false);
-    if(mudou && !(SUJO && view==="treino")) renderAll();
+    if(mudou && !(emEdicao() && view==="treino")) renderAll();
   }catch(e){
     if(e&&e.erro==="sessao"){ sairDoApp(); return; }
     if(nome===ALUNO) sync("err",msgDe(e)+" Mostrando a última leitura.","Tentar de novo");
@@ -1276,7 +1276,7 @@ function renderTreino(){
   $("#tr-semanas").innerHTML=Array.from({length:12},(_,i)=>i+1).map(w=>{const d=dataDe(TR_T,w), comp=semanaCompleta(w);
     if(comp) return `<button type="button" class="chip-b completa" data-w="${w}" aria-pressed="${w===TR_W}" aria-label="Semana ${w}, concluída">✓ S${w}<small>concluída</small></button>`;
     return `<button type="button" class="chip-b${temAlgo(TR_T,w)?" tem":""}" data-w="${w}" aria-pressed="${w===TR_W}" aria-label="Semana ${w}${d?", "+fmtDL(d):""}">S${w}<small>${d?fmtD(d):"–"}</small></button>`;}).join("");
-  const trocar=fn=>()=>{ if(SUJO&&!window.confirmarTroca){ avisoSujo(fn); return; } fn(); };
+  const trocar=fn=>()=>{ salvarPendentesJa(); fn(); };
   $("#tr-treinos").querySelectorAll("button").forEach(b=>b.addEventListener("click",trocar(()=>{TR_T=b.dataset.t;renderTreino();})));
   $("#tr-semanas").querySelectorAll("button").forEach(b=>b.addEventListener("click",trocar(()=>{TR_W=+b.dataset.w;renderTreino();})));
   const sel=$("#tr-semanas").querySelector('[aria-pressed="true"]'); if(sel) sel.scrollIntoView({block:"nearest",inline:"center"});
@@ -1320,21 +1320,19 @@ function renderTreino(){
         ${campoNum("s-cmj3","CMJ 3 (cm)",s.cmj&&s.cmj[2],0,150,0.1)}
         <div class="auto"><span class="r">CMJ média (cm)</span><span class="dica">calculado: média das tentativas</span><output class="calc" id="s-cmjm">–</output></div></div>
       </div>
-      <div class="actions"><button type="submit" class="btn">Salvar registro da sessão</button><span class="msg" id="s-msg" role="status" aria-live="polite"></span></div>
+      <div class="actions"><button type="submit" class="btn ghost">Salvar agora</button><span class="msg" id="s-msg" role="status" aria-live="polite"></span></div>
     </form></details>${temAlgo(TR_T,TR_W)?`<div class="desf">${treinoFeito(TR_T,TR_W)?`<button type="button" class="link-limpar" id="desmarcar">Desmarcar Treino ${TR_T} como concluído</button>`:""}<button type="button" class="link-limpar" id="desfazer">Desfazer registro do Treino ${TR_T} na semana ${TR_W}</button><span class="msg" id="d-msg" role="status" aria-live="polite"></span></div>`:""}`;
   const calcS=()=>{const du=+$("#s-dur").value, p=$("#s-pse").value, it=["#s-qual","#s-fad","#s-dorm","#s-est","#s-hum"].map(x=>$(x).value);
     const cm=["#s-cmj1","#s-cmj2","#s-cmj3"].map(x=>$(x).value).filter(v=>v!=="").map(Number);
     $("#s-ua").textContent=du&&p!==""?`${num(du*+p)} UA`:"–";
     $("#s-bem").textContent=it.every(v=>v!=="")?`${it.reduce((a,b)=>a+ +b,0)} / 25`:"–";
     $("#s-cmjm").textContent=cm.length?`${num(cm.reduce((a,b)=>a+b,0)/cm.length,1)} cm`:"–";};
-  $("#f-sessao").addEventListener("input",ev=>{SUJO=true;calcS();
-    // com o treino em andamento, a PSR é salva na hora (para não se perder se o app for fechado)
-    if(ev.target.id==="s-psr"&&CRON&&CRON.aluno===ALUNO&&CRON.treino===TR_T&&CRON.semana===TR_W&&ev.target.value!==""){
-      const v=id=>$(id).value; const msg=$("#s-msg");
-      const sessao={data:v("#s-data")||new Date().toLocaleDateString("sv-SE"),dur:v("#s-dur"),pse:v("#s-pse"),psr:v("#s-psr"),sono:v("#s-sono"),qual:v("#s-qual"),fad:v("#s-fad"),dorm:v("#s-dorm"),est:v("#s-est"),hum:v("#s-hum"),local:v("#s-local"),dor:v("#s-dor"),cmj1:v("#s-cmj1"),cmj2:v("#s-cmj2"),cmj3:v("#s-cmj3")};
-      msg.className="msg"; msg.textContent="Salvando a PSR…";
-      api({acao:"salvarSessao",token:TOKEN,nome:ALUNO,treino:TR_T,semana:TR_W,sessao}).then(()=>{msg.className="msg ok";msg.textContent="PSR salva. Bom treino!";SUJO=false;}).catch(e=>{msg.className="msg erro";msg.textContent=msgDe(e);});
-    }});
+  $("#f-sessao").addEventListener("input",ev=>{calcS();
+    const t=ev.target; if(!t||!t.id) return;
+    agendarAuto("s|"+TR_T+"|"+TR_W, t.tagName==="SELECT"||t.type==="date"?600:1200,
+      {acao:"salvarSessao",token:TOKEN,nome:ALUNO,treino:TR_T,semana:TR_W,sessao:sessaoDoForm()},
+      {msg:()=>$("#s-msg")});
+  });
   calcS();
   const bDesm=$("#desmarcar");
   if(bDesm){ let conf=false; bDesm.addEventListener("click",async()=>{
@@ -1357,6 +1355,7 @@ function renderTreino(){
     const v=id=>$(id).value;
     const sessao={data:v("#s-data"),dur:v("#s-dur"),pse:v("#s-pse"),psr:v("#s-psr"),sono:v("#s-sono"),qual:v("#s-qual"),fad:v("#s-fad"),dorm:v("#s-dorm"),est:v("#s-est"),hum:v("#s-hum"),local:v("#s-local"),dor:v("#s-dor"),cmj1:v("#s-cmj1"),cmj2:v("#s-cmj2"),cmj3:v("#s-cmj3")};
     if(!sessao.data){msg.className="msg erro";msg.textContent="Preencha a data.";return;}
+    cancelarAuto("s|"+TR_T+"|"+TR_W);
     b.disabled=true; msg.className="msg"; msg.textContent="Salvando na planilha…";
     try{ await api({acao:"salvarSessao",token:TOKEN,nome:ALUNO,treino:TR_T,semana:TR_W,sessao}); SUJO=false; const fim=POS_ENCERRAR; POS_ENCERRAR=null; if(fim) PEDIR_OBS=true; await recarregarAluno(fim?`Treino encerrado: ${fim} min salvos. Daqui a 15 a 30 minutos, responda a PSE.`:"Registro da sessão salvo."); }
     catch(e){ if(e&&e.erro==="sessao"){sairDoApp();return;} msg.className="msg erro"; msg.textContent=msgDe(e); }
@@ -1377,11 +1376,11 @@ function renderTreino(){
     const repsPre=primeiroNum(pw.reps);
     const linhas=[0,1,2].map(k=>{
       const sv=ss[k], a=ant&&ant.ss[k];
-      const reps=sv?sv[0]:(a?a[0]:""), kg=sv?sv[1]:(a?a[1]:"");
-      const pre=!sv&&(reps!==""||kg!=="");
+      const reps=sv?sv[0]:(a?a[0]:""), kg=sv?sv[1]:"";
+      const pre=!sv&&reps!=="";
       return `<tr><td>${k+1}ª</td>
         <td><input class="in${pre?" pre":""}" data-k="${k}" data-f="0" type="number" inputmode="decimal" min="0" max="1000" step="any" value="${esc(val0(reps))}" aria-label="Repetições da ${k+1}ª série"></td>
-        <td><input class="in${pre?" pre":""}" data-k="${k}" data-f="1" type="number" inputmode="decimal" min="0" max="1000" step="any" value="${esc(val0(kg))}" aria-label="Carga da ${k+1}ª série em kg"></td>
+         <td><input class="in" data-k="${k}" data-f="1" type="number" inputmode="decimal" min="0" max="1000" step="any" value="${esc(val0(kg))}" aria-label="Carga da ${k+1}ª série em kg"></td>
         <td class="vs">${a?`${num(a[0])} × ${fmtKg(a[1])}`:"–"}</td></tr>`;}).join("");
     const linkOk=e.link&&/^https?:\/\//i.test(e.link);
     const vl=ss.length?vlSets(ss):null;
@@ -1390,39 +1389,117 @@ function renderTreino(){
       ${sug?`<p class="sug sug-${sug.tipo}"><b>${sug.tipo==="sobe"?"↑ Sugestão de carga":"Sugestão de carga"}:</b> ${sug.txt}</p>`:""}
       <div class="presc"><div><b>${pw.reps?esc(pw.reps):"–"}</b><span>repetições</span></div><div><b>${pw.int?esc(pw.int):"–"}</b><span>intervalo</span></div><div><b>${vl!=null?num(vl):"–"}</b><span>volume load</span></div></div>
       <div class="tablewrap"><table class="series"><tr><th>Série</th><th>Repetições</th><th>Carga (kg)</th><th>${ant?"Sem. "+ant.w:"Sem. anterior"}</th></tr>${linhas}</table></div>
-      ${!ss.length?`<p class="dica-pre">${ant?`Valores em cinza repetem a semana ${ant.w}. Ajuste se precisar e salve.`:"Preencha repetições e carga de cada série e salve."} Carga 1 = peso corporal.</p>`:""}
+      ${!ss.length?`<p class="dica-pre">${ant?`As repetições em cinza repetem a semana ${ant.w}; a carga dela aparece na coluna ao lado. Preencha a carga de cada série: salva sozinho.`:"Preencha repetições e carga de cada série: salva sozinho."} Carga 1 = peso corporal.</p>`:""}
       <dl class="campos">
         <div><dt>Link</dt><dd>${ed?`<input class="in-link" type="url" placeholder="https://… (vídeo do exercício)" value="${esc(e.link||"")}">`:(linkOk?`<a class="video" href="${esc(e.link)}" target="_blank" rel="noopener noreferrer">Ver vídeo do exercício</a>`:'<span class="dash">sem vídeo</span>')}</dd></div>
         <div><dt>Método de treino</dt><dd>${ed?`<input class="in-met" maxlength="60" placeholder="Ex.: Drop-set, Bi-set, Isometria" value="${esc(metodo)}">`:(metodo?(descs.length===1&&descs[0][1]?"":`<b class="met-nome">${esc(metodo.replace(/\s*\n\s*/g," "))}</b>`):'<span class="dash">–</span>')}
           ${descs.filter(([,d])=>d).map(([n,d])=>`<span class="met-desc"><b>${esc(n)}:</b> ${esc(d)}</span>`).join("")}${notaSem?`<span class="met-desc"><b>Nesta semana:</b> ${esc(notaSem)}</span>`:""}</dd></div>
         <div class="obs-c"><dt>Observação do aluno em relação ao exercício</dt><dd><textarea class="in-obs" rows="2" maxlength="300" placeholder="Como foi? Dor, dificuldade, ajuste de carga…">${esc(obsW)}</textarea></dd></div>
       </dl>
-      <div class="actions"><button type="button" class="btn salvar-ex">Salvar exercício</button>${ss.length||obsW?'<button type="button" class="link-limpar">Limpar séries</button>':""}<span class="msg" role="status" aria-live="polite">${ss.length?"Registrado na planilha.":""}</span></div>
+      <div class="actions"><button type="button" class="btn ghost salvar-ex">Salvar agora</button>${ss.length||obsW?'<button type="button" class="link-limpar">Limpar séries</button>':""}<span class="msg" role="status" aria-live="polite">${ss.length?"Registrado na planilha.":""}</span></div>
     </article>`;
   };
   $("#tr-lista").innerHTML = montarGrupos(lista,cardHtml)||'<p class="sub">Nenhum exercício neste treino.</p>';
-  $("#tr-lista").querySelectorAll("input,textarea").forEach(x=>x.addEventListener("input",()=>{SUJO=true;x.classList.remove("pre");}));
+  $("#tr-lista").querySelectorAll("input,textarea").forEach(x=>x.addEventListener("input",()=>{
+    x.classList.remove("pre");
+    const card=x.closest(".ex"); if(!card) return; const e=EXT.ex[+card.dataset.i], m=card.querySelector(".msg");
+    const {corpo,meia}=corpoExercicio(card,e);
+    const chave="ex|"+TR_T+"|"+TR_W+"|"+e.row;
+    if(meia>=0){ cancelarAuto(chave); autoMsg(m,`Preencha ${corpo.sets[meia][0]===""?"as repetições":"a carga"} da ${meia+1}ª série para salvar.`,"erro"); return; }
+    agendarAuto(chave, x.classList.contains("in-obs")||x.classList.contains("in-link")||x.classList.contains("in-met")?1500:1000, corpo, {msg:()=>card.isConnected?card.querySelector(".msg"):null});
+  }));
   $("#tr-lista").querySelectorAll(".link-limpar").forEach(b=>{ let conf=false; b.addEventListener("click",async()=>{
     const card=b.closest(".ex"), e=EXT.ex[+card.dataset.i], msg=card.querySelector(".msg");
     if(!conf){ conf=true; b.textContent="Toque de novo para limpar"; msg.className="msg erro"; msg.textContent="Apaga as 3 séries e a observação deste exercício nesta semana."; return; }
     msg.className="msg"; msg.textContent="Limpando…";
+    cancelarAuto("ex|"+TR_T+"|"+TR_W+"|"+e.row);
     try{ await api({acao:"salvarExercicio",token:TOKEN,nome:ALUNO,treino:TR_T,semana:TR_W,linha:e.row,exercicio:desesc(e.ex),sets:[[],[],[]],obs:""}); SUJO=false; await recarregarAluno("Séries apagadas."); }
     catch(err){ if(err&&err.erro==="sessao"){sairDoApp();return;} msg.className="msg erro"; msg.textContent=msgDe(err); }
   }); });
   $("#tr-lista").querySelectorAll(".salvar-ex").forEach(b=>b.addEventListener("click",async()=>{
     const card=b.closest(".ex"), e=EXT.ex[+card.dataset.i], msg=card.querySelector(".msg");
-    const sets=[0,1,2].map(k=>[0,1].map(f=>card.querySelector(`input[data-k="${k}"][data-f="${f}"]`).value));
-    const meia=sets.findIndex(x=>(x[0]==="")!==(x[1]===""));
+    const {corpo,meia}=corpoExercicio(card,e);
     if(meia>=0){ msg.className="msg erro"; msg.textContent=`Na ${meia+1}ª série, preencha as repetições e a carga (use 1 para peso corporal).`; return; }
-    const corpo={acao:"salvarExercicio",token:TOKEN,nome:ALUNO,treino:TR_T,semana:TR_W,linha:e.row,exercicio:desesc(e.ex),sets,obs:card.querySelector(".in-obs").value};
-    if(podeEditarTreinador()){ corpo.link=card.querySelector(".in-link").value.trim(); corpo.metodo=card.querySelector(".in-met").value; }
+    cancelarAuto("ex|"+TR_T+"|"+TR_W+"|"+e.row);
     b.disabled=true; msg.className="msg"; msg.textContent="Salvando na planilha…";
     try{ await api(corpo); SUJO=false; await recarregarAluno(); }
     catch(err){ if(err&&err.erro==="sessao"){sairDoApp();return;} msg.className="msg erro"; msg.textContent=msgDe(err); b.disabled=false; }
   }));
   $("#tr-legenda").hidden=false;
-  $("#tr-legenda").textContent="Escolha o treino e a semana, preencha as séries e toque em Salvar: tudo vai direto para a planilha. A bolinha verde marca as semanas já registradas.";
+  $("#tr-legenda").textContent="Escolha o treino e a semana e preencha: tudo é salvo sozinho na planilha, segundos depois de você digitar. A bolinha verde marca as semanas já registradas.";
 }
+// ---------- salvamento automático ----------
+// Cada alteração entra numa fila por chave (exercício, sessão, observação) e vai para a planilha
+// pouco depois de o aluno parar de digitar. Se falhar (sem internet), tenta de novo sozinho.
+const AUTO={pend:new Map(), voo:0};
+function emEdicao(){
+  if(SUJO||AUTO.pend.size||AUTO.voo) return true;
+  const a=document.activeElement;
+  return !!(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&a.closest&&a.closest("#tr-lista,#f-sessao,#tr-obs"));
+}
+function autoMsg(el,txt,cls){ if(el&&el.isConnected){ el.className="msg"+(cls?" "+cls:""); el.textContent=txt; } }
+function agendarAuto(chave,ms,payload,ui){
+  const it=AUTO.pend.get(chave)||{tentativas:0};
+  clearTimeout(it.t); it.payload=payload; it.ui=ui; it.versao=(it.versao||0)+1;
+  it.t=setTimeout(()=>rodarAuto(chave),ms);
+  AUTO.pend.set(chave,it);
+  if(ui&&ui.msg) autoMsg(ui.msg(),"Alterado, salvando em instantes…","");
+}
+function cancelarAuto(chave){ const it=AUTO.pend.get(chave); if(it){ clearTimeout(it.t); if(!it.rodando) AUTO.pend.delete(chave); else it.cancelado=true; } }
+async function rodarAuto(chave){
+  const it=AUTO.pend.get(chave); if(!it) return;
+  if(it.rodando){ it.denovo=true; return; }
+  clearTimeout(it.t); it.rodando=true; AUTO.voo++;
+  const versao=it.versao, msg=()=>it.ui&&it.ui.msg&&it.ui.msg();
+  autoMsg(msg(),"Salvando na planilha…","");
+  let ok=false;
+  try{ await api(it.payload); ok=true; it.tentativas=0; }
+  catch(e){
+    if(e&&e.erro==="sessao"){ AUTO.voo--; sairDoApp(); return; }
+    it.tentativas++;
+    const semNet=!navigator.onLine||!(e&&e.erro)||e.erro==="rede"||e.erro==="interno";
+    autoMsg(msg(),semNet?"Sem conexão. Vou tentar de novo sozinho…":msgDe(e),"erro");
+    if(semNet||it.tentativas<3) it.t=setTimeout(()=>rodarAuto(chave),Math.min(30000,3000*it.tentativas));
+    else AUTO.pend.delete(chave);
+  }
+  it.rodando=false; AUTO.voo--;
+  if(ok){
+    if(it.cancelado||it.versao===versao){ AUTO.pend.delete(chave); if(!it.cancelado){ autoMsg(msg(),"✓ Salvo na planilha","ok"); if(it.ui&&it.ui.feito) it.ui.feito(); } refrescarQuieto(); }
+    else rodarAuto(chave); // mudou enquanto salvava: salva a versão nova
+  }else if(it.denovo){ it.denovo=false; }
+}
+function salvarPendentesJa(){ AUTO.pend.forEach((it,chave)=>{ if(!it.rodando) rodarAuto(chave); }); }
+window.addEventListener("beforeunload",ev=>{ if(AUTO.pend.size||AUTO.voo){ salvarPendentesJa(); ev.preventDefault(); ev.returnValue=""; } });
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden") salvarPendentesJa(); });
+window.addEventListener("online",salvarPendentesJa);
+// depois de salvar, relê a planilha em silêncio para atualizar marcações (sem atrapalhar quem está digitando)
+let refrescoT=null;
+function refrescarQuieto(){
+  clearTimeout(refrescoT);
+  refrescoT=setTimeout(async()=>{
+    if(NA_HOME) return;
+    if(emEdicao()) return refrescarQuieto();
+    const nome=ALUNO;
+    try{
+      const r=await api({acao:"aluno",token:TOKEN,nome,forcar:true});
+      if(nome!==ALUNO||NA_HOME) return;
+      if(emEdicao()) return refrescarQuieto();
+      const y=window.scrollY; ALUNOS[nome]=limpar(r.dados); aplicarDados(false); renderAll(); window.scrollTo(0,y);
+    }catch(e){}
+  },4000);
+}
+function sessaoDoForm(){ const v=id=>{const x=$(id);return x?x.value:"";};
+  return {data:v("#s-data")||new Date().toLocaleDateString("sv-SE"),dur:v("#s-dur"),pse:v("#s-pse"),psr:v("#s-psr"),sono:v("#s-sono"),qual:v("#s-qual"),fad:v("#s-fad"),dorm:v("#s-dorm"),est:v("#s-est"),hum:v("#s-hum"),local:v("#s-local"),dor:v("#s-dor"),cmj1:v("#s-cmj1"),cmj2:v("#s-cmj2"),cmj3:v("#s-cmj3")}; }
+function corpoExercicio(card,e){
+  // repetição só sugerida (cinza, vinda da semana anterior) sem carga = série ainda não feita
+  const sets=[0,1,2].map(k=>{ const r=card.querySelector(`input[data-k="${k}"][data-f="0"]`), c=card.querySelector(`input[data-k="${k}"][data-f="1"]`);
+    return (r.classList.contains("pre")&&c.value==="")?["",""]:[r.value,c.value]; });
+  const meia=sets.findIndex(x=>(x[0]==="")!==(x[1]===""));
+  const corpo={acao:"salvarExercicio",token:TOKEN,nome:ALUNO,treino:TR_T,semana:TR_W,linha:e.row,exercicio:desesc(e.ex),sets,obs:card.querySelector(".in-obs").value};
+  if(podeEditarTreinador()){ corpo.link=card.querySelector(".in-link").value.trim(); corpo.metodo=card.querySelector(".in-met").value; }
+  return {corpo,meia};
+}
+
 // ---------- cronômetro do treino ----------
 let CRON=null; try{ CRON=JSON.parse(guardar.get("eb_cron")||"null"); }catch(e){ CRON=null; }
 let cronTick=null, POS_ENCERRAR=null, PEDIR_OBS=false;
@@ -1508,10 +1585,15 @@ function renderObsTreino(){
     <textarea id="obs-txt" rows="3" maxlength="1000" placeholder="Ex.: senti desconforto no ombro no supino; troquei a extensora pelo leg press; dormi mal e rendi menos.">${esc(o?o.texto:"")}</textarea>
     <div class="acoes-o"><button type="button" class="btn" id="obs-salvar">${o?"Salvar alteração":"Enviar observação"}</button><span class="msg" id="obs-msg" role="status" aria-live="polite">${o?"Enviada para o Eduardo.":""}</span></div>
   </div>`;
-  $("#obs-txt").addEventListener("input",()=>{ SUJO=true; });
+  $("#obs-txt").addEventListener("input",()=>{
+    const s0=sessaoDe(TR_T,TR_W)||{}, texto=$("#obs-txt").value.trim();
+    if(!texto&&!o) return;
+    agendarAuto("o|"+TR_T+"|"+TR_W,1800,{acao:"salvarObsTreino",token:TOKEN,nome:ALUNO,treino:TR_T,semana:TR_W,data:s0.data||dataDe(TR_T,TR_W)||new Date().toLocaleDateString("sv-SE"),texto},{msg:()=>$("#obs-msg")});
+  });
   $("#obs-salvar").addEventListener("click",async ev=>{
     const b=ev.currentTarget, m=$("#obs-msg"), texto=$("#obs-txt").value.trim();
     if(!texto&&!o){ m.className="msg erro"; m.textContent="Escreva algo antes de enviar."; return; }
+    cancelarAuto("o|"+TR_T+"|"+TR_W);
     b.disabled=true; m.className="msg"; m.textContent="Enviando…";
     const s=sessaoDe(TR_T,TR_W)||{};
     try{ await api({acao:"salvarObsTreino",token:TOKEN,nome:ALUNO,treino:TR_T,semana:TR_W,data:s.data||dataDe(TR_T,TR_W)||new Date().toLocaleDateString("sv-SE"),texto}); SUJO=false; await recarregarAluno(texto?"Observação enviada para o Eduardo.":"Observação apagada."); }
