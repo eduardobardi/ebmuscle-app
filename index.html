@@ -1376,8 +1376,8 @@ function renderTreino(){
     const repsPre=primeiroNum(pw.reps);
     const linhas=[0,1,2].map(k=>{
       const sv=ss[k], a=ant&&ant.ss[k];
-      const reps=sv?sv[0]:(a?a[0]:""), kg=sv?sv[1]:"";
-      const pre=!sv&&reps!=="";
+      const reps=sv?sv[0]:"", kg=sv?sv[1]:"";
+      const pre=false;
       return `<tr><td>${k+1}ª</td>
         <td><input class="in${pre?" pre":""}" data-k="${k}" data-f="0" type="number" inputmode="decimal" min="0" max="1000" step="any" value="${esc(val0(reps))}" aria-label="Repetições da ${k+1}ª série"></td>
          <td><input class="in" data-k="${k}" data-f="1" type="number" inputmode="decimal" min="0" max="1000" step="any" value="${esc(val0(kg))}" aria-label="Carga da ${k+1}ª série em kg"></td>
@@ -1389,7 +1389,7 @@ function renderTreino(){
       ${sug?`<p class="sug sug-${sug.tipo}"><b>${sug.tipo==="sobe"?"↑ Sugestão de carga":"Sugestão de carga"}:</b> ${sug.txt}</p>`:""}
       <div class="presc"><div><b>${pw.reps?esc(pw.reps):"–"}</b><span>repetições</span></div><div><b>${pw.int?esc(pw.int):"–"}</b><span>intervalo</span></div><div><b>${vl!=null?num(vl):"–"}</b><span>volume load</span></div></div>
       <div class="tablewrap"><table class="series"><tr><th>Série</th><th>Repetições</th><th>Carga (kg)</th><th>${ant?"Sem. "+ant.w:"Sem. anterior"}</th></tr>${linhas}</table></div>
-      ${!ss.length?`<p class="dica-pre">${ant?`As repetições em cinza repetem a semana ${ant.w}; a carga dela aparece na coluna ao lado. Preencha a carga de cada série: salva sozinho.`:"Preencha repetições e carga de cada série: salva sozinho."} Carga 1 = peso corporal.</p>`:""}
+      ${!ss.length?`<p class="dica-pre">${ant?`O que você fez na semana ${ant.w} aparece na coluna ao lado. `:""}Preencha repetições e carga de cada série: salva sozinho. Carga 1 = peso corporal.</p>`:""}
       <dl class="campos">
         <div><dt>Link</dt><dd>${ed?`<input class="in-link" type="url" placeholder="https://… (vídeo do exercício)" value="${esc(e.link||"")}">`:(linkOk?`<a class="video" href="${esc(e.link)}" target="_blank" rel="noopener noreferrer">Ver vídeo do exercício</a>`:'<span class="dash">sem vídeo</span>')}</dd></div>
         <div><dt>Método de treino</dt><dd>${ed?`<input class="in-met" maxlength="60" placeholder="Ex.: Drop-set, Bi-set, Isometria" value="${esc(metodo)}">`:(metodo?(descs.length===1&&descs[0][1]?"":`<b class="met-nome">${esc(metodo.replace(/\s*\n\s*/g," "))}</b>`):'<span class="dash">–</span>')}
