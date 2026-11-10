@@ -413,6 +413,28 @@ table.escala td{font-family:var(--f-body)}
 .obs-lista li{padding:10px 0;border-top:1px solid var(--line)} .obs-lista li:first-child{border-top:0;padding-top:0}
 .obs-lista .q{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
 .obs-lista p{margin:3px 0 0;font-size:14px;color:var(--ink);white-space:pre-wrap}
+/* ---- v23: quadro de fim de treino ---- */
+body.com-modal{overflow:hidden}
+.fim-ov{position:fixed;inset:0;z-index:200;background:rgba(10,20,22,.62);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:grid;place-items:center;padding:16px;animation:fimIn .18s ease-out}
+@keyframes fimIn{from{opacity:0}to{opacity:1}}
+.fim-box{width:min(560px,100%);max-height:calc(100dvh - 32px);overflow:auto;background:var(--surface);color:var(--ink);border-radius:18px;padding:20px 18px;box-shadow:0 20px 60px rgba(0,0,0,.35);border:1px solid var(--line)}
+.fim-box h2:focus{outline:none}
+.fim-box h2{margin:2px 0 4px;font-family:var(--f-display);font-weight:800;font-size:21px;line-height:1.2}
+.fim-ok{margin:0;font-size:13px;font-weight:700;color:var(--ok)}
+.fim-sub{margin:0 0 14px;font-size:13.5px;color:var(--muted);line-height:1.4}
+.fim-pse{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px}
+.pse-b{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:8px;padding:9px 10px;border-radius:12px;border:1px solid var(--line);background:color-mix(in srgb,var(--crit) calc(var(--n) * 3.2%),var(--surface))}
+.pse-b b{font-family:var(--f-mono);font-size:20px;min-width:26px;text-align:center}
+.pse-b span{font-size:12.5px;line-height:1.2;color:var(--ink-2)}
+.pse-b.on,.pse-b:hover{border-color:var(--brand);box-shadow:inset 0 0 0 1.5px var(--brand)}
+.pse-b:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.fim-box textarea{width:100%;box-sizing:border-box;font:inherit;font-size:15px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);resize:vertical;min-height:96px}
+.fim-acoes{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin-top:14px}
+.fim-acoes .link{all:unset;cursor:pointer;font-size:13.5px;color:var(--muted);text-decoration:underline}
+.fim-acoes .link:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+@media (max-width:420px){.fim-pse{grid-template-columns:1fr 1fr}.fim-box{padding:18px 14px}}
+.lembra-pse{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:0 0 10px;padding:10px 14px;border-radius:var(--r);background:color-mix(in srgb,var(--warn) 22%,var(--surface));border:1px solid var(--warn);font-size:13.5px}
+.lembra-pse .btn{padding:7px 14px;font-size:13.5px}
 /* ---- v18: CMJ fora ---- */
 .panel:has(#c-semj){display:none}
 </style>
@@ -1158,7 +1180,12 @@ async function abrirAluno(nome){
   atualizarModo();
   $("#aluno-status").hidden=true;
   $("#aluno").textContent=nome;
-  show(primeiraVez?"treino":view); primeiraVez=false; window.scrollTo(0,0);
+  let pos=null; try{ pos=JSON.parse(guardar.get("eb_pos")||"null"); }catch(e){ pos=null; }
+  if(primeiraVez&&pos&&pos.aluno===nome&&Date.now()-pos.ts<3*3600e3){
+    if(pos.t&&TREINOS.includes(pos.t)){ TR_T=pos.t; TR_W=pos.w; }
+    show(pos.view||"treino"); primeiraVez=false;
+    setTimeout(()=>window.scrollTo(0,pos.y||0),80);
+  }else{ show(primeiraVez?"treino":view); primeiraVez=false; window.scrollTo(0,0); }
   iniciarAuto();
 }
 function aplicarDados(trocou){
@@ -1176,10 +1203,11 @@ async function atualizar(forcar){
   try{
     const r=await api({acao:"aluno",token:TOKEN,nome,forcar:!!forcar});
     if(nome!==ALUNO||NA_HOME) return;
+    if(AUTO.pend.size||AUTO.voo) return;
     limpar(r.dados);
     const mudou=JSON.stringify([r.dados.ext,r.dados.sessoes,r.dados.cardio||[],r.dados.obsTreino||[]])!==JSON.stringify([ALUNOS[nome].ext,ALUNOS[nome].sessoes,ALUNOS[nome].cardio||[],ALUNOS[nome].obsTreino||[]]);
     ALUNOS[nome]=limpar(r.dados); aplicarDados(false);
-    if(mudou && !(emEdicao() && view==="treino")) renderAll();
+    if(mudou && !(emEdicao() && view==="treino")){ const y=window.scrollY; renderAll(); window.scrollTo(0,y); }
   }catch(e){
     if(e&&e.erro==="sessao"){ sairDoApp(); return; }
     if(nome===ALUNO) sync("err",msgDe(e)+" Mostrando a última leitura.","Tentar de novo");
@@ -1339,6 +1367,7 @@ function renderTreino(){
     const msg=$("#d-msg");
     if(!conf){ conf=true; bDesm.textContent="Toque de novo para confirmar"; msg.className="msg erro"; msg.textContent=`O Treino ${TR_T} deixa de contar como feito na semana ${TR_W}: apaga só a duração e a PSE. As cargas e o resto do registro continuam.`; return; }
     bDesm.disabled=true; msg.className="msg"; msg.textContent="Desmarcando…";
+    await esperarFila();
     try{ await api({acao:"salvarSessao",token:TOKEN,nome:ALUNO,treino:TR_T,semana:TR_W,sessao:sessaoComo(TR_T,TR_W,{dur:"",pse:""})}); guardar.del("eb_fim"); SUJO=false; await recarregarAluno(`Treino ${TR_T} desmarcado na semana ${TR_W}.`); }
     catch(e){ if(e&&e.erro==="sessao"){sairDoApp();return;} msg.className="msg erro"; msg.textContent=msgDe(e); bDesm.disabled=false; }
   }); }
@@ -1347,6 +1376,7 @@ function renderTreino(){
     const msg=$("#d-msg");
     if(!conf){ conf=true; bDesf.textContent="Toque de novo para confirmar"; msg.className="msg erro"; msg.textContent=`Isso apaga a data, o registro da sessão e as séries do Treino ${TR_T} na semana ${TR_W}. A prescrição (repetições, intervalo, link e método) continua.`; return; }
     bDesf.disabled=true; msg.className="msg"; msg.textContent="Apagando…";
+    await esperarFila();
     try{ await api({acao:"limparSemana",token:TOKEN,nome:ALUNO,treino:TR_T,semana:TR_W}); SUJO=false; await recarregarAluno(`Registro do Treino ${TR_T}, semana ${TR_W}, desfeito.`); }
     catch(e){ if(e&&e.erro==="sessao"){sairDoApp();return;} msg.className="msg erro"; msg.textContent=msgDe(e); bDesf.disabled=false; }
   }); }
@@ -1440,6 +1470,7 @@ function emEdicao(){
 function autoMsg(el,txt,cls){ if(el&&el.isConnected){ el.className="msg"+(cls?" "+cls:""); el.textContent=txt; } }
 function agendarAuto(chave,ms,payload,ui){
   const it=AUTO.pend.get(chave)||{tentativas:0};
+  aplicarLocal(payload);
   clearTimeout(it.t); it.payload=payload; it.ui=ui; it.versao=(it.versao||0)+1;
   it.t=setTimeout(()=>rodarAuto(chave),ms);
   AUTO.pend.set(chave,it);
@@ -1500,6 +1531,77 @@ function corpoExercicio(card,e){
   return {corpo,meia};
 }
 
+// ---------- estado local otimista: o que foi digitado vale na tela antes de chegar na planilha ----------
+function aplicarLocal(p){
+  const A=ALUNOS[p.nome]; if(!A) return;
+  const n=v=>v===""||v==null?null:(isNaN(+String(v).replace(",","."))?null:+String(v).replace(",","."));
+  if(p.acao==="salvarSessao"){
+    const s=p.sessao; let o=(A.sessoes||[]).find(x=>x.treino===p.treino&&+x.semana===+p.semana);
+    if(!o){ o={treino:p.treino,semana:+p.semana}; (A.sessoes=A.sessoes||[]).push(o); }
+    Object.assign(o,{data:s.data,dur:n(s.dur),pse:n(s.pse),psr:n(s.psr),sono:n(s.sono),qual:n(s.qual),fad:n(s.fad),dorm:n(s.dorm),est:n(s.est),hum:n(s.hum),local:esc(s.local||""),dor:n(s.dor),cmj:[s.cmj1,s.cmj2,s.cmj3].map(n).filter(v=>v!=null)});
+    if(A.ext.dates[p.treino]&&s.data) A.ext.dates[p.treino][p.semana]=s.data;
+  }else if(p.acao==="salvarExercicio"){
+    const e=A.ext.ex.find(x=>x.t===p.treino&&x.row===p.linha); if(!e) return;
+    const ss=p.sets.filter(x=>x[0]!==""&&x[1]!=="").map(x=>[n(x[0]),n(x[1])]);
+    if(ss.length) e.sets[p.semana]=ss; else delete e.sets[p.semana];
+    e.p=e.p||{}; e.p[p.semana]=Object.assign({},e.p[p.semana],{obs:p.obs||""});
+  }else if(p.acao==="salvarObsTreino"){
+    A.obsTreino=(A.obsTreino||[]).filter(o=>!(o.treino===p.treino&&+o.semana===+p.semana));
+    if(p.texto) A.obsTreino.push({linha:99999,data:p.data,treino:p.treino,semana:+p.semana,texto:p.texto});
+  }
+  if(p.nome===ALUNO&&!NA_HOME){ EXT=A.ext; TREINOS=Object.keys(EXT.dates); montarDrive(); S=DRIVE.map(x=>({...x})).concat(cardioComoSessoes()); }
+}
+
+// ---------- fim do treino: quadro com a PSE e depois a observação ----------
+function abrirFimTreino(t,w,min,passo){
+  let ov=$("#fim-modal"); if(ov) ov.remove();
+  ov=document.createElement("div"); ov.id="fim-modal"; ov.className="fim-ov";
+  ov.innerHTML=`<div class="fim-box" role="dialog" aria-modal="true" aria-labelledby="fim-tit"><div id="fim-corpo"></div></div>`;
+  document.body.appendChild(ov); document.body.classList.add("com-modal");
+  const fechar=()=>{ ov.remove(); document.body.classList.remove("com-modal"); document.removeEventListener("keydown",esc_); if(view==="treino") renderTreino(); };
+  const esc_=ev=>{ if(ev.key==="Escape") fechar(); };
+  document.addEventListener("keydown",esc_);
+  const corpo=$("#fim-corpo");
+  const passoPSE=()=>{
+    const s=sessaoDe(t,w)||{};
+    corpo.innerHTML=`<p class="fim-ok">${min?`✓ Treino ${esc(t)} encerrado · ${min} min`:`Treino ${esc(t)} · semana ${w}`}</p>
+      <h2 id="fim-tit">Quão pesado foi o treino inteiro?</h2>
+      <p class="fim-sub">PSE da sessão (0 a 10). Pense no treino todo, não só na última série.</p>
+      <div class="fim-pse" role="radiogroup" aria-label="PSE da sessão">${ESC_PSE.map(([v,r])=>`<button type="button" role="radio" aria-checked="${s.pse===v}" class="pse-b${s.pse===v?" on":""}" data-v="${v}" style="--n:${v}"><b>${v}</b><span>${esc(r.replace(/^\d+ · /,""))}</span></button>`).join("")}</div>
+      <div class="fim-acoes"><button type="button" class="link" id="fim-depois">Responder depois</button></div>`;
+    corpo.querySelectorAll(".pse-b").forEach(b=>b.addEventListener("click",()=>{
+      const v=b.dataset.v;
+      agendarAuto("s|"+t+"|"+w,200,{acao:"salvarSessao",token:TOKEN,nome:ALUNO,treino:t,semana:w,sessao:sessaoComo(t,w,{pse:v})},{msg:()=>$("#s-msg")});
+      passoObs(v);
+    }));
+    $("#fim-depois").addEventListener("click",fechar);
+    const tit=$("#fim-tit"); tit.setAttribute("tabindex","-1"); tit.focus({preventScroll:true});
+  };
+  const passoObs=v=>{
+    const o=obsDe(t,w);
+    corpo.innerHTML=`<p class="fim-ok">✓ PSE ${v} salva</p>
+      <h2 id="fim-tit" tabindex="-1">Alguma observação sobre o treino?</h2>
+      <p class="fim-sub">Pro Eduardo: desconforto em algum exercício, troca ou exercício que ficou de fora, como você se sentiu…</p>
+      <textarea id="fim-obs" rows="4" maxlength="1000" placeholder="Ex.: senti o ombro no supino; troquei a extensora pelo leg press.">${esc(o?o.texto:"")}</textarea>
+      <div class="fim-acoes"><button type="button" class="btn" id="fim-enviar">Enviar observação</button><button type="button" class="btn ghost" id="fim-nao">Não, tudo certo</button></div>`;
+    $("#fim-enviar").addEventListener("click",()=>{
+      const texto=$("#fim-obs").value.trim(); if(!texto){ $("#fim-obs").focus(); return; }
+      const s=sessaoDe(t,w)||{};
+      agendarAuto("o|"+t+"|"+w,0,{acao:"salvarObsTreino",token:TOKEN,nome:ALUNO,treino:t,semana:w,data:s.data||new Date().toLocaleDateString("sv-SE"),texto},{msg:()=>$("#obs-msg")});
+      fechar();
+    });
+    $("#fim-nao").addEventListener("click",fechar);
+    $("#fim-obs").focus();
+  };
+  if(passo==="obs") passoObs((sessaoDe(t,w)||{}).pse); else passoPSE();
+}
+
+// ---------- posição na tela: volta para o mesmo lugar depois de bloquear o celular ----------
+function guardarPos(){ if(NA_HOME||!ALUNO) return; guardar.set("eb_pos",JSON.stringify({aluno:ALUNO,view,t:TR_T,w:TR_W,y:Math.round(window.scrollY),ts:Date.now()})); }
+let posT=null;
+window.addEventListener("scroll",()=>{ clearTimeout(posT); posT=setTimeout(guardarPos,400); },{passive:true});
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden") guardarPos(); });
+
 // ---------- cronômetro do treino ----------
 let CRON=null; try{ CRON=JSON.parse(guardar.get("eb_cron")||"null"); }catch(e){ CRON=null; }
 let cronTick=null, POS_ENCERRAR=null, PEDIR_OBS=false;
@@ -1516,6 +1618,7 @@ function renderCron(){
     $("#fim-ok").addEventListener("click",()=>{ guardar.del("eb_fim"); renderTreino(); });
     $("#cron-volta").addEventListener("click",async ev=>{
       const b=ev.currentTarget, m=$("#fim-msg"); b.disabled=true; m.className="msg"; m.textContent="Voltando ao treino…";
+    await esperarFila();
       try{ await api({acao:"salvarSessao",token:TOKEN,nome:ALUNO,treino:fim.treino,semana:fim.semana,sessao:sessaoComo(fim.treino,fim.semana,{dur:""})});
         CRON={aluno:fim.aluno,treino:fim.treino,semana:fim.semana,inicio:fim.inicio}; guardar.set("eb_cron",JSON.stringify(CRON)); guardar.del("eb_fim");
         await recarregarAluno("Cronômetro retomado. Toque em Encerrar treino quando terminar."); }
@@ -1548,9 +1651,11 @@ function renderCron(){
     $("#s-dur").dispatchEvent(new Event("input",{bubbles:true}));
     reg.scrollIntoView({block:"start",behavior:"smooth"});
     if(min>240){ $("#s-msg").className="msg erro"; $("#s-msg").textContent=`O cronômetro marcou ${min} minutos. Parece que ficou ligado depois do treino: ajuste a duração e toque em Salvar.`; return; }
-    POS_ENCERRAR=min;
     guardar.set("eb_fim",JSON.stringify({aluno:c.aluno,treino:c.treino,semana:c.semana,inicio:c.inicio,min,ts:Date.now()}));
-    $("#f-sessao").requestSubmit();
+    const s0=sessaoDe(c.treino,c.semana)||{};
+    agendarAuto("s|"+c.treino+"|"+c.semana,0,{acao:"salvarSessao",token:TOKEN,nome:ALUNO,treino:c.treino,semana:c.semana,sessao:sessaoComo(c.treino,c.semana,{dur:String(min),data:s0.data||new Date(c.inicio).toLocaleDateString("sv-SE")})},{msg:()=>$("#s-msg")});
+    renderTreino();
+    abrirFimTreino(c.treino,c.semana,min);
   });
 }
 // ---------- aviso de treino em andamento (em qualquer aba) ----------
@@ -1599,8 +1704,13 @@ function renderObsTreino(){
     try{ await api({acao:"salvarObsTreino",token:TOKEN,nome:ALUNO,treino:TR_T,semana:TR_W,data:s.data||dataDe(TR_T,TR_W)||new Date().toLocaleDateString("sv-SE"),texto}); SUJO=false; await recarregarAluno(texto?"Observação enviada para o Eduardo.":"Observação apagada."); }
     catch(e){ if(e&&e.erro==="sessao"){sairDoApp();return;} m.className="msg erro"; m.textContent=msgDe(e); b.disabled=false; }
   });
-  if(PEDIR_OBS&&pede){ PEDIR_OBS=false; setTimeout(()=>{ el.scrollIntoView({block:"center",behavior:"smooth"}); },150); }
-  else PEDIR_OBS=false;
+  PEDIR_OBS=false;
+  const s0=sessaoDe(TR_T,TR_W)||{};
+  if(s0.dur!=null&&s0.pse==null){
+    const lem=document.createElement("div"); lem.className="lembra-pse";
+    lem.innerHTML=`<span><b>Falta a PSE deste treino.</b> Quão pesado foi o treino inteiro?</span><button type="button" class="btn">Responder agora</button>`;
+    el.prepend(lem); lem.querySelector("button").addEventListener("click",()=>abrirFimTreino(TR_T,TR_W,null));
+  }
 }
 function renderObsLista(){
   const box=$("#obs-box"); if(!box) return;
@@ -1792,7 +1902,12 @@ function avisoSujo(fn){
   $("#tr-aviso-nao").onclick=()=>{m.hidden=true;};
   m.scrollIntoView({block:"nearest"});
 }
+async function esperarFila(maxMs){
+  salvarPendentesJa(); const t0=Date.now();
+  while((AUTO.pend.size||AUTO.voo)&&Date.now()-t0<(maxMs||15000)) await new Promise(r=>setTimeout(r,200));
+}
 async function recarregarAluno(aviso){
+  await esperarFila();
   const y=window.scrollY;
   try{ const r=await api({acao:"aluno",token:TOKEN,nome:ALUNO,forcar:true}); ALUNOS[ALUNO]=limpar(r.dados); aplicarDados(false); renderAll(); }
   catch(e){ if(e&&e.erro==="sessao"){sairDoApp();return;} }
