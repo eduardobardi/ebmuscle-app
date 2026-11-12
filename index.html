@@ -533,7 +533,7 @@ tr[data-dpk]:hover td{background:color-mix(in srgb,var(--brand) 10%,var(--surfac
 /* ---- v18: CMJ fora ---- */
 .panel:has(#c-semj){display:none}
 </style>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https://script.google.com https://script.googleusercontent.com; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://script.google.com https://script.googleusercontent.com; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <script>if(window.top!==window.self){try{window.top.location=window.self.location.href}catch(e){document.documentElement.style.display="none"}}</script>
 <link rel="manifest" href="manifest.webmanifest">
@@ -2262,6 +2262,26 @@ function marcarLinhasDet(){ document.querySelectorAll("#tab-sem tr, #tab-reg tr,
 const _renderAll24=renderAll;
 renderAll=function(){ _renderAll24(); marcarLinhasDet();
   if(view==="detalhe"&&DET_ATUAL){ const y=window.scrollY; const sec=detSecao(); sec.innerHTML=DET_ATUAL.html(); window.scrollTo(0,y); } };
+
+// ---------- v25: atualização automática ----------
+// Ao abrir (ou voltar para) o app, confere se há versão nova publicada e recarrega sozinho.
+const APP_VER="20261112155444";
+let VER_CHECADO=0;
+async function checarVersao(){
+  if(!/^\d+$/.test(APP_VER)||Date.now()-VER_CHECADO<60000) return; VER_CHECADO=Date.now();
+  try{
+    const r=await fetch(location.pathname+"?checar="+Date.now(),{cache:"no-store"});
+    if(!r.ok) return;
+    const m=(await r.text()).match(/const APP_VER="(\d+)"/);
+    if(!m||m[1]===APP_VER) return;
+    if(typeof emEdicao==="function"&&emEdicao()){ VER_CHECADO=0; setTimeout(checarVersao,20000); return; }
+    let n=0; try{ n=+(sessionStorage.getItem("eb_upd_"+m[1])||0); sessionStorage.setItem("eb_upd_"+m[1],String(n+1)); }catch(e){}
+    if(n>=2) return;
+    location.replace(location.pathname+"?v="+m[1]+location.hash);
+  }catch(e){}
+}
+setTimeout(checarVersao,2500);
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible") checarVersao(); });
 
 // ---------- abas reorganizadas: Resumo e Esforço e recuperação ----------
 document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>{
