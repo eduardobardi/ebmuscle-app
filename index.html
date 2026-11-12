@@ -435,19 +435,47 @@ body.com-modal{overflow:hidden}
 @media (max-width:420px){.fim-pse{grid-template-columns:1fr 1fr}.fim-box{padding:18px 14px}}
 .lembra-pse{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:0 0 10px;padding:10px 14px;border-radius:var(--r);background:color-mix(in srgb,var(--warn) 22%,var(--surface));border:1px solid var(--warn);font-size:13.5px}
 .lembra-pse .btn{padding:7px 14px;font-size:13.5px}
-/* ---- v24: detalhes de Esforço e recuperação ---- */
-.fim-box.det{width:min(720px,100%);padding:0}
-.det-top{position:sticky;top:0;z-index:2;display:flex;gap:12px;align-items:flex-start;padding:16px 18px 10px;background:var(--surface);border-bottom:1px solid var(--line)}
-.det-top .fim-sub{margin:2px 0 0}
-.det-x{all:unset;cursor:pointer;margin-left:auto;flex:none;width:36px;height:36px;display:grid;place-items:center;border-radius:50%;font-size:17px;color:var(--ink-2);background:color-mix(in srgb,var(--ink) 6%,var(--surface))}
-.det-x:hover{background:color-mix(in srgb,var(--ink) 12%,var(--surface))}
-.det-x:focus-visible,.det-btn:focus-visible,#tab-sem tr:focus-visible,#tab-reg tr:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
-.det-corpo{padding:14px 18px 22px;display:grid;gap:12px}
+/* ---- v24: páginas de detalhe ---- */
+#det-page{display:grid;gap:14px;padding-bottom:40px}
+#det-page h1{margin:4px 0 2px} #det-page h1:focus{outline:none}
+.dp-top{position:sticky;top:var(--top-h,0px);z-index:4;background:var(--bg);display:grid;gap:8px;padding:10px 0 10px;border-bottom:1px solid var(--line)}
+.dp-voltar{all:unset;cursor:pointer;justify-self:start;font-weight:700;font-size:15px;color:var(--brand-ink);padding:4px 10px 4px 0}
+.dp-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+.dp-chips::-webkit-scrollbar{display:none}
+.dp-chips button{all:unset;cursor:pointer;flex:none;font-size:13px;font-weight:600;padding:6px 13px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2)}
+.dp-chips button[aria-current]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.dp-voltar:focus-visible,.dp-chips button:focus-visible,.det-btn:focus-visible,.dp-tudo:focus-visible,tr[data-dpk]:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
 .det-kpis{display:flex;flex-wrap:wrap;gap:8px}
 .det-kpi{padding:7px 12px;border-radius:12px;background:color-mix(in srgb,var(--brand) 12%,var(--surface));border:1px solid var(--line);font-size:12px;color:var(--muted);display:grid;gap:1px}
 .det-kpi b{font-family:var(--f-mono);font-size:15px;color:var(--ink)}
-.det-s{border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:grid;gap:10px;scroll-margin:110px;background:var(--surface)}
-.det-s.on{border-color:var(--brand);box-shadow:0 0 0 2px color-mix(in srgb,var(--brand) 50%,transparent)}
+.det-w{display:grid;gap:10px;scroll-margin-top:calc(var(--top-h,0px) + 110px);padding:4px 0 8px}
+.det-w + .det-w{border-top:1px dashed var(--line);padding-top:16px}
+.det-w h2{margin:0;font-family:var(--f-display);font-weight:800;font-size:19px}
+.det-w h2 span{font-family:var(--f-mono);font-size:12px;font-weight:400;color:var(--muted);margin-left:6px}
+.det-w.on{outline:2px solid color-mix(in srgb,var(--brand) 55%,transparent);outline-offset:6px;border-radius:10px}
+.dp-lista{display:grid;gap:8px}
+.dp-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);scroll-margin-top:calc(var(--top-h,0px) + 110px)}
+.dp-row .dp-bar{grid-column:1/-1}
+.dp-q{display:grid;gap:1px;min-width:0}
+.dp-q b{font-family:var(--f-display);font-weight:800;font-size:15px}
+.dp-q span{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.dp-val{display:flex;align-items:center;gap:8px;justify-content:flex-end;text-align:right}
+.dp-val .e{font-size:24px;line-height:1}
+.dp-val b{font-family:var(--f-mono);font-size:16px;display:block}
+.dp-val small{display:block;font-size:12px;color:var(--ink-2);line-height:1.25;max-width:160px}
+.dp-duo{display:flex;gap:14px;justify-content:flex-end;flex-wrap:wrap}
+.dp-sem{font-size:12.5px;color:var(--muted)}
+.dp-bar{height:6px;border-radius:3px;background:color-mix(in srgb,var(--ink) 8%,var(--surface));overflow:hidden}
+.dp-bar i{display:block;height:100%;border-radius:3px}
+.dp-de{margin:0;font-size:13px;color:var(--ink-2);line-height:1.5}
+.dp-tab{width:100%;border-collapse:collapse;font-size:13px}
+.dp-tab th{font-size:11.5px;font-weight:600;color:var(--muted);text-align:left;padding:4px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.dp-tab td{padding:6px 8px;border-bottom:1px solid var(--line);font-family:var(--f-mono);white-space:nowrap}
+.dp-tab td.t{font-family:var(--f-body);white-space:normal}
+.dp-tab small.dt{display:block;font-size:11px;color:var(--muted)} .dp-tab td.sets{line-height:1.6}
+.dp-tab small.up{color:var(--ok)} .dp-tab small.down{color:var(--crit)}
+.det-s{border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:grid;gap:10px;background:var(--surface);scroll-margin-top:calc(var(--top-h,0px) + 110px)}
+.det-s.on,.dp-row.on{border-color:var(--brand);box-shadow:0 0 0 2px color-mix(in srgb,var(--brand) 50%,transparent)}
 .det-s header{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
 .det-s header div{display:grid;gap:1px}
 .det-s header b{font-family:var(--f-display);font-weight:800;font-size:16px}
@@ -458,26 +486,20 @@ body.com-modal{overflow:hidden}
 .det-i .e{font-size:25px;line-height:1;grid-row:span 2}
 .det-i .n{font-size:11.5px;color:var(--muted)}
 .det-i .v{font-size:14px;font-weight:700;font-family:var(--f-mono)}
-.det-i .v small{display:block;font-family:var(--f-body,inherit);font-weight:400;font-size:12px;color:var(--ink-2);line-height:1.25}
-.det-cmp{margin:0;font-size:13px;color:var(--ink-2)}
+.det-i .v small{display:block;font-family:var(--f-body);font-weight:400;font-size:12px;color:var(--ink-2);line-height:1.25}
 .det-obs{margin:0;padding:8px 12px;border-left:3px solid var(--brand);background:color-mix(in srgb,var(--brand) 8%,var(--surface));font-size:13.5px;white-space:pre-wrap;border-radius:0 8px 8px 0}
-.det-w{display:grid;gap:9px;scroll-margin:110px;padding-bottom:6px}
-.det-w + .det-w{border-top:1px dashed var(--line);padding-top:12px}
-.det-w h3{margin:0;font-family:var(--f-display);font-weight:800;font-size:18px}
-.det-w h3 span{font-family:var(--f-mono);font-size:12px;font-weight:400;color:var(--muted);margin-left:6px}
-.det-w.on h3{color:var(--brand-ink)}
-.det-w.on{outline:2px solid color-mix(in srgb,var(--brand) 50%,transparent);outline-offset:6px;border-radius:8px}
 .det-dias{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
 .det-dias div{padding:5px 2px;border-radius:8px;background:color-mix(in srgb,var(--ink) 4%,var(--surface));display:grid;font-size:11px;color:var(--muted)}
 .det-dias div.tem{background:color-mix(in srgb,var(--load) 30%,var(--surface));color:var(--ink)}
 .det-dias b{font-family:var(--f-mono);font-size:12px}
 .det-vazio{margin:0;color:var(--muted);font-size:14px}
 .det-btn{all:unset;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--brand-ink);padding:4px 11px;border-radius:999px;border:1px solid var(--line);white-space:nowrap;background:var(--surface)}
-.det-btn:hover{border-color:var(--brand)}
-section[data-view="esforco"] .chartbox{cursor:pointer}
-#tab-sem tr:not(.empty):not(:first-child),#tab-reg tr:not(.empty):not(:first-child){cursor:pointer}
-#tab-sem tr:not(.empty):not(:first-child):hover td,#tab-reg tr:not(.empty):not(:first-child):hover td{background:color-mix(in srgb,var(--brand) 10%,var(--surface))}
-@media (max-width:420px){.det-it{grid-template-columns:1fr 1fr}.det-corpo{padding:12px 12px 20px}.det-top{padding:14px 12px 10px}.det-i .e{font-size:22px}}
+.det-btn:hover,.dp-tudo:hover{border-color:var(--brand)}
+.dp-tudo{all:unset;cursor:pointer;justify-self:start;font-weight:700;font-size:14px;padding:9px 16px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+section[data-view="esforco"] .chartbox,section[data-view="cargas"] .chartbox,#multi-ex .mini{cursor:pointer}
+tr[data-dpk]{cursor:pointer}
+tr[data-dpk]:hover td{background:color-mix(in srgb,var(--brand) 10%,var(--surface))}
+@media (max-width:420px){.det-it{grid-template-columns:1fr 1fr}.det-i .e{font-size:22px}.dp-val small{max-width:130px}}
 /* ---- v18: CMJ fora ---- */
 .panel:has(#c-semj){display:none}
 </style>
@@ -1967,7 +1989,7 @@ const _renderAllBase=renderAll;
 renderAll=function(){ _renderAllBase(); if(!NA_HOME&&view==="treino") renderTreino(); if(!NA_HOME&&view==="cardio") renderCardio(); if(!NA_HOME&&view==="resumo"){ renderDor(); renderObsLista(); } if(!NA_HOME) renderAvisoCron(); else { const a=$("#aviso-cron"); if(a) a.hidden=true; } };
 
 
-// ---------- v24: detalhes clicáveis em Esforço e recuperação ----------
+// ---------- v24: páginas de detalhe (Esforço e Cargas) ----------
 const DET_EMO5=["😫","😟","😐","🙂","😄"];
 const emo5=v=>v==null?"":DET_EMO5[Math.max(1,Math.min(5,Math.round(v)))-1];
 const emoBem=t=>t==null?"":t>=21?"😄":t>=17?"🙂":t>=13?"😐":t>=9?"😟":"😫";
@@ -1979,149 +2001,226 @@ function rotEsc(tab,v){ if(v==null) return ""; for(let i=Math.round(v);i>=0;i--)
 const detDia=iso=>{ if(!iso) return "sem data"; const d=new Date(iso+"T12:00:00"); return d.toLocaleDateString("pt-BR",{weekday:"short"}).replace(".","")+" · "+fmtDL(iso); };
 const detNome=s=>s.cardio?"Cardio · "+s.tipo:"Treino "+esc(s.treino);
 const detN=(v,d)=>v==null?"–":num(v,d==null?(v%1?1:0):d);
-const detChave=s=>esc((s.data||"")+"|"+s.treino+"|"+(s.semana??""));
-const detItem=(e,n,v,r)=>`<div class="det-i"><span class="e" aria-hidden="true">${e}</span><span class="n">${n}</span><span class="v">${v}${r?` <small>${esc(r)}</small>`:""}</span></div>`;
+const detChave=s=>(s.data||"")+"|"+s.treino+"|"+(s.semana??"");
+const detItem=(e,n,v,r)=>`<div class="det-i"><span class="e" aria-hidden="true">${e||"·"}</span><span class="n">${n}</span><span class="v">${v}${r?` <small>${esc(r)}</small>`:""}</span></div>`;
+const detKpi=(n,v,e)=>`<div class="det-kpi"><span>${n}</span><b>${e?e+" ":""}${v}</b></div>`;
 const detAluno=()=>document.body.classList.contains("visao-aluno");
-const DET_CAMPOS={carga:["dur","pse","psr"],dur:["dur","pse"],pse:["pse","psr"],sono:["sono","qual"],dor:["dor"],wb:["qual","fad","dorm","est","hum","sono"],full:["dur","pse","psr","sono","qual","fad","dorm","est","hum","dor"]};
-function detBlocos(s,foco,prev){
-  if(!(DET_CAMPOS[foco]||DET_CAMPOS.full).some(k=>s[k]!=null)&&!(foco==="full"&&!s.cardio&&obsDe(s.treino,s.semana))) return '<p class="det-vazio">Ainda sem registro nesta sessão.</p>';
-  const q=[], it=a=>q.push(`<div class="det-it">${a.join("")}</div>`);
-  const pse=()=>detItem(emoPSE(s.pse),"Esforço (PSE)",s.pse!=null?detN(s.pse)+"/10":"–",rotEsc(ESC_PSE,s.pse));
-  const psr=()=>detItem(emoPSR(s.psr),"Recuperação (PSR)",s.psr!=null?detN(s.psr)+"/10":"–",rotEsc(ESC_PSR,s.psr));
-  const dur=()=>detItem("⏱️","Duração",s.dur!=null?s.dur+" min":"–","");
-  const ua=()=>detItem("🏋️","Carga",carga(s)!=null?num(carga(s))+" UA":"–",s.dur!=null&&s.pse!=null?`${s.dur} min × PSE ${detN(s.pse)}`:"");
-  const sono=()=>detItem(emoSono(s.sono),"Horas de sono",s.sono!=null?num(s.sono,s.sono%1?1:0)+" h":"–","");
-  const qual=()=>detItem(emo5(s.qual),"Qualidade do sono",s.qual!=null?s.qual+"/5":"–",rotEsc(ESC_SONO,s.qual));
-  const wb=()=>[detItem(emo5(s.fad),"Fadiga",s.fad!=null?s.fad+"/5":"–",rotEsc(ESC_FAD,s.fad)),
-    detItem(emo5(s.dorm),"Dor muscular",s.dorm!=null?s.dorm+"/5":"–",rotEsc(ESC_DORM,s.dorm)),
-    detItem(emo5(s.est),"Estresse",s.est!=null?s.est+"/5":"–",rotEsc(ESC_EST,s.est)),
-    detItem(emo5(s.hum),"Humor",s.hum!=null?s.hum+"/5":"–",rotEsc(ESC_HUM,s.hum))];
-  const dor=()=>detItem(emoDor(s.dor),"Dor no treino",s.dor!=null?s.dor+"/10":"não registrada",s.dor!=null?[s.local,rotEsc(ESC_DOR,s.dor)].filter(Boolean).join(" · "):"");
-  if(foco==="carga"){ it([dur(),pse(),ua(),psr()]); }
-  else if(foco==="dur"){
-    it([dur(),pse(),ua()]);
-    if(prev&&s.dur!=null&&s.pse!=null&&prev.dur!=null&&prev.pse!=null){
-      const dm=s.dur-prev.dur, dp=s.pse-prev.pse, sg=v=>(v>0?"+":"")+num(v,v%1?1:0);
-      const msg=dm===0&&dp===0?"igual à sessão anterior":dm!==0&&dp===0?(dm>0?"carga subiu pelo volume (mais tempo)":"carga caiu pelo volume (menos tempo)"):dm===0?(dp>0?"carga subiu pela intensidade (PSE maior)":"carga caiu pela intensidade (PSE menor)"):(dm>0&&dp>0?"mais longo e mais intenso":dm<0&&dp<0?"mais curto e mais leve":dm>0?"mais longo, porém mais leve":"mais curto, porém mais intenso");
-      q.push(`<p class="det-cmp">vs. sessão anterior: <b>${sg(dm)} min</b> · <b>PSE ${sg(dp)}</b> → ${msg}</p>`);
-    }
+const detIni=n=>{const x=new Date(n*864e5);return String(x.getUTCDate()).padStart(2,"0")+"/"+String(x.getUTCMonth()+1).padStart(2,"0");};
+const pct=v=>v==null?"–":(v>=0?"+":"")+Math.round(v*100)+"%";
+const dpBar=(f,cor)=>f==null?"":`<div class="dp-bar" aria-hidden="true"><i style="width:${Math.max(2,Math.min(100,f*100)).toFixed(1)}%;background:var(${cor})"></i></div>`;
+const dpVal=(e,main,small)=>`<div class="dp-val">${e?`<span class="e" aria-hidden="true">${e}</span>`:""}<div><b>${main}</b>${small?`<small>${small}</small>`:""}</div></div>`;
+const dpLinha=(k,quem,quando,val,bar)=>`<article class="dp-row"${k?` data-k="${esc(k)}"`:""}><div class="dp-q"><b>${quem}</b><span>${quando}</span></div>${val}${bar||""}</article>`;
+const dpSemRegistro='<span class="dp-sem">sem registro</span>';
+
+// ---- página ----
+let DET_VOLTA=null, DET_ATUAL=null;
+function detSecao(){ let sec=$("#det-page"); if(!sec){ sec=document.createElement("section"); sec.id="det-page"; sec.dataset.view="detalhe"; sec.hidden=true; ($('section[data-view="esforco"]').parentElement||$("main")).appendChild(sec); } return sec; }
+function abrirPagina(atual,alvo){
+  const sec=detSecao(); const ja=view==="detalhe";
+  if(!ja){ DET_VOLTA={view,y:window.scrollY}; try{ history.pushState({det:1},""); }catch(e){} }
+  DET_ATUAL=atual;
+  document.documentElement.style.setProperty("--top-h",(($(".top")||{}).offsetHeight||0)+"px");
+  sec.innerHTML=atual.html();
+  if(!ja) show("detalhe");
+  document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===(DET_VOLTA&&DET_VOLTA.view)));
+  const el=alvo&&[...sec.querySelectorAll("[data-k]")].find(e=>e.dataset.k===alvo);
+  if(el){ el.classList.add("on"); requestAnimationFrame(()=>el.scrollIntoView({block:"center"})); } else window.scrollTo(0,0);
+  const t=sec.querySelector("h1"); if(t){ t.tabIndex=-1; t.focus({preventScroll:true}); }
+}
+function voltarDet(doHistorico){
+  if(view!=="detalhe") return;
+  const v=DET_VOLTA||{view:"esforco",y:0}; DET_VOLTA=null; DET_ATUAL=null;
+  show(v.view); requestAnimationFrame(()=>window.scrollTo(0,v.y));
+  if(!doHistorico){ try{ if(history.state&&history.state.det) history.back(); }catch(e){} }
+}
+window.addEventListener("popstate",()=>{ if(view==="detalhe") voltarDet(true); });
+function detCabeca(grupo,id,tit,sub){
+  const temas=grupo==="e"?Object.entries(TEMAS_E).filter(([k,t])=>!(t.treinador&&detAluno())):Object.entries(TEMAS_C);
+  return `<div class="dp-top"><button type="button" class="dp-voltar" data-dp="voltar">‹ Voltar</button>
+    <nav class="dp-chips" aria-label="Escolher o detalhe">${temas.map(([k,t])=>`<button type="button" data-dp="${grupo}:${k}"${k===id?' aria-current="page"':""}>${t.nome}</button>`).join("")}</nav></div>
+    <div><h1>${tit}</h1>${sub?`<p class="sub">${sub}</p>`:""}</div>`;
+}
+
+// ---- Esforço: um tema por página ----
+function detBlocosFull(s){
+  const it=a=>`<div class="det-it">${a.join("")}</div>`;
+  const q=[it([detItem("⏱️","Duração",s.dur!=null?s.dur+" min":"–",""),
+    detItem(emoPSE(s.pse),"Esforço (PSE)",s.pse!=null?detN(s.pse)+"/10":"–",rotEsc(ESC_PSE,s.pse)),
+    detItem("🏋️","Carga",carga(s)!=null?num(carga(s))+" UA":"–",s.dur!=null&&s.pse!=null?`${s.dur} min × PSE ${detN(s.pse)}`:""),
+    detItem(emoPSR(s.psr),"Recuperação (PSR)",s.psr!=null?detN(s.psr)+"/10":"–",rotEsc(ESC_PSR,s.psr))])];
+  if(!s.cardio){
+    q.push(it([detItem(emoSono(s.sono),"Horas de sono",s.sono!=null?num(s.sono,s.sono%1?1:0)+" h":"–",""),...wbItens(s)]));
+    q.push(it([detItem(emoDor(s.dor),"Dor no treino",s.dor!=null?s.dor+"/10":"não registrada",s.dor!=null?[s.local,rotEsc(ESC_DOR,s.dor)].filter(Boolean).join(" · "):"")]));
+    const o=obsDe(s.treino,s.semana); if(o&&o.texto) q.push(`<p class="det-obs"><b>Observação do treino:</b> ${esc(o.texto)}</p>`);
   }
-  else if(foco==="pse"){ it([pse(),psr()]); }
-  else if(foco==="sono"){ it([sono(),qual()]); }
-  else if(foco==="dor"){ it([dor()]); }
-  else if(foco==="wb"){ it([qual(),...wb(),sono()]); }
-  else { // completo
-    it([dur(),pse(),ua(),psr()]);
-    if(!s.cardio){ it([sono(),qual(),...wb()]); it([dor()]); }
-  }
-  if(foco==="full"&&!s.cardio){ const o=obsDe(s.treino,s.semana); if(o&&o.texto) q.push(`<p class="det-obs"><b>Observação do treino:</b> ${esc(o.texto)}</p>`); }
   return q.join("");
 }
-function detSessao(s,foco,prev){
-  const b=bem(s);
-  const selo=foco==="wb"||foco==="full"?(b!=null?`<span class="det-selo" title="Bem-estar total">${emoBem(b)} ${b}/25</span>`:""):"";
-  return `<article class="det-s" data-k="${detChave(s)}"><header><div><b>${detNome(s)}</b><span>${detDia(s.data)}${s.semana!=null?" · semana "+s.semana:""}</span></div>${selo}</header>${detBlocos(s,foco,prev)}</article>`;
-}
-function abrirDet(tit,sub,html,alvo){
-  let ov=$("#det-modal"); if(ov) ov.remove();
-  ov=document.createElement("div"); ov.id="det-modal"; ov.className="fim-ov";
-  ov.innerHTML=`<div class="fim-box det" role="dialog" aria-modal="true" aria-labelledby="det-tit"><div class="det-top"><div><h2 id="det-tit" tabindex="-1">${tit}</h2>${sub?`<p class="fim-sub">${sub}</p>`:""}</div><button type="button" class="det-x" aria-label="Fechar">✕</button></div><div class="det-corpo">${html}</div></div>`;
-  document.body.appendChild(ov); document.body.classList.add("com-modal");
-  const volta=document.activeElement;
-  const fechar=()=>{ ov.remove(); document.body.classList.remove("com-modal"); document.removeEventListener("keydown",k); if(volta&&volta.focus) volta.focus({preventScroll:true}); };
-  const k=ev=>{ if(ev.key==="Escape") fechar(); };
-  document.addEventListener("keydown",k);
-  ov.addEventListener("click",ev=>{ if(ev.target===ov) fechar(); });
-  ov.querySelector(".det-x").addEventListener("click",fechar);
-  $("#det-tit").focus({preventScroll:true});
-  if(alvo){ const el=[...ov.querySelectorAll("[data-k]")].find(e=>e.dataset.k===alvo); if(el){ el.classList.add("on"); requestAnimationFrame(()=>el.scrollIntoView({block:"center"})); } }
-}
-const detKpi=(n,v,e)=>`<div class="det-kpi"><span>${n}</span><b>${e?e+" ":""}${v}</b></div>`;
-const detVazio='<p class="det-vazio">Nenhuma sessão registrada ainda.</p>';
-// --- por sessão ---
-const DET_SESS={
-  "c-carga":{tit:"Carga diária com PSE e PSR",sub:"Sessão a sessão: duração, esforço (PSE), carga em UA e como chegou recuperado (PSR).",foco:"carga",lista:()=>last30(),
-    res:d=>{ const c=d.map(carga).filter(v=>v!=null); const mx=d.reduce((a,s)=>carga(s)!=null&&(!a||carga(s)>carga(a))?s:a,null);
-      return detKpi("Sessões",d.length)+detKpi("Carga média",num(avg(c))+" UA")+(mx?detKpi("Maior carga",num(carga(mx))+" UA · "+fmtD(mx.data)):"")+detKpi("PSE média",detN(avg(d.map(s=>s.pse)),1),emoPSE(avg(d.map(s=>s.pse))))+detKpi("PSR média",detN(avg(d.map(s=>s.psr)),1),emoPSR(avg(d.map(s=>s.psr)))); }},
-  "c-dur":{tit:"Duração x PSE",sub:"Para cada sessão: quanto tempo durou, o quanto pesou e se a carga mudou por volume ou por intensidade.",foco:"dur",lista:()=>last30(),
-    res:d=>detKpi("Duração média",num(avg(d.map(s=>s.dur)))+" min")+detKpi("PSE média",detN(avg(d.map(s=>s.pse)),1),emoPSE(avg(d.map(s=>s.pse))))},
-  "c-wb":{tit:"Bem-estar diário",sub:"Como o aluno chegou em cada treino: sono, fadiga, dor muscular, estresse e humor (1 a 5, quanto maior melhor).",foco:"wb",lista:()=>last30().filter(s=>!s.cardio),
-    res:d=>{ const m=avg(d.map(bem)); return detKpi("Bem-estar médio",m!=null?num(m,1)+"/25":"–",emoBem(m))+detKpi("Sono médio",d.some(s=>s.sono!=null)?num(avg(d.map(s=>s.sono)),1)+" h":"–",emoSono(avg(d.map(s=>s.sono)))); }}
-};
-function detPorSessao(id,idx){
-  const c=DET_SESS[id]; const d=c.lista(); if(!d.length){ abrirDet(c.tit,c.sub,detVazio); return; }
-  const prevDe=i=>i>0?d[i-1]:null;
-  const html=`<div class="det-kpis">${c.res(d)}</div>`+d.map((s,i)=>({s,i})).reverse().map(({s,i})=>detSessao(s,c.foco,prevDe(i))).join("");
-  abrirDet(c.tit,c.sub,html,idx!=null&&d[idx]?detChave(d[idx]):null);
-}
-// --- por semana ---
-const detIni=n=>{const x=new Date(n*864e5);return String(x.getUTCDate()).padStart(2,"0")+"/"+String(x.getUTCMonth()+1).padStart(2,"0");};
-function detDiasSemana(x){
-  const daily=[0,0,0,0,0,0,0]; S.forEach(s=>{const k=dayN(s.data)-x.inicio; if(k>=0&&k<7) daily[k]+=carga(s)||0;});
-  return `<div class="det-dias">${["seg","ter","qua","qui","sex","sáb","dom"].map((d,i)=>`<div class="${daily[i]?"tem":""}"><span>${d}</span><b>${daily[i]?num(daily[i]):"0"}</b></div>`).join("")}</div>`;
-}
-const zonaAC=v=>v==null?"":v<0.8?"abaixo do habitual":v<=1.3?"zona segura":v<=1.5?"atenção":"pico de carga, risco maior";
-const DET_SEM={
-  "c-semc":{tit:"Carga semanal",sub:"Soma da carga (PSE × minutos) de todas as sessões da semana, com cada sessão que entrou na conta.",foco:"carga",
-    res:x=>detKpi("Carga",num(x.carga)+" UA")+detKpi("Sessões",x.n)+detKpi("vs semana anterior",x.var!=null?(x.var>=0?"+":"")+Math.round(x.var*100)+"%":"–")},
-  "c-semm":{tit:"Monotonia e Agudo:Crônico",sub:"Monotonia = média da carga diária ÷ desvio-padrão dos 7 dias. Strain = carga × monotonia. A:C = semana ÷ média das 4 anteriores (zona segura ~0,8 a 1,3).",foco:"carga",
-    res:x=>detKpi("Monotonia",detN(x.mono,2))+detKpi("Strain",num(x.strain))+detKpi("Agudo:Crônico",x.ac!=null?num(x.ac,2)+" · "+zonaAC(x.ac):"a partir da S5"),dias:true},
-  "c-semp":{tit:"Esforço (PSE) x Recuperação (PSR)",sub:"Média da semana e cada sessão: quão pesado foi e quão recuperado chegou.",foco:"pse",
-    res:x=>detKpi("PSE média",detN(x.pse,1),emoPSE(x.pse))+detKpi("PSR média",detN(x.psr,1),emoPSR(x.psr))},
-  "c-sems":{tit:"Sono",sub:"Horas e qualidade do sono antes de cada treino.",foco:"sono",
-    res:x=>detKpi("Sono médio",x.sono!=null?num(x.sono,1)+" h":"–",emoSono(x.sono))+detKpi("Qualidade média",x.qual!=null?num(x.qual,1)+"/5":"–",emo5(x.qual))},
-  "c-semb":{tit:"Bem-estar médio",sub:"Soma de qualidade do sono, fadiga, dor muscular, estresse e humor (5 a 25).",foco:"wb",
-    res:x=>detKpi("Bem-estar médio",x.bem!=null?num(x.bem,1)+"/25":"–",emoBem(x.bem))},
-  "c-semd":{tit:"Dor registrada",sub:"Local e intensidade da dor (0 a 10) informados em cada treino.",foco:"dor",
-    res:x=>detKpi("Dor média",x.dor!=null?num(x.dor,1)+"/10":"–",emoDor(x.dor))+detKpi("Treinos com dor ≥ 4",x.dor4)},
-  "tab-sem":{tit:"Semana completa",sub:"Todos os números da semana e cada sessão em detalhe.",foco:"full",
-    res:x=>detKpi("Carga",num(x.carga)+" UA")+detKpi("Sessões",x.n)+detKpi("vs semana anterior",x.var!=null?(x.var>=0?"+":"")+Math.round(x.var*100)+"%":"–")+
+const wbItens=s=>[detItem(emo5(s.qual),"Qualidade do sono",s.qual!=null?s.qual+"/5":"–",rotEsc(ESC_SONO,s.qual)),
+  detItem(emo5(s.fad),"Fadiga",s.fad!=null?s.fad+"/5":"–",rotEsc(ESC_FAD,s.fad)),
+  detItem(emo5(s.dorm),"Dor muscular",s.dorm!=null?s.dorm+"/5":"–",rotEsc(ESC_DORM,s.dorm)),
+  detItem(emo5(s.est),"Estresse",s.est!=null?s.est+"/5":"–",rotEsc(ESC_EST,s.est)),
+  detItem(emo5(s.hum),"Humor",s.hum!=null?s.hum+"/5":"–",rotEsc(ESC_HUM,s.hum))];
+const cartao=(s,corpo,selo)=>`<article class="det-s" data-k="${esc(detChave(s))}"><header><div><b>${detNome(s)}</b><span>${detDia(s.data)}</span></div>${selo||""}</header>${corpo}</article>`;
+const media=(ss,f)=>avg(ss.map(f));
+const TEMAS_E={
+  carga:{nome:"Carga",tit:"Carga de cada treino",sub:"Carga (UA) = minutos × PSE. Mostra o quanto cada treino pesou no corpo.",inclui:()=>true,
+    linha:(s,c)=>dpLinha(detChave(s),detNome(s),detDia(s.data),carga(s)!=null?dpVal("",num(carga(s))+" UA",`${s.dur} min × PSE ${detN(s.pse)}`):dpSemRegistro,carga(s)!=null?dpBar(carga(s)/c.max(carga),"--load"):""),
+    semana:(x,ss)=>detKpi("Carga da semana",num(x.carga)+" UA")+detKpi("Treinos",x.n)+detKpi("vs semana anterior",pct(x.var))+detKpi("Média por treino",num(media(ss,carga))+" UA"),
+    geral:ss=>{ const mx=ss.reduce((a,s)=>carga(s)!=null&&(!a||carga(s)>carga(a))?s:a,null); return detKpi("Carga média por treino",num(media(ss,carga))+" UA")+(mx?detKpi("Maior carga",num(carga(mx))+" UA · "+fmtD(mx.data)):""); }},
+  dur:{nome:"Duração",tit:"Duração dos treinos",sub:"Quanto tempo durou cada treino, e a diferença para o treino anterior.",inclui:()=>true,
+    linha:(s,c)=>{ const p=c.ant(s,"dur"); return dpLinha(detChave(s),detNome(s),detDia(s.data),s.dur!=null?dpVal("⏱️",s.dur+" min",p!=null?(s.dur-p===0?"igual ao anterior":(s.dur-p>0?"+":"")+(s.dur-p)+" min vs anterior"):""):dpSemRegistro,s.dur!=null?dpBar(s.dur/c.max(x=>x.dur),"--dur"):""); },
+    semana:(x,ss)=>detKpi("Tempo total",num(ss.reduce((a,s)=>a+(s.dur||0),0))+" min")+detKpi("Média por treino",num(media(ss,s=>s.dur))+" min"),
+    geral:ss=>detKpi("Duração média",num(media(ss,s=>s.dur))+" min")+detKpi("Mais longo",num(Math.max(0,...ss.map(s=>s.dur||0)))+" min")},
+  pse:{nome:"PSE",tit:"Esforço percebido (PSE)",sub:"De 0 a 10: o quanto o treino inteiro pareceu pesado.",inclui:()=>true,
+    linha:(s,c)=>dpLinha(detChave(s),detNome(s),detDia(s.data),s.pse!=null?dpVal(emoPSE(s.pse),detN(s.pse)+"/10",esc(rotEsc(ESC_PSE,s.pse))):dpSemRegistro,s.pse!=null?dpBar(s.pse/10,"--pse"):""),
+    semana:(x,ss)=>detKpi("PSE média",detN(x.pse,1),emoPSE(x.pse))+(m=>detKpi("Maior PSE",m<0?"–":detN(m)))(Math.max(...ss.map(s=>s.pse??-1)))+detKpi("Treinos com PSE ≥ 8",ss.filter(s=>s.pse>=8).length),
+    geral:ss=>detKpi("PSE média",detN(media(ss,s=>s.pse),1),emoPSE(media(ss,s=>s.pse)))},
+  psr:{nome:"PSR",tit:"Recuperação antes do treino (PSR)",sub:"De 0 a 10: o quanto chegou recuperado para treinar.",inclui:s=>!s.cardio,
+    linha:(s,c)=>dpLinha(detChave(s),detNome(s),detDia(s.data),s.psr!=null?dpVal(emoPSR(s.psr),detN(s.psr)+"/10",esc(rotEsc(ESC_PSR,s.psr))):dpSemRegistro,s.psr!=null?dpBar(s.psr/10,"--psr"):""),
+    semana:(x,ss)=>detKpi("PSR média",detN(x.psr,1),emoPSR(x.psr))+detKpi("Chegou mal recuperado (≤ 4)",ss.filter(s=>s.psr!=null&&s.psr<=4).length),
+    geral:ss=>detKpi("PSR média",detN(media(ss,s=>s.psr),1),emoPSR(media(ss,s=>s.psr)))},
+  wb:{nome:"Bem-estar",tit:"Bem-estar diário",sub:"Como chegou em cada treino: qualidade do sono, fadiga, dor muscular, estresse e humor. De 1 a 5, quanto maior melhor (total de 5 a 25).",inclui:s=>!s.cardio,
+    linha:s=>{ const b=bem(s); const tem=[s.qual,s.fad,s.dorm,s.est,s.hum].some(v=>v!=null);
+      return cartao(s,tem?`<div class="det-it">${wbItens(s).join("")}</div>`:'<p class="det-vazio">Ainda sem registro nesta sessão.</p>',b!=null?`<span class="det-selo" title="Bem-estar total">${emoBem(b)} ${b}/25</span>`:""); },
+    semana:(x,ss)=>detKpi("Bem-estar médio",x.bem!=null?num(x.bem,1)+"/25":"–",emoBem(x.bem))+[["Sono","qual"],["Fadiga","fad"],["Dor musc.","dorm"],["Estresse","est"],["Humor","hum"]].map(([n,k])=>{const m=media(ss,s=>s[k]);return detKpi(n,m!=null?num(m,1):"–",emo5(m));}).join(""),
+    geral:ss=>detKpi("Bem-estar médio",media(ss,bem)!=null?num(media(ss,bem),1)+"/25":"–",emoBem(media(ss,bem)))},
+  sono:{nome:"Sono",tit:"Sono",sub:"Horas dormidas e qualidade do sono na noite antes de cada treino.",inclui:s=>!s.cardio,
+    linha:s=>dpLinha(detChave(s),detNome(s),detDia(s.data),s.sono!=null||s.qual!=null?`<div class="dp-duo">${dpVal(emoSono(s.sono),s.sono!=null?num(s.sono,s.sono%1?1:0)+" h":"–","horas")}${dpVal(emo5(s.qual),s.qual!=null?s.qual+"/5":"–",esc(rotEsc(ESC_SONO,s.qual))||"qualidade")}</div>`:dpSemRegistro,s.sono!=null?dpBar(s.sono/10,"--load"):""),
+    semana:(x,ss)=>detKpi("Sono médio",x.sono!=null?num(x.sono,1)+" h":"–",emoSono(x.sono))+detKpi("Qualidade média",x.qual!=null?num(x.qual,1)+"/5":"–",emo5(x.qual))+detKpi("Noites com menos de 6 h",ss.filter(s=>s.sono!=null&&s.sono<6).length),
+    geral:ss=>detKpi("Sono médio",media(ss,s=>s.sono)!=null?num(media(ss,s=>s.sono),1)+" h":"–",emoSono(media(ss,s=>s.sono)))},
+  dor:{nome:"Dor",tit:"Dor registrada",sub:"Local e intensidade da dor (0 a 10) informados em cada treino.",inclui:s=>!s.cardio,
+    linha:s=>dpLinha(detChave(s),detNome(s),detDia(s.data),s.dor!=null?dpVal(emoDor(s.dor),s.dor+"/10",s.dor>0?esc([s.local,rotEsc(ESC_DOR,s.dor)].filter(Boolean).join(" · ")):"Sem dor"):dpSemRegistro,s.dor!=null?dpBar(s.dor/10,"--pse"):""),
+    semana:(x,ss)=>{ const locais=[...new Set(ss.filter(s=>s.dor>0&&s.local).map(s=>s.local))]; return detKpi("Dor média",x.dor!=null?num(x.dor,1)+"/10":"–",emoDor(x.dor))+detKpi("Treinos com dor ≥ 4",x.dor4)+(locais.length?detKpi("Locais",esc(locais.join(", "))):""); },
+    geral:ss=>detKpi("Dor média",media(ss,s=>s.dor)!=null?num(media(ss,s=>s.dor),1)+"/10":"–",emoDor(media(ss,s=>s.dor)))+detKpi("Treinos com dor ≥ 4",ss.filter(s=>s.dor>=4).length)},
+  mono:{nome:"Monotonia e A:C",treinador:true,tit:"Monotonia e Agudo:Crônico",sub:"Monotonia = média da carga diária ÷ desvio-padrão dos 7 dias (dias sem treino contam 0). Strain = carga × monotonia. Agudo:Crônico = semana ÷ média das 4 anteriores; zona segura de ~0,8 a 1,3.",inclui:()=>true,dias:true,
+    linha:(s,c)=>TEMAS_E.carga.linha(s,c),
+    semana:x=>detKpi("Monotonia",detN(x.mono,2))+detKpi("Strain",num(x.strain))+detKpi("Agudo:Crônico",x.ac!=null?num(x.ac,2)+" · "+zonaAC(x.ac):"a partir da S5"),
+    geral:()=>""},
+  tudo:{nome:"Tudo junto",tit:"Tudo junto",sub:"Cada treino com todos os registros: carga, PSE, PSR, sono, bem-estar, dor e a observação do aluno.",inclui:()=>true,dias:true,
+    linha:s=>{ const b=bem(s); const vazio=["dur","pse","psr","sono","qual","fad","dorm","est","hum","dor"].every(k=>s[k]==null)&&!(!s.cardio&&obsDe(s.treino,s.semana));
+      return cartao(s,vazio?'<p class="det-vazio">Ainda sem registro nesta sessão.</p>':detBlocosFull(s),b!=null?`<span class="det-selo" title="Bem-estar total">${emoBem(b)} ${b}/25</span>`:""); },
+    semana:(x,ss)=>detKpi("Carga",num(x.carga)+" UA")+detKpi("Treinos",x.n)+detKpi("vs semana anterior",pct(x.var))+
       (detAluno()?"":detKpi("Monotonia",detN(x.mono,2))+detKpi("Agudo:Crônico",x.ac!=null?num(x.ac,2):"–"))+
       detKpi("PSE média",detN(x.pse,1),emoPSE(x.pse))+detKpi("PSR média",detN(x.psr,1),emoPSR(x.psr))+detKpi("Sono médio",x.sono!=null?num(x.sono,1)+" h":"–",emoSono(x.sono))+
-      detKpi("Bem-estar",x.bem!=null?num(x.bem,1)+"/25":"–",emoBem(x.bem))+detKpi("Dor média",x.dor!=null?num(x.dor,1):"–",emoDor(x.dor)),dias:true}
+      detKpi("Bem-estar",x.bem!=null?num(x.bem,1)+"/25":"–",emoBem(x.bem))+detKpi("Dor média",x.dor!=null?num(x.dor,1):"–",emoDor(x.dor)),
+    geral:()=>""}
 };
-function detSemana(x,c){
-  const ss=sorted().filter(s=>s.semana===x.w);
-  return `<section class="det-w" data-k="w${x.w}"><h3>Semana ${x.w} <span>${detIni(x.inicio)} a ${detIni(x.inicio+6)}</span></h3><div class="det-kpis">${c.res(x)}</div>${c.dias&&!(detAluno()&&c!==DET_SEM["tab-sem"])?detDiasSemana(x):""}${ss.map(s=>detSessao(s,c.foco)).join("")}</section>`;
+const zonaAC=v=>v==null?"":v<0.8?"abaixo do habitual":v<=1.3?"zona segura":v<=1.5?"atenção":"pico, risco maior";
+function detDiasSemana(x){
+  const daily=[0,0,0,0,0,0,0]; S.forEach(s=>{const k=dayN(s.data)-x.inicio; if(k>=0&&k<7) daily[k]+=carga(s)||0;});
+  return `<div class="det-dias" aria-label="Carga por dia">${["seg","ter","qua","qui","sex","sáb","dom"].map((d,i)=>`<div class="${daily[i]?"tem":""}"><span>${d}</span><b>${daily[i]?num(daily[i]):"0"}</b></div>`).join("")}</div>`;
 }
-function detPorSemana(id,w,so){
-  const c=DET_SEM[id]; const ws=semanas().filter(x=>x.n);
-  if(!ws.length){ abrirDet(c.tit,c.sub,detVazio); return; }
-  if(so){ const x=ws.find(y=>y.w===w); if(!x) return; abrirDet(c.tit+" · semana "+w,c.sub,detSemana(x,c)); return; }
-  abrirDet(c.tit,c.sub,[...ws].reverse().map(x=>detSemana(x,c)).join(""),w!=null?"w"+w:null);
-}
-function detSessaoUnica(s){ abrirDet(detNome(s),detDia(s.data)+(s.semana!=null?" · semana "+s.semana:""),detSessao(s,"full")); }
-// --- ligações ---
-(function ligarDetalhes(){
-  const todos={...DET_SESS,...DET_SEM}; delete todos["tab-sem"];
-  Object.keys(todos).forEach(id=>{
-    const cv=document.getElementById(id); const head=cv&&cv.closest(".panel")&&cv.closest(".panel").querySelector(".head");
-    if(!head||head.querySelector(".det-btn")) return;
-    const b=document.createElement("button"); b.type="button"; b.className="det-btn"; b.textContent="Ver detalhes ›"; b.dataset.det=id; head.appendChild(b);
-  });
-  [["tab-sem","Resumo por semana"]].forEach(([id])=>{ const t=document.getElementById(id); const head=t&&t.closest(".panel").querySelector(".head"); if(head&&!head.querySelector(".det-dica")){ const s=document.createElement("span"); s.className="sub det-dica"; s.textContent="toque numa semana para ver os detalhes"; head.appendChild(s);} });
-  document.querySelectorAll('section[data-view="esforco"][data-sub="sessao"] > div > p.sub, section[data-view="esforco"][data-sub="semana"] > div > p.sub').forEach(p=>{ if(!p.dataset.det){ p.dataset.det="1"; p.textContent+=" Toque em qualquer gráfico ou tabela para abrir os detalhes."; } });
-  const abrir=(id,idx)=>{ if(DET_SESS[id]) detPorSessao(id,idx); else if(DET_SEM[id]) detPorSemana(id,idx!=null?idx+1:null); };
-  document.addEventListener("click",ev=>{
-    const b=ev.target.closest(".det-btn"); if(b){ abrir(b.dataset.det,null); return; }
-    const cv=ev.target.closest("canvas"); if(cv&&(DET_SESS[cv.id]||DET_SEM[cv.id])&&cv.id!=="tab-sem"){
-      const ch=charts[cv.id]; let idx=null;
-      if(ch){ const el=ch.getElementsAtEventForMode(ev,"index",{intersect:false},false); if(el&&el.length) idx=el[0].index; }
-      abrir(cv.id,idx); return;
+function paginaEsforco(id){
+  const T=TEMAS_E[id];
+  return ()=>{
+    const todas=sorted().filter(T.inclui);
+    const ctx={max:f=>Math.max(1,...todas.map(f).filter(v=>v!=null)),ant:(s,k)=>{ const i=todas.indexOf(s); for(let j=i-1;j>=0;j--) if(todas[j][k]!=null) return todas[j][k]; return null; }};
+    const ws=semanas().filter(x=>x.n).reverse();
+    let corpo="";
+    if(!todas.length) corpo='<p class="det-vazio">Nenhum treino registrado ainda.</p>';
+    else {
+      const g=T.geral(todas); if(g) corpo+=`<div class="det-kpis">${g}</div>`;
+      corpo+=ws.map(x=>{ const ss=todas.filter(s=>s.semana===x.w); if(!ss.length) return "";
+        return `<section class="det-w" data-k="w${x.w}"><h2>Semana ${x.w} <span>${detIni(x.inicio)} a ${detIni(x.inicio+6)}</span></h2><div class="det-kpis">${T.semana(x,ss)}</div>${T.dias?detDiasSemana(x):""}<div class="dp-lista">${[...ss].reverse().map(s=>T.linha(s,ctx)).join("")}</div></section>`; }).join("");
+      const sem=todas.filter(s=>s.semana==null); if(sem.length) corpo+=`<section class="det-w"><h2>Sem semana</h2><div class="dp-lista">${[...sem].reverse().map(s=>T.linha(s,ctx)).join("")}</div></section>`;
     }
-    const tr=ev.target.closest("#tab-sem tr, #tab-reg tr"); if(tr) abrirLinha(tr);
+    return detCabeca("e",id,T.tit,T.sub)+corpo;
+  };
+}
+const abrirEsforco=(id,alvo)=>abrirPagina({grupo:"e",id,html:paginaEsforco(id)},alvo);
+
+// ---- Cargas: um tema por página ----
+const fmtSet=x=>`${x[0]} × ${x[1]>1?num(x[1],x[1]%1?1:0)+" kg":"PC"}`;
+function TEMAS_C_dados(){ const W=semanasExt(); return {W}; }
+const TEMAS_C={
+  ex:{nome:"Exercícios",tit:"Cada exercício, semana a semana",sub:"Séries feitas (repetições × carga), volume load e a evolução de cada exercício. 🏆 marca a semana em que a carga máxima foi alcançada.",
+    html:()=>{ const {W}=TEMAS_C_dados(); if(!W.length) return '<p class="det-vazio">Nenhuma carga registrada ainda.</p>';
+      return TREINOS.map(t=>{ const lista=EXT.ex.map((e,i)=>({e,i})).filter(x=>x.e.t===t); if(!lista.length) return "";
+        return `<section class="det-w"><h2>Treino ${esc(t)}</h2>${lista.map(({e,i})=>{
+          const ws=W.filter(w=>e.sets[w]);
+          const ks=Object.values(e.sets).flat().map(x=>x[1]); const mxk=ks.length?Math.max(...ks):null; const pc=ks.length&&ks.every(k=>k<=1);
+          const wRec=ws.find(w=>e.sets[w].some(x=>x[1]===mxk));
+          const vs=ws.map(w=>vlEx(e,w)); const vr=vs.length>1?vs[vs.length-1]/vs[0]-1:null;
+          return `<article class="det-s" data-k="ex${i}"><header><div><b>${esc(e.ex)}</b><span>${esc(e.g.join(", "))}</span></div></header>
+            ${ws.length?`<div class="det-kpis">${detKpi(pc?"Peso corporal":"Carga máxima",pc?"reps":num(mxk,mxk%1?1:0)+" kg")}${detKpi("Volume load (1ª → última)",pct(vr))}${detKpi("Semanas feitas",ws.length)}</div>
+            <div class="tablewrap"><table class="dp-tab"><tr><th>Semana</th><th>Séries (reps × carga)</th><th>Volume</th></tr>${ws.map((w,j)=>{ const d=EXT.dates[e.t]&&EXT.dates[e.t][w]; const ss=e.sets[w];
+              const dv=j>0&&vs[j-1]?vs[j]/vs[j-1]-1:null;
+              return `<tr><td>S${w}${w===wRec&&!pc?" 🏆":""}<small class="dt">${d?fmtD(d):"sem data"}</small></td><td class="sets">${ss.map(fmtSet).join("<br>")}</td><td>${num(vlEx(e,w))}${dv!=null?` <small class="${dv>0.005?"up":dv<-0.005?"down":""}">${pct(dv)}</small>`:""}</td></tr>`; }).join("")}</table></div>`
+            :'<p class="det-vazio">Sem séries lançadas ainda.</p>'}</article>`; }).join("")}</section>`; }).join(""); }},
+  vsem:{nome:"Volume por semana",tit:"Volume load por semana",sub:"Soma de repetições × carga de todas as séries da semana, separada por treino e por exercício.",
+    html:()=>{ const {W}=TEMAS_C_dados(); if(!W.length) return '<p class="det-vazio">Nenhuma carga registrada ainda.</p>';
+      const mx=Math.max(1,...EXT.ex.flatMap(e=>W.map(w=>vlEx(e,w)||0)));
+      return [...W].reverse().map((w,i,arr)=>{ const tot=vlSemana(w), ant=W[W.indexOf(w)-1]; const dv=ant&&vlSemana(ant)?tot/vlSemana(ant)-1:null;
+        return `<section class="det-w" data-k="w${w}"><h2>Semana ${w}</h2><div class="det-kpis">${detKpi("Volume load",num(tot)+" kg")}${detKpi("vs semana anterior",pct(dv))}${TREINOS.map(t=>{const v=EXT.ex.filter(e=>e.t===t).map(e=>vlEx(e,w)).filter(x=>x!=null);return v.length?detKpi("Treino "+esc(t),num(v.reduce((a,b)=>a+b,0))+" kg"):"";}).join("")}</div>
+          <div class="dp-lista">${EXT.ex.filter(e=>e.sets[w]).sort((a,b)=>vlEx(b,w)-vlEx(a,w)).map(e=>dpLinha("",esc(e.ex),"Treino "+esc(e.t)+" · "+e.sets[w].map(fmtSet).join(" · "),dpVal("",num(vlEx(e,w))+" kg",""),dpBar(vlEx(e,w)/mx,"--load"))).join("")}</div></section>`; }).join(""); }},
+  vgrp:{nome:"Volume por grupo",tit:"Volume load por grupo muscular",sub:"Quanto cada grupo muscular recebeu de volume (reps × carga), semana a semana, e de quais exercícios veio.",
+    html:()=>{ const {W,G}=vlGrupos(); if(!W.length) return '<p class="det-vazio">Nenhuma carga registrada ainda.</p>';
+      const tot=g=>W.reduce((p,w)=>p+(G[g][w]||0),0); const gs=Object.keys(G).filter(g=>tot(g)>0).sort((a,b)=>tot(b)-tot(a));
+      return gs.map(g=>{ const mx=Math.max(1,...W.map(w=>G[g][w]||0)); const exs=EXT.ex.filter(e=>e.g.includes(g)).map(e=>({e,v:W.reduce((p,w)=>p+(vlEx(e,w)||0),0)})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+        return `<section class="det-w" data-k="g${esc(g)}"><h2>${esc(g)}</h2><div class="det-kpis">${detKpi("Total",num(tot(g))+" kg")}${detKpi("Média por semana",num(tot(g)/W.length)+" kg")}</div>
+          <div class="dp-lista">${[...W].reverse().map(w=>dpLinha("","Semana "+w,"",dpVal("",G[g][w]!=null?num(G[g][w])+" kg":"–",""),G[g][w]!=null?dpBar(G[g][w]/mx,"--brand"):"")).join("")}</div>
+          <p class="dp-de">Vem de: ${exs.map(x=>`<b>${esc(x.e.ex)}</b> (Treino ${esc(x.e.t)}, ${num(x.v)} kg)`).join(" · ")}</p></section>`; }).join(""); }},
+  sgrp:{nome:"Séries por grupo",tit:"Séries por grupo muscular",sub:"Quantas séries cada grupo muscular fez por semana. Exercício que trabalha 2 grupos conta para os dois.",
+    html:()=>{ const {W}=TEMAS_C_dados(); if(!W.length) return '<p class="det-vazio">Nenhuma carga registrada ainda.</p>';
+      const G={}; EXT.ex.forEach(e=>e.g.forEach(g=>{G[g]=G[g]||{};W.forEach(w=>{G[g][w]=(G[g][w]||0)+(e.sets[w]?e.sets[w].length:0);});}));
+      const tot=g=>W.reduce((p,w)=>p+G[g][w],0); const gs=Object.keys(G).sort((a,b)=>tot(b)-tot(a));
+      const mx=Math.max(1,...gs.flatMap(g=>W.map(w=>G[g][w])));
+      return gs.map(g=>`<section class="det-w" data-k="g${esc(g)}"><h2>${esc(g)}</h2><div class="det-kpis">${detKpi("Média por semana",num(tot(g)/W.length,1)+" séries")}${detKpi("Total",tot(g)+" séries")}</div>
+        <div class="dp-lista">${[...W].reverse().map(w=>{ const exs=EXT.ex.filter(e=>e.g.includes(g)&&e.sets[w]); return dpLinha("","Semana "+w,exs.map(e=>esc(e.ex)+" ("+e.sets[w].length+")").join(" · ")||"nenhum exercício",dpVal("",G[g][w]+" séries",""),dpBar(G[g][w]/mx,"--brand")); }).join("")}</div></section>`).join(""); }},
+  tudo:{nome:"Tudo junto",tit:"Tudo junto",sub:"Semana a semana, cada treino com todos os exercícios, séries e volume load.",
+    html:()=>{ const {W}=TEMAS_C_dados(); if(!W.length) return '<p class="det-vazio">Nenhuma carga registrada ainda.</p>';
+      return [...W].reverse().map(w=>{ const ser=EXT.ex.reduce((p,e)=>p+(e.sets[w]?e.sets[w].length:0),0);
+        return `<section class="det-w" data-k="w${w}"><h2>Semana ${w}</h2><div class="det-kpis">${detKpi("Volume load",num(vlSemana(w))+" kg")}${detKpi("Séries",ser)}</div>
+          ${TREINOS.map(t=>{ const exs=EXT.ex.filter(e=>e.t===t&&e.sets[w]); if(!exs.length) return ""; const d=EXT.dates[t]&&EXT.dates[t][w];
+            return `<article class="det-s"><header><div><b>Treino ${esc(t)}</b><span>${d?detDia(d):"sem data"}</span></div><span class="det-selo">${num(exs.reduce((p,e)=>p+vlEx(e,w),0))} kg</span></header>
+              <div class="tablewrap"><table class="dp-tab"><tr><th>Exercício</th><th>Séries</th><th>Volume</th></tr>${exs.map(e=>`<tr><td class="t">${esc(e.ex)}</td><td class="sets">${e.sets[w].map(fmtSet).join("<br>")}</td><td>${num(vlEx(e,w))}</td></tr>`).join("")}</table></div></article>`; }).join("")}</section>`; }).join(""); }}
+};
+const abrirCargas=(id,alvo)=>abrirPagina({grupo:"c",id,html:()=>detCabeca("c",id,TEMAS_C[id].tit,TEMAS_C[id].sub)+TEMAS_C[id].html()},alvo);
+
+// ---- ligações ----
+(function ligarDetalhes(){
+  detSecao();
+  const CH_E={"c-carga":"carga","c-dur":"dur","c-wb":"wb","c-semc":"carga","c-semm":"mono","c-semp":"pse","c-sems":"sono","c-semb":"wb","c-semd":"dor"};
+  const SESS_E={"c-carga":()=>last30(),"c-dur":()=>last30(),"c-wb":()=>last30().filter(s=>!s.cardio)};
+  const CH_C={"c-ext-sem":"vsem","c-ext-grp-tot":"vgrp","c-ext-grp":"vgrp"};
+  const botao=(el,dp,txt)=>{ const head=el&&el.closest(".panel")&&el.closest(".panel").querySelector(".head"); if(!head||head.querySelector(".det-btn")) return;
+    const b=document.createElement("button"); b.type="button"; b.className="det-btn"; b.textContent=txt||"Ver detalhes ›"; b.dataset.dp=dp; head.appendChild(b); };
+  Object.entries(CH_E).forEach(([id,t])=>botao(document.getElementById(id),"e:"+t));
+  Object.entries(CH_C).forEach(([id,t])=>botao(document.getElementById(id),"c:"+t));
+  botao($("#tab-sem"),"e:tudo"); botao($("#tab-grp"),"c:sgrp"); botao($("#tab-ext"),"c:ex"); botao($("#multi-ex"),"c:ex");
+  // botões "tudo junto"
+  const seg=$('section[data-view="esforco"] .seg'); if(seg&&!$("#dp-tudo-e")){ const b=document.createElement("button"); b.type="button"; b.id="dp-tudo-e"; b.className="dp-tudo"; b.dataset.dp="e:tudo"; b.textContent="📋 Ver tudo junto"; seg.insertAdjacentElement("afterend",b); }
+  const kc=$('section[data-view="cargas"] > div > div:first-child'); if(kc&&!$("#dp-tudo-c")){ const b=document.createElement("button"); b.type="button"; b.id="dp-tudo-c"; b.className="dp-tudo"; b.dataset.dp="c:tudo"; b.textContent="📋 Ver tudo junto"; kc.insertAdjacentElement("afterend",b); }
+  document.querySelectorAll('section[data-view="esforco"][data-sub="sessao"] > div > p.sub, section[data-view="esforco"][data-sub="semana"] > div > p.sub, section[data-view="cargas"] > div > div > p.sub').forEach(p=>{ if(!p.dataset.det){ p.dataset.det="1"; p.textContent+=" Toque em qualquer gráfico ou tabela para ver os detalhes."; } });
+  const idxDe=(id,ev)=>{ const ch=charts[id]; if(!ch) return null; const el=ch.getElementsAtEventForMode(ev,"index",{intersect:false},false); return el&&el.length?el[0].index:null; };
+  document.addEventListener("click",ev=>{
+    const d=ev.target.closest("[data-dp]");
+    if(d){ const v=d.dataset.dp; if(v==="voltar"){ voltarDet(false); return; } const [g,t]=v.split(":"); if(g==="e") abrirEsforco(t); else abrirCargas(t); return; }
+    if(ev.target.closest("select,label,button,a,input")) return;
+    const cv=ev.target.closest("canvas");
+    if(cv&&CH_E[cv.id]){ const i=idxDe(cv.id,ev); let alvo=null;
+      if(i!=null){ if(SESS_E[cv.id]){ const s=SESS_E[cv.id]()[i]; if(s) alvo=detChave(s); } else alvo="w"+(i+1); }
+      abrirEsforco(CH_E[cv.id],alvo); return; }
+    if(cv&&CH_C[cv.id]){ const i=idxDe(cv.id,ev); let alvo=null; const ch=charts[cv.id];
+      if(cv.id==="c-ext-grp") alvo="g"+$("#sel-grp").value; else if(i!=null&&ch){ const l=ch.data.labels[i]; alvo=cv.id==="c-ext-sem"?"w"+String(l).replace("S",""):"g"+l; }
+      abrirCargas(CH_C[cv.id],alvo); return; }
+    const mini=ev.target.closest("#multi-ex .mini"); if(mini){ const c=mini.querySelector("canvas"); abrirCargas("ex",c?"ex"+c.id.replace("mx-",""):null); return; }
+    const tr=ev.target.closest("#tab-sem tr, #tab-reg tr, #tab-ext tr, #tab-grp tr"); if(tr) abrirLinha(tr);
   });
-  document.addEventListener("keydown",ev=>{ if((ev.key==="Enter"||ev.key===" ")&&ev.target.matches&&ev.target.matches("#tab-sem tr[tabindex], #tab-reg tr[tabindex]")){ ev.preventDefault(); abrirLinha(ev.target); } });
+  document.addEventListener("keydown",ev=>{ if((ev.key==="Enter"||ev.key===" ")&&ev.target.matches&&ev.target.matches("tr[data-dpk]")){ ev.preventDefault(); abrirLinha(ev.target); } });
   function abrirLinha(tr){
     if(tr.classList.contains("empty")||tr.querySelector("th")) return;
-    const tab=tr.closest("table"); const linhas=[...tab.querySelectorAll("tr")].filter(r=>!r.querySelector("th"));
-    if(tab.id==="tab-sem"){ const m=(tr.cells[0]&&tr.cells[0].textContent||"").match(/S(\d+)/); if(m) detPorSemana("tab-sem",+m[1],true); }
-    else { const s=sorted()[linhas.indexOf(tr)]; if(s) detSessaoUnica(s); }
+    const tab=tr.closest("table"); const linhas=[...tab.querySelectorAll("tr")].filter(r=>!r.querySelector("th")); const i=linhas.indexOf(tr);
+    if(tab.id==="tab-sem"){ const m=(tr.cells[0].textContent||"").match(/S(\d+)/); if(m) abrirEsforco("tudo","w"+m[1]); }
+    else if(tab.id==="tab-reg"){ const s=sorted()[i]; if(s) abrirEsforco("tudo",detChave(s)); }
+    else if(tab.id==="tab-ext"){ if(EXT.ex[i]) abrirCargas("ex","ex"+i); }
+    else if(tab.id==="tab-grp"){ abrirCargas("sgrp","g"+tr.cells[0].textContent.trim()); }
   }
 })();
-function marcarLinhasDet(){ document.querySelectorAll("#tab-sem tr, #tab-reg tr").forEach(r=>{ if(!r.querySelector("th")&&!r.classList.contains("empty")){ r.tabIndex=0; r.title="Ver detalhes"; } }); }
+function marcarLinhasDet(){ document.querySelectorAll("#tab-sem tr, #tab-reg tr, #tab-ext tr, #tab-grp tr").forEach(r=>{ if(!r.querySelector("th")&&!r.classList.contains("empty")){ r.tabIndex=0; r.dataset.dpk="1"; r.title="Ver detalhes"; } }); }
 const _renderAll24=renderAll;
-renderAll=function(){ _renderAll24(); marcarLinhasDet(); };
+renderAll=function(){ _renderAll24(); marcarLinhasDet();
+  if(view==="detalhe"&&DET_ATUAL){ const y=window.scrollY; const sec=detSecao(); sec.innerHTML=DET_ATUAL.html(); window.scrollTo(0,y); } };
 
 // ---------- abas reorganizadas: Resumo e Esforço e recuperação ----------
 document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>{
