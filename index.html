@@ -500,6 +500,32 @@ section[data-view="esforco"] .chartbox,section[data-view="cargas"] .chartbox,#mu
 tr[data-dpk]{cursor:pointer}
 tr[data-dpk]:hover td{background:color-mix(in srgb,var(--brand) 10%,var(--surface))}
 @media (max-width:420px){.det-it{grid-template-columns:1fr 1fr}.det-i .e{font-size:22px}.dp-val small{max-width:130px}}
+/* ---- v25: registro da sessão organizado ---- */
+.reg-form .blocos{display:grid;gap:14px}
+.reg-form .bl{margin:0;border:1px solid var(--line);border-radius:14px;padding:12px 14px 14px;display:grid;gap:14px;min-width:0;background:var(--surface)}
+.reg-form .bl legend{text-transform:none;letter-spacing:0;display:flex;align-items:center;gap:8px;padding:0 6px;margin-left:-4px;font-family:var(--f-display);font-weight:800;font-size:15px;color:var(--ink)}
+.reg-form .bl legend .n{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--brand);color:#233438;font-size:12.5px;font-family:var(--f-mono)}
+.reg-form .bl label{display:block;font-size:14px;font-weight:700;color:var(--ink);min-width:0;line-height:1.3}
+.reg-form .bl label .dica{display:inline;font-size:12.5px;font-weight:400;color:var(--muted);margin:0}
+.reg-form .bl label .dica::before{content:" · "}
+.reg-form .bl label:has(.perg) .dica{display:block}
+.reg-form .bl label:has(.perg) .dica::before{content:none}
+.reg-form .bl .col{display:grid;gap:14px}
+.reg-form .bl .par label .dica{display:block}
+.reg-form .bl .par label .dica::before{content:none}
+.reg-form .bl label .perg{font-size:15.5px}
+.reg-form .bl input,.reg-form .bl select{display:block;width:100%;max-width:none;height:46px;box-sizing:border-box;margin-top:6px;font-size:16px;font-weight:500;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);box-shadow:none;text-overflow:ellipsis}
+.reg-form .bl select{padding:0 34px 0 12px}
+.reg-form .bl input:focus,.reg-form .bl select:focus{border-color:var(--brand);outline:2px solid color-mix(in srgb,var(--brand) 40%,transparent);outline-offset:0}
+.reg-form .bl .par{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 12px}
+.reg-form .bl-sub{margin:4px 0 -4px;font-size:14px;font-weight:700;color:var(--ink)}
+.reg-form .bl-sub span{display:block;font-size:12px;font-weight:400;color:var(--muted)}
+.reg-form .bl .res{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border-radius:12px;background:color-mix(in srgb,var(--brand) 14%,var(--surface))}
+.reg-form .bl .res .r{font-size:14px;font-weight:700;color:var(--ink);display:grid}
+.reg-form .bl .res .r .dica{font-size:12px;font-weight:400;color:var(--muted)}
+.reg-form .bl .res .calc{border:0;padding:0;background:none;font-family:var(--f-mono);font-size:18px;font-weight:700;color:var(--ink);min-height:0;white-space:nowrap}
+@media (max-width:380px){.reg-form .bl{padding:10px 10px 12px}.reg-form .bl .par{gap:12px 8px}.reg-form .bl input,.reg-form .bl select{font-size:15px;padding:0 8px}}
+@media (min-width:720px){.reg-form .blocos{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}.reg-form .bl:first-child{grid-row:span 2}}
 /* ---- v18: CMJ fora ---- */
 .panel:has(#c-semj){display:none}
 </style>
@@ -1395,26 +1421,37 @@ function renderTreino(){
           <p><b>Bem-estar:</b> cada item vai de 1 (pior) a 5 (melhor). 3 é um dia normal para você.</p>
         </div>
       </details>
-      <div class="grade">
-        <label for="s-data">Data<input id="s-data" type="date" value="${esc(d||s.data||hojeISO)}"></label>
-        ${campoNum("s-dur","Duração (min)",s.dur,1,400,1)}
-        ${campoSel("s-pse",'<span class="perg">Quão pesado foi o treino inteiro?</span>',s.pse,ESC_PSE,"PSE da sessão (0-10)")}
-        ${campoSel("s-psr",'<span class="perg">Quão recuperado você chegou?</span>',s.psr,ESC_PSR,"PSR pré-treino (0-10)")}
-        ${campoNum("s-sono","Horas de sono",s.sono,0,24,0.5)}
-        ${campoSel("s-qual","Qualidade do sono",s.qual,ESC_SONO,"como foi a noite passada")}
-        ${campoSel("s-fad","Fadiga",s.fad,ESC_FAD,"cansaço geral hoje")}
-        ${campoSel("s-dorm","Dor muscular",s.dorm,ESC_DORM,"dor de treinos anteriores")}
-        ${campoSel("s-est","Estresse",s.est,ESC_EST,"no geral, hoje")}
-        ${campoSel("s-hum","Humor",s.hum,ESC_HUM,"como você está hoje")}
-        <div class="auto"><span class="r">Bem-estar total (5-25)</span><span class="dica">calculado: soma dos 5 itens</span><output class="calc" id="s-bem">–</output></div>
-        ${campoSel("s-local","Local da dor",s.local||(s.dor!=null?"":""),LOCAIS)}
-        ${campoSel("s-dor","Intensidade da dor (0-10)",s.dor,ESC_DOR)}
-        <div class="auto"><span class="r">Carga da sessão (UA)</span><span class="dica">calculado: PSE × minutos</span><output class="calc" id="s-ua">–</output></div>
+      <div class="blocos">
+        <fieldset class="bl"><legend><span class="n">1</span>Antes do treino</legend>
+          ${campoSel("s-psr",'<span class="perg">Quão recuperado você chegou?</span>',s.psr,ESC_PSR,"PSR pré-treino, de 0 a 10")}
+          ${campoNum("s-sono","Horas de sono",s.sono,0,24,0.5,"na noite passada")}
+          ${campoSel("s-qual","Qualidade do sono",s.qual,ESC_SONO,"como foi a noite")}
+          <p class="bl-sub">Como você está hoje? <span>1 = pior · 3 = normal · 5 = melhor</span></p>
+          <div class="col">
+            ${campoSel("s-fad","Fadiga",s.fad,ESC_FAD,"cansaço geral")}
+            ${campoSel("s-dorm","Dor muscular",s.dorm,ESC_DORM,"de treinos anteriores")}
+            ${campoSel("s-est","Estresse",s.est,ESC_EST,"no geral")}
+            ${campoSel("s-hum","Humor",s.hum,ESC_HUM,"agora")}
+          </div>
+          <div class="auto res"><span class="r">Bem-estar total<span class="dica">soma dos 5 itens, de 5 a 25</span></span><output class="calc" id="s-bem">–</output></div>
+        </fieldset>
+        <fieldset class="bl"><legend><span class="n">2</span>Depois do treino</legend>
+          <div class="par">
+            <label for="s-data">Data<span class="dica">do treino</span><input id="s-data" type="date" value="${esc(d||s.data||hojeISO)}"></label>
+            ${campoNum("s-dur","Duração",s.dur,1,400,1,"em minutos")}
+          </div>
+          ${campoSel("s-pse",'<span class="perg">Quão pesado foi o treino inteiro?</span>',s.pse,ESC_PSE,"PSE da sessão, de 0 a 10")}
+          <div class="auto res"><span class="r">Carga da sessão<span class="dica">PSE × minutos</span></span><output class="calc" id="s-ua">–</output></div>
+        </fieldset>
+        <fieldset class="bl"><legend><span class="n">3</span>Dor</legend>
+          ${campoSel("s-local","Local da dor",s.local||"",LOCAIS,"onde doeu")}
+          ${campoSel("s-dor","Intensidade da dor",s.dor,ESC_DOR,"de 0 a 10")}
+        </fieldset>
         <div class="cmj-off" hidden>
         ${campoNum("s-cmj1","CMJ 1 (cm)",s.cmj&&s.cmj[0],0,150,0.1)}
         ${campoNum("s-cmj2","CMJ 2 (cm)",s.cmj&&s.cmj[1],0,150,0.1)}
         ${campoNum("s-cmj3","CMJ 3 (cm)",s.cmj&&s.cmj[2],0,150,0.1)}
-        <div class="auto"><span class="r">CMJ média (cm)</span><span class="dica">calculado: média das tentativas</span><output class="calc" id="s-cmjm">–</output></div></div>
+        <div class="auto"><span class="r">CMJ média (cm)</span><output class="calc" id="s-cmjm">–</output></div></div>
       </div>
       <div class="actions"><button type="submit" class="btn ghost">Salvar agora</button><span class="msg" id="s-msg" role="status" aria-live="polite"></span></div>
     </form></details>${temAlgo(TR_T,TR_W)?`<div class="desf">${treinoFeito(TR_T,TR_W)?`<button type="button" class="link-limpar" id="desmarcar">Desmarcar Treino ${TR_T} como concluído</button>`:""}<button type="button" class="link-limpar" id="desfazer">Desfazer registro do Treino ${TR_T} na semana ${TR_W}</button><span class="msg" id="d-msg" role="status" aria-live="polite"></span></div>`:""}`;
