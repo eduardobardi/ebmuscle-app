@@ -516,6 +516,10 @@ tr[data-dpk]:hover td{background:color-mix(in srgb,var(--brand) 10%,var(--surfac
 .reg-form .bl label .perg{font-size:15.5px}
 .reg-form .bl input,.reg-form .bl select{display:block;width:100%;max-width:none;height:46px;box-sizing:border-box;margin-top:6px;font-size:16px;font-weight:500;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);box-shadow:none;text-overflow:ellipsis}
 .reg-form .bl select{padding:0 34px 0 12px}
+.reg-form .bl input[type=date]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;display:flex;align-items:center;text-align:left;line-height:44px}
+.reg-form .bl input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
+.reg-form .bl input[type=date]::-webkit-calendar-picker-indicator{margin-left:auto}
+.reg-form .bl .par > label{min-width:0;overflow:hidden}
 .reg-form .bl input:focus,.reg-form .bl select:focus{border-color:var(--brand);outline:2px solid color-mix(in srgb,var(--brand) 40%,transparent);outline-offset:0}
 .reg-form .bl .par{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 12px}
 .reg-form .bl-sub{margin:4px 0 -4px;font-size:14px;font-weight:700;color:var(--ink)}
