@@ -1298,10 +1298,12 @@ async function atualizar(forcar){
   if(NA_HOME||!ALUNO) return;
   const nome=ALUNO;
   if(forcar) sync("load","Lendo a planilha…",null);
+  const g0=AUTO.ger;
   try{
     const r=await api({acao:"aluno",token:TOKEN,nome,forcar:!!forcar});
     if(nome!==ALUNO||NA_HOME) return;
     if(AUTO.pend.size||AUTO.voo) return;
+    if(AUTO.ger!==g0){ refrescarQuieto(); if(forcar) sync("ok","Atualizado.","Atualizar agora"); return; } // algo foi salvo durante a leitura: essa leitura já nasceu velha
     limpar(r.dados);
     const mudou=JSON.stringify([r.dados.ext,r.dados.sessoes,r.dados.cardio||[],r.dados.obsTreino||[]])!==JSON.stringify([ALUNOS[nome].ext,ALUNOS[nome].sessoes,ALUNOS[nome].cardio||[],ALUNOS[nome].obsTreino||[]]);
     ALUNOS[nome]=limpar(r.dados); aplicarDados(false);
@@ -1540,7 +1542,7 @@ function renderTreino(){
   };
   $("#tr-lista").innerHTML = montarGrupos(lista,cardHtml)||'<p class="sub">Nenhum exercício neste treino.</p>';
   $("#tr-lista").querySelectorAll("input,textarea").forEach(x=>x.addEventListener("input",()=>{
-    x.classList.remove("pre");
+    x.classList.remove("pre"); guardarRasc(x);
     const card=x.closest(".ex"); if(!card) return; const e=EXT.ex[+card.dataset.i], m=card.querySelector(".msg");
     const {corpo,meia}=corpoExercicio(card,e);
     const chave="ex|"+TR_T+"|"+TR_W+"|"+e.row;
@@ -1570,7 +1572,7 @@ function renderTreino(){
 // ---------- salvamento automático ----------
 // Cada alteração entra numa fila por chave (exercício, sessão, observação) e vai para a planilha
 // pouco depois de o aluno parar de digitar. Se falhar (sem internet), tenta de novo sozinho.
-const AUTO={pend:new Map(), voo:0};
+const AUTO={pend:new Map(), voo:0, ger:0}; // ger muda a cada alteração/gravação: leitura antiga não pode sobrescrever
 function emEdicao(){
   if(SUJO||AUTO.pend.size||AUTO.voo) return true;
   const a=document.activeElement;
@@ -1579,6 +1581,7 @@ function emEdicao(){
 function autoMsg(el,txt,cls){ if(el&&el.isConnected){ el.className="msg"+(cls?" "+cls:""); el.textContent=txt; } }
 function agendarAuto(chave,ms,payload,ui){
   const it=AUTO.pend.get(chave)||{tentativas:0};
+  AUTO.ger++;
   aplicarLocal(payload);
   clearTimeout(it.t); it.payload=payload; it.ui=ui; it.versao=(it.versao||0)+1;
   it.t=setTimeout(()=>rodarAuto(chave),ms);
@@ -1589,7 +1592,7 @@ function cancelarAuto(chave){ const it=AUTO.pend.get(chave); if(it){ clearTimeou
 async function rodarAuto(chave){
   const it=AUTO.pend.get(chave); if(!it) return;
   if(it.rodando){ it.denovo=true; return; }
-  clearTimeout(it.t); it.rodando=true; AUTO.voo++;
+  clearTimeout(it.t); it.rodando=true; AUTO.voo++; AUTO.ger++;
   const versao=it.versao, msg=()=>it.ui&&it.ui.msg&&it.ui.msg();
   autoMsg(msg(),"Salvando na planilha…","");
   let ok=false;
@@ -1619,11 +1622,11 @@ function refrescarQuieto(){
   refrescoT=setTimeout(async()=>{
     if(NA_HOME) return;
     if(emEdicao()) return refrescarQuieto();
-    const nome=ALUNO;
+    const nome=ALUNO, g0=AUTO.ger;
     try{
       const r=await api({acao:"aluno",token:TOKEN,nome,forcar:true});
       if(nome!==ALUNO||NA_HOME) return;
-      if(emEdicao()) return refrescarQuieto();
+      if(emEdicao()||AUTO.ger!==g0) return refrescarQuieto();
       const y=window.scrollY; ALUNOS[nome]=limpar(r.dados); aplicarDados(false); renderAll(); window.scrollTo(0,y);
     }catch(e){}
   },4000);
@@ -2265,7 +2268,7 @@ renderAll=function(){ _renderAll24(); marcarLinhasDet();
 
 // ---------- v25: atualização automática ----------
 // Ao abrir (ou voltar para) o app, confere se há versão nova publicada e recarrega sozinho.
-const APP_VER="20261112155444";
+const APP_VER="20261113143230";
 let VER_CHECADO=0;
 async function checarVersao(){
   if(!/^\d+$/.test(APP_VER)||Date.now()-VER_CHECADO<60000) return; VER_CHECADO=Date.now();
@@ -2282,6 +2285,45 @@ async function checarVersao(){
 }
 setTimeout(checarVersao,2500);
 document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible") checarVersao(); });
+
+// ---------- v26: rascunho das séries ----------
+// O que o aluno digita nas séries fica guardado no aparelho até a planilha confirmar o mesmo valor.
+// Assim, nenhuma releitura, atualização do app ou recarga apaga uma série digitada (nem a meio preenchida).
+const RASC_VALIDADE=12*3600e3; let RASC_REAPLICANDO=false;
+const rascChave=()=>"eb_rasc_"+(ALUNO||"");
+function lerRasc(){ try{ const o=JSON.parse(guardar.get(rascChave())||"{}"); const ag=Date.now(); Object.keys(o).forEach(k=>{ if(!o[k]||ag-o[k].t>RASC_VALIDADE) delete o[k]; }); return o; }catch(e){ return {}; } }
+function gravarRasc(o){ if(Object.keys(o).length) guardar.set(rascChave(),JSON.stringify(o)); else guardar.del(rascChave()); }
+function rascId(x){
+  const card=x.closest(".ex"); if(!card||!EXT.ex[+card.dataset.i]) return null;
+  const e=EXT.ex[+card.dataset.i]; const base=TR_T+"|"+TR_W+"|"+e.row+"|";
+  if(x.dataset.k!=null&&x.dataset.f!=null) return base+x.dataset.k+"|"+x.dataset.f;
+  if(x.classList.contains("in-obs")) return base+"obs";
+  return null;
+}
+function guardarRasc(x){ const id=rascId(x); if(!id) return; const o=lerRasc(); if(RASC_REAPLICANDO) return; o[id]={v:x.value,t:Date.now()}; gravarRasc(o); }
+function rascIgual(a,b,x){
+  if(x.tagName==="TEXTAREA") return String(a).trim()===String(b).trim();
+  const na=String(a).replace(",",".").trim(), nb=String(b).replace(",",".").trim();
+  if(na===""||nb==="") return na===nb;
+  return +na===+nb;
+}
+function aplicarRasc(){
+  const lista=$("#tr-lista"); if(!lista||!ALUNO) return;
+  const o=lerRasc(); if(!Object.keys(o).length) return;
+  const reenviar=new Set(); let mudou=false;
+  lista.querySelectorAll("input[data-k][data-f],textarea.in-obs").forEach(x=>{
+    const id=rascId(x); if(!id||!o[id]) return;
+    const atual=x.classList.contains("pre")?"":x.value;   // repetição cinza é só sugestão, não dado salvo
+    if(rascIgual(atual,o[id].v,x)){ delete o[id]; mudou=true; return; }   // planilha já tem esse valor
+    x.value=o[id].v; x.classList.remove("pre");
+    if((o[id].env||0)<3){ o[id].env=(o[id].env||0)+1; mudou=true; reenviar.add(x); }   // reenvia para a fila, no máximo 3 vezes
+  });
+  if(mudou) gravarRasc(o);
+  // o que voltou do rascunho e ainda não está salvo volta para a fila de salvamento
+  const cards=new Set(); reenviar.forEach(x=>{ const c=x.closest(".ex"); if(c&&!cards.has(c)){ cards.add(c); RASC_REAPLICANDO=true; try{ x.dispatchEvent(new Event("input",{bubbles:true})); }finally{ RASC_REAPLICANDO=false; } } });
+}
+const _renderTreino26=renderTreino;
+renderTreino=function(){ _renderTreino26.apply(this,arguments); aplicarRasc(); };
 
 // ---------- abas reorganizadas: Resumo e Esforço e recuperação ----------
 document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>{
