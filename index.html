@@ -872,7 +872,7 @@ function comboCarga(id){
   const o=baseOpts();
   o.scales.y.title={display:true,text:"Carga (UA)",color:css("--muted"),font:{family:"Work Sans",size:11}};
   o.scales.y2={position:"right",min:0,max:10,grid:{display:false},border:{display:false},ticks:{color:css("--ink-2"),font:{family:"IBM Plex Mono",size:11},stepSize:2},title:{display:true,text:"0 a 10",color:css("--muted"),font:{family:"Work Sans",size:11}}};
-  draw(id,{data:{labels:d.map(s=>s.cardio?fmtD(s.data)+" cardio":fmtD(s.data)),datasets:[
+  draw(id,{data:{labels:d.map(rotSess),datasets:[
     {type:"line",label:"PSE",data:d.map(s=>s.pse),yAxisID:"y2",borderColor:css("--pse"),backgroundColor:css("--pse"),borderWidth:2.5,pointRadius:4,order:1,datalabels:lbl(css("--pse"),"end","top")},
     {type:"line",label:"PSR",data:d.map(s=>s.psr),yAxisID:"y2",borderColor:css("--psr"),backgroundColor:css("--psr"),borderWidth:2.5,pointRadius:4,order:2,datalabels:lbl(css("--psr"),"start","bottom")},
     {type:"bar",label:"Carga (UA)",data:d.map(carga),backgroundColor:css("--load"),borderRadius:4,maxBarThickness:46,order:3,
@@ -883,7 +883,7 @@ function comboDur(){
   const d=last30(); const o=baseOpts();
   o.scales.y.title={display:true,text:"Minutos",color:css("--muted"),font:{family:"Work Sans",size:11}};
   o.scales.y2={position:"right",min:0,max:10,grid:{display:false},border:{display:false},ticks:{color:css("--ink-2"),font:{family:"IBM Plex Mono",size:11},stepSize:2}};
-  draw("c-dur",{data:{labels:d.map(s=>s.cardio?fmtD(s.data)+" cardio":fmtD(s.data)),datasets:[
+  draw("c-dur",{data:{labels:d.map(rotSess),datasets:[
     {type:"line",label:"PSE",data:d.map(s=>s.pse),yAxisID:"y2",borderColor:css("--pse"),backgroundColor:css("--pse"),borderWidth:2.5,pointRadius:4,order:1,datalabels:lbl(css("--pse"))},
     {type:"bar",label:"Duração (min)",data:d.map(s=>s.dur),backgroundColor:css("--dur"),borderRadius:4,maxBarThickness:46,order:2,
       datalabels:{display:true,color:css("--ink"),anchor:"end",align:"start",offset:4,font:{family:"IBM Plex Mono",size:11,weight:"600"}}},
@@ -893,11 +893,11 @@ function stackWB(id){
   const d=last30().filter(s=>!s.cardio); const o=baseOpts();
   o.scales.x.stacked=true; o.scales.y.stacked=true; o.scales.y.max=25;
   const items=[["Qualidade do sono","qual","--wb1"],["Fadiga","fad","--wb2"],["Dor muscular","dorm","--wb3"],["Estresse","est","--wb4"],["Humor","hum","--wb5"]];
-  draw(id,{type:"bar",data:{labels:d.map(s=>fmtD(s.data)),datasets:items.map(([l,k,c],i)=>({label:l,data:d.map(s=>s[k]),backgroundColor:css(c),maxBarThickness:46,
+  draw(id,{type:"bar",data:{labels:d.map(rotSess),datasets:items.map(([l,k,c],i)=>({label:l,data:d.map(s=>s[k]),backgroundColor:css(c),maxBarThickness:46,
     datalabels:{display:true,color:textOn(css(c)),font:{family:"IBM Plex Mono",size:11,weight:"600"}}}))},options:o});
 }
 function semCharts(){
-  const w=semanas(); const lab=w.map(x=>"S"+x.w);
+  const w=semanas(); const lab=w.map(x=>rotSem(x.w,x.inicio));
   const o=baseOpts();
   draw("c-semc",{type:"bar",data:{labels:lab,datasets:[{label:"Carga semanal",data:w.map(x=>x.n?x.carga:null),backgroundColor:css("--ink"),borderRadius:4,maxBarThickness:40,
     datalabels:{display:ctx=>ctx.raw!=null,anchor:"end",align:"top",color:css("--ink-2"),font:{family:"IBM Plex Mono",size:11,weight:"600"}}}]},options:Object.assign(o,{plugins:Object.assign(o.plugins,{legend:{display:false}})})});
@@ -978,7 +978,7 @@ function renderExt(){
    <div class="kpi"><div class="l">Sessões com data</div><div class="v">${DRIVE.length}</div><div class="d">${ALUNOS[ALUNO].porSemana||TREINOS.length} treinos por semana planejados</div></div>`;
   if(view!=="cargas") return;
   const o=baseOpts(); o.scales.x.stacked=true; o.scales.y.stacked=true;
-  draw("c-ext-sem",{type:"bar",data:{labels:W.map(w=>"S"+w),datasets:TREINOS.map((t,i)=>({label:"Treino "+t,backgroundColor:tcolor(i),maxBarThickness:60,
+  draw("c-ext-sem",{type:"bar",data:{labels:W.map(w=>rotSemExt(w)),datasets:TREINOS.map((t,i)=>({label:"Treino "+t,backgroundColor:tcolor(i),maxBarThickness:60,
     data:W.map(w=>{const v=EXT.ex.filter(e=>e.t===t).map(e=>vlEx(e,w)).filter(x=>x!=null);return v.length?v.reduce((p,c)=>p+c,0):null;}),
     datalabels:{display:c=>c.dataset.data[c.dataIndex]!=null&&c.dataset.data[c.dataIndex]>400,color:textOn(tcolor(i)),formatter:v=>num(v),font:{family:"IBM Plex Mono",size:10,weight:"600"}}}))},options:o});
   const G={}; EXT.ex.forEach(e=>e.g.forEach(g=>{G[g]=G[g]||{};W.forEach(w=>{G[g][w]=(G[g][w]||0)+(e.sets[w]?e.sets[w].length:0);});}));
@@ -1000,7 +1000,7 @@ function renderExEx(){
   const o=baseOpts(); o.scales.y.title={display:true,text:"Volume load",color:css("--muted"),font:{family:"Work Sans",size:11}};
   o.scales.y2={position:"right",grid:{display:false},border:{display:false},beginAtZero:true,ticks:{color:css("--ink-2"),font:{family:"IBM Plex Mono",size:11}},title:{display:true,text:"Carga (kg)",color:css("--muted"),font:{family:"Work Sans",size:11}}};
   const cols=["--pse","--psr","--wb5"];
-  draw("c-ext-ex",{data:{labels:W.map(w=>"S"+w),datasets:[
+  draw("c-ext-ex",{data:{labels:W.map(w=>rotSemExt(w,e.t)),datasets:[
     ...[0,1,2].map(k=>({type:"line",label:`Série ${k+1} (kg)`,yAxisID:"y2",data:W.map(w=>e.sets[w]&&e.sets[w][k]?e.sets[w][k][1]:null),borderColor:css(cols[k]),backgroundColor:css(cols[k]),borderWidth:2,pointRadius:3,spanGaps:true,order:k})),
     {type:"bar",label:"Volume load",data:W.map(w=>vlEx(e,w)),backgroundColor:css("--load"),borderRadius:4,maxBarThickness:46,order:5,
       datalabels:{display:c=>c.dataset.data[c.dataIndex]!=null,color:"#fff",anchor:"start",align:"end",offset:6,formatter:v=>num(v),font:{family:"IBM Plex Mono",size:11,weight:"600"}}}]},options:o});
@@ -1027,7 +1027,7 @@ function renderGrp(){
     datalabels:{display:true,anchor:"end",align:"end",offset:4,color:css("--ink-2"),formatter:v=>num(v),font:{family:"IBM Plex Mono",size:11,weight:"600"}}}]},options:o});
   const g=sel.value; const o2=baseOpts(); o2.plugins.legend.display=false;
   o2.scales.y.title={display:true,text:"Volume load (kg)",color:css("--muted"),font:{family:"Work Sans",size:11}};
-  draw("c-ext-grp",{type:"bar",data:{labels:W.map(w=>"S"+w),datasets:[
+  draw("c-ext-grp",{type:"bar",data:{labels:W.map(w=>rotSemExt(w)),datasets:[
     {type:"line",label:g,data:W.map(w=>g&&G[g][w]!=null?G[g][w]:null),borderColor:css("--pse"),backgroundColor:css("--pse"),borderWidth:2,pointRadius:3,spanGaps:true,order:0},
     {type:"bar",label:"Volume load",data:W.map(w=>g&&G[g][w]!=null?G[g][w]:null),backgroundColor:css("--brand"),borderRadius:4,maxBarThickness:46,order:1,
       datalabels:{display:c=>c.dataset.data[c.dataIndex]!=null,color:textOn(css("--brand")),anchor:"start",align:"end",offset:6,formatter:v=>num(v),font:{family:"IBM Plex Mono",size:11,weight:"600"}}}]},options:o2});
@@ -1051,7 +1051,7 @@ function renderMulti(){
     const o=baseOpts(); o.plugins.legend.labels.boxWidth=10; o.plugins.legend.labels.font={family:"Work Sans",size:11};
     o.scales.y.title={display:true,text:pc?"Repetições":"Carga (kg)",color:css("--muted"),font:{family:"Work Sans",size:11}};
     const id="mx-"+i; multiIds.push(id);
-    draw(id,{type:"bar",data:{labels:W.map(w=>"S"+w),datasets:[0,1,2].map(k=>({label:`Série ${k+1}`,data:W.map(w=>val(w,k)),backgroundColor:cores[k],borderRadius:3,maxBarThickness:22,
+    draw(id,{type:"bar",data:{labels:W.map(w=>rotSemExt(w,e.t)),datasets:[0,1,2].map(k=>({label:`Série ${k+1}`,data:W.map(w=>val(w,k)),backgroundColor:cores[k],borderRadius:3,maxBarThickness:22,
       datalabels:{display:c=>c.dataset.data[c.dataIndex]!=null,anchor:"end",align:"start",offset:4,color:textOn(cores[k]),formatter:v=>num(v,v%1?1:0),font:{family:"IBM Plex Mono",size:10,weight:"600"}}}))},
       options:o});
   });
@@ -1868,7 +1868,7 @@ function renderDor(){
   box.innerHTML=`<ul class="dor-res">${resumo}</ul><div class="chartbox"><canvas id="c-dor" aria-label="Intensidade da dor por região ao longo das sessões"></canvas></div>`;
   const cores=[css("--pse"),css("--load"),css("--brand"),css("--psr"),css("--dur"),css("--ink-2")];
   const o=baseOpts(); o.scales.y.min=0; o.scales.y.max=10; o.scales.y.title={display:true,text:"Intensidade (0-10)",color:css("--muted"),font:{family:"Work Sans",size:11}};
-  draw("c-dor",{type:"line",data:{labels:pts.map(s=>fmtD(s.data)),datasets:locais.map((l,i)=>({label:l,data:serie(l),borderColor:cores[i%cores.length],backgroundColor:cores[i%cores.length],borderWidth:2.5,pointRadius:4,spanGaps:true,tension:0,datalabels:{display:false}}))},options:o});
+  draw("c-dor",{type:"line",data:{labels:pts.map(rotSess),datasets:locais.map((l,i)=>({label:l,data:serie(l),borderColor:cores[i%cores.length],backgroundColor:cores[i%cores.length],borderWidth:2.5,pointRadius:4,spanGaps:true,tension:0,datalabels:{display:false}}))},options:o});
 }
 
 new MutationObserver(()=>{ if(!NA_HOME&&view==="resumo") renderDor(); }).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
@@ -2246,7 +2246,7 @@ const abrirCargas=(id,alvo)=>abrirPagina({grupo:"c",id,html:()=>detCabeca("c",id
       if(i!=null){ if(SESS_E[cv.id]){ const s=SESS_E[cv.id]()[i]; if(s) alvo=detChave(s); } else alvo="w"+(i+1); }
       abrirEsforco(CH_E[cv.id],alvo); return; }
     if(cv&&CH_C[cv.id]){ const i=idxDe(cv.id,ev); let alvo=null; const ch=charts[cv.id];
-      if(cv.id==="c-ext-grp") alvo="g"+$("#sel-grp").value; else if(i!=null&&ch){ const l=ch.data.labels[i]; alvo=cv.id==="c-ext-sem"?"w"+String(l).replace("S",""):"g"+l; }
+      if(cv.id==="c-ext-grp") alvo="g"+$("#sel-grp").value; else if(i!=null&&ch){ let l=ch.data.labels[i]; if(Array.isArray(l)) l=l[0]; alvo=cv.id==="c-ext-sem"?"w"+String(l).replace("S",""):"g"+l; }
       abrirCargas(CH_C[cv.id],alvo); return; }
     const mini=ev.target.closest("#multi-ex .mini"); if(mini){ const c=mini.querySelector("canvas"); abrirCargas("ex",c?"ex"+c.id.replace("mx-",""):null); return; }
     const tr=ev.target.closest("#tab-sem tr, #tab-reg tr, #tab-ext tr, #tab-grp tr"); if(tr) abrirLinha(tr);
@@ -2268,7 +2268,7 @@ renderAll=function(){ _renderAll24(); marcarLinhasDet();
 
 // ---------- v25: atualização automática ----------
 // Ao abrir (ou voltar para) o app, confere se há versão nova publicada e recarrega sozinho.
-const APP_VER="20261113143230";
+const APP_VER="20261113144443";
 let VER_CHECADO=0;
 async function checarVersao(){
   if(!/^\d+$/.test(APP_VER)||Date.now()-VER_CHECADO<60000) return; VER_CHECADO=Date.now();
@@ -2325,6 +2325,15 @@ function aplicarRasc(){
 const _renderTreino26=renderTreino;
 renderTreino=function(){ _renderTreino26.apply(this,arguments); aplicarRasc(); };
 
+// eixo dos gráficos por sessão: data em cima, treino e semana embaixo (v27)
+function rotSess(s){ const curto=window.innerWidth<600; return [fmtD(s.data), s.cardio?"Cardio":(s.treino?(curto?"":"Treino ")+s.treino+(s.semana!=null?(curto?"·S":" · S")+s.semana:""):"")]; }
+// eixo dos gráficos por semana: "S3" em cima, data embaixo (v27)
+function rotSem(w,inicio){ if(inicio==null) return "S"+w; const x=new Date(inicio*864e5); return ["S"+w, String(x.getUTCDate()).padStart(2,"0")+"/"+String(x.getUTCMonth()+1).padStart(2,"0")]; }
+function rotSemExt(w,t){
+  const ds=(t?[t]:TREINOS).map(tr=>EXT.dates[tr]&&EXT.dates[tr][w]).filter(Boolean).sort();
+  return ds.length?["S"+w, fmtD(ds[0])]:"S"+w;
+}
+
 // ---------- abas reorganizadas: Resumo e Esforço e recuperação ----------
 document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>{
   SUB=b.dataset.sub;
@@ -2365,7 +2374,7 @@ function renderResumo(){
   const o=baseOpts(); o.scales.y.title={display:true,text:"Esforço (UA)",color:css("--muted"),font:{family:"Work Sans",size:11}};
   o.scales.y2={position:"right",grid:{display:false},border:{display:false},beginAtZero:true,ticks:{color:css("--ink-2"),font:{family:"IBM Plex Mono",size:11}},title:{display:true,text:"Volume load (kg)",color:css("--muted"),font:{family:"Work Sans",size:11}}};
   const T=semanas(); const ws=T.filter(x=>x.n||vlSemana(x.w)!=null).map(x=>x.w);
-  draw("c-res",{data:{labels:ws.map(w=>"S"+w),datasets:[
+  draw("c-res",{data:{labels:ws.map(w=>rotSemExt(w)),datasets:[
     {type:"line",label:"Volume load (kg)",yAxisID:"y2",data:ws.map(w=>vlSemana(w)),borderColor:css("--brand"),backgroundColor:css("--brand"),borderWidth:2,pointRadius:4,spanGaps:true,order:0},
     {type:"bar",label:"Esforço (UA)",data:ws.map(w=>{const x=T.find(t=>t.w===w);return x&&x.carga!=null?x.carga:null;}),backgroundColor:css("--load"),borderRadius:4,maxBarThickness:46,order:1,
       datalabels:{display:c=>c.dataset.data[c.dataIndex]!=null,color:"#fff",anchor:"start",align:"end",offset:6,formatter:v=>num(v),font:{family:"IBM Plex Mono",size:11,weight:"600"}}}]},options:o});
