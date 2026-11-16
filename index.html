@@ -525,6 +525,13 @@ tr[data-dpk]:hover td{background:color-mix(in srgb,var(--brand) 10%,var(--surfac
 .reg-form .bl-sub{margin:4px 0 -4px;font-size:14px;font-weight:700;color:var(--ink)}
 .reg-form .bl-sub span{display:block;font-size:12px;font-weight:400;color:var(--muted)}
 .reg-form .bl .res[hidden]{display:none}
+.reg-form .locais{display:grid;gap:10px}
+.reg-form .chips-loc{display:flex;flex-wrap:wrap;gap:8px}
+.reg-form .chip-loc{all:unset;cursor:pointer;padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:14px;font-weight:600;color:var(--ink-2);line-height:1.2}
+.reg-form .chip-loc:hover{border-color:var(--pse)}
+.reg-form .chip-loc[aria-pressed="true"]{background:var(--pse);border-color:var(--pse);color:#fff}
+.reg-form .chip-loc.sem[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#233438}
+.reg-form .chip-loc:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
 .reg-form .bl .res{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border-radius:12px;background:color-mix(in srgb,var(--brand) 14%,var(--surface))}
 .reg-form .bl .res .r{font-size:14px;font-weight:700;color:var(--ink);display:grid}
 .reg-form .bl .res .r .dica{font-size:12px;font-weight:400;color:var(--muted)}
@@ -1378,6 +1385,13 @@ const podeEditarTreinador=()=>EU&&EU.treinador&&!MODO_ALUNO;
 const primeiroNum=t=>{const m=String(t||"").match(/\d+(?:[.,]\d+)?/);return m?m[0].replace(",","."):"";};
 const val0=v=>v==null||v===""?"":String(v);
 function campoNum(id,rot,v,min,max,step,dica){return `<label for="${id}">${rot}${dica?`<span class="dica">${dica}</span>`:""}<input id="${id}" type="number" inputmode="decimal" min="${min}" max="${max}" step="${step}" value="${esc(val0(v))}"></label>`;}
+function campoLocais(v){
+  const sel=new Set(String(v||"").replace(/&amp;/g,"&").split(/\s*,\s*/).filter(Boolean));
+  const val=LOCAIS.filter(l=>sel.has(l)).join(", ");
+  return `<div class="locais" role="group" aria-labelledby="loc-rot"><p class="bl-sub" id="loc-rot">Está com alguma dor? <span>toque em todos os lugares que doem</span></p>
+    <input type="hidden" id="s-local" value="${esc(val)}">
+    <div class="chips-loc">${LOCAIS.map(l=>`<button type="button" class="chip-loc${l==="Sem dor"?" sem":""}" aria-pressed="${sel.has(l)}" data-l="${esc(l)}">${esc(l)}</button>`).join("")}</div></div>`;
+}
 function campoSel(id,rot,v,opts,dica){
   // opts: lista de valores ou de [valor, texto]
   const op=opts.map(o=>Array.isArray(o)?o:[o,String(o)]);
@@ -1440,6 +1454,8 @@ function renderTreino(){
             ${campoSel("s-est","Estresse",s.est,ESC_EST,"no geral")}
             ${campoSel("s-hum","Humor",s.hum,ESC_HUM,"agora")}
           </div>
+          ${campoLocais(s.local)}
+          ${campoSel("s-dor","Intensidade da dor",s.dor,ESC_DOR,"a mais forte, de 0 a 10")}
           <div class="auto res" hidden><span class="r">Bem-estar total<span class="dica">soma dos 5 itens, de 5 a 25</span></span><output class="calc" id="s-bem">–</output></div>
         </fieldset>
         <fieldset class="bl"><legend><span class="n">2</span>Depois do treino</legend>
@@ -1449,10 +1465,6 @@ function renderTreino(){
           </div>
           ${campoSel("s-pse",'<span class="perg">Quão pesado foi o treino inteiro?</span>',s.pse,ESC_PSE,"PSE da sessão, de 0 a 10")}
           <div class="auto res" hidden><span class="r">Carga da sessão<span class="dica">PSE × minutos</span></span><output class="calc" id="s-ua">–</output></div>
-        </fieldset>
-        <fieldset class="bl"><legend><span class="n">3</span>Dor</legend>
-          ${campoSel("s-local","Local da dor",s.local||"",LOCAIS,"onde doeu")}
-          ${campoSel("s-dor","Intensidade da dor",s.dor,ESC_DOR,"de 0 a 10")}
         </fieldset>
         <div class="cmj-off" hidden>
         ${campoNum("s-cmj1","CMJ 1 (cm)",s.cmj&&s.cmj[0],0,150,0.1)}
@@ -1474,6 +1486,16 @@ function renderTreino(){
       {msg:()=>$("#s-msg")});
   });
   calcS();
+  // locais da dor: pode marcar mais de um; "Sem dor" desmarca os outros
+  $("#f-sessao").addEventListener("click",ev=>{
+    const b=ev.target.closest(".chip-loc"); if(!b) return;
+    const box=b.closest(".locais"), l=b.dataset.l, on=b.getAttribute("aria-pressed")!=="true";
+    box.querySelectorAll(".chip-loc").forEach(c=>{ if(c===b) c.setAttribute("aria-pressed",String(on)); else if(on&&(l==="Sem dor"||c.dataset.l==="Sem dor")) c.setAttribute("aria-pressed","false"); });
+    const sel=[...box.querySelectorAll('.chip-loc[aria-pressed="true"]')].map(c=>c.dataset.l);
+    const inp=$("#s-local"); inp.value=sel.join(", ");
+    if(sel.length===1&&sel[0]==="Sem dor"){ $("#s-dor").value="0"; }
+    inp.dispatchEvent(new Event("input",{bubbles:true}));
+  });
   const bDesm=$("#desmarcar");
   if(bDesm){ let conf=false; bDesm.addEventListener("click",async()=>{
     const msg=$("#d-msg");
@@ -1859,12 +1881,13 @@ function renderDor(){
   const box=$("#dor-box"); if(!box) return;
   const ss=S.filter(s=>!s.cardio&&s.data).sort((a,b)=>a.data<b.data?-1:a.data>b.data?1:0);
   const reg=s=>s.pse!=null||s.psr!=null||s.dor!=null||s.local;
-  const locais=[...new Set(ss.filter(s=>s.local).map(s=>s.local))];
+  const locsDe=s=>String(s.local||"").split(/\s*,\s*/).filter(x=>x&&x!=="Sem dor");
+  const locais=[...new Set(ss.flatMap(locsDe))];
   if(!locais.length){ box.innerHTML='<p class="sub" style="margin:0">Nenhuma dor registrada até agora.</p>'; if(charts["c-dor"]){charts["c-dor"].destroy();delete charts["c-dor"];} return; }
   const pts=ss.filter(reg);
-  const serie=l=>pts.map(s=>s.local===l?(s.dor!=null?s.dor:null):0);
-  const resumo=locais.map(l=>{ const v=pts.filter(s=>s.local===l&&s.dor!=null); if(!v.length) return `<li><b>${l}</b> registrada sem intensidade</li>`;
-    const ultimo=pts[pts.length-1], atual=ultimo.local===l?(ultimo.dor??v[v.length-1].dor):0;
+  const serie=l=>pts.map(s=>locsDe(s).includes(l)?(s.dor!=null?s.dor:null):0);
+  const resumo=locais.map(l=>{ const v=pts.filter(s=>locsDe(s).includes(l)&&s.dor!=null); if(!v.length) return `<li><b>${l}</b> registrada sem intensidade</li>`;
+    const ultimo=pts[pts.length-1], atual=locsDe(ultimo).includes(l)?(ultimo.dor??v[v.length-1].dor):0;
     return `<li><b>${l}</b> ${num(v[0].dor)} → ${num(atual)}${atual<v[0].dor?' <span class="melhor">melhorou</span>':atual>v[0].dor?' <span class="pior">piorou</span>':""}</li>`; }).join("");
   box.innerHTML=`<ul class="dor-res">${resumo}</ul><div class="chartbox"><canvas id="c-dor" aria-label="Intensidade da dor por região ao longo das sessões"></canvas></div>`;
   const cores=[css("--pse"),css("--load"),css("--brand"),css("--psr"),css("--dur"),css("--ink-2")];
@@ -2269,7 +2292,7 @@ renderAll=function(){ _renderAll24(); marcarLinhasDet();
 
 // ---------- v25: atualização automática ----------
 // Ao abrir (ou voltar para) o app, confere se há versão nova publicada e recarrega sozinho.
-const APP_VER="20261116145847";
+const APP_VER="20261116151607";
 let VER_CHECADO=0;
 async function checarVersao(){
   if(!/^\d+$/.test(APP_VER)||Date.now()-VER_CHECADO<60000) return; VER_CHECADO=Date.now();
