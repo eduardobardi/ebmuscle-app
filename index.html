@@ -524,6 +524,7 @@ tr[data-dpk]:hover td{background:color-mix(in srgb,var(--brand) 10%,var(--surfac
 .reg-form .bl .par{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 12px}
 .reg-form .bl-sub{margin:4px 0 -4px;font-size:14px;font-weight:700;color:var(--ink)}
 .reg-form .bl-sub span{display:block;font-size:12px;font-weight:400;color:var(--muted)}
+.reg-form .bl .res[hidden]{display:none}
 .reg-form .bl .res{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border-radius:12px;background:color-mix(in srgb,var(--brand) 14%,var(--surface))}
 .reg-form .bl .res .r{font-size:14px;font-weight:700;color:var(--ink);display:grid}
 .reg-form .bl .res .r .dica{font-size:12px;font-weight:400;color:var(--muted)}
@@ -1439,7 +1440,7 @@ function renderTreino(){
             ${campoSel("s-est","Estresse",s.est,ESC_EST,"no geral")}
             ${campoSel("s-hum","Humor",s.hum,ESC_HUM,"agora")}
           </div>
-          <div class="auto res"><span class="r">Bem-estar total<span class="dica">soma dos 5 itens, de 5 a 25</span></span><output class="calc" id="s-bem">–</output></div>
+          <div class="auto res" hidden><span class="r">Bem-estar total<span class="dica">soma dos 5 itens, de 5 a 25</span></span><output class="calc" id="s-bem">–</output></div>
         </fieldset>
         <fieldset class="bl"><legend><span class="n">2</span>Depois do treino</legend>
           <div class="par">
@@ -1447,7 +1448,7 @@ function renderTreino(){
             ${campoNum("s-dur","Duração",s.dur,1,400,1,"em minutos")}
           </div>
           ${campoSel("s-pse",'<span class="perg">Quão pesado foi o treino inteiro?</span>',s.pse,ESC_PSE,"PSE da sessão, de 0 a 10")}
-          <div class="auto res"><span class="r">Carga da sessão<span class="dica">PSE × minutos</span></span><output class="calc" id="s-ua">–</output></div>
+          <div class="auto res" hidden><span class="r">Carga da sessão<span class="dica">PSE × minutos</span></span><output class="calc" id="s-ua">–</output></div>
         </fieldset>
         <fieldset class="bl"><legend><span class="n">3</span>Dor</legend>
           ${campoSel("s-local","Local da dor",s.local||"",LOCAIS,"onde doeu")}
@@ -2268,7 +2269,7 @@ renderAll=function(){ _renderAll24(); marcarLinhasDet();
 
 // ---------- v25: atualização automática ----------
 // Ao abrir (ou voltar para) o app, confere se há versão nova publicada e recarrega sozinho.
-const APP_VER="20261113144443";
+const APP_VER="20261116145847";
 let VER_CHECADO=0;
 async function checarVersao(){
   if(!/^\d+$/.test(APP_VER)||Date.now()-VER_CHECADO<60000) return; VER_CHECADO=Date.now();
