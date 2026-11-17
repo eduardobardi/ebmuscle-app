@@ -532,6 +532,75 @@ tr[data-dpk]:hover td{background:color-mix(in srgb,var(--brand) 10%,var(--surfac
 .reg-form .chip-loc[aria-pressed="true"]{background:var(--pse);border-color:var(--pse);color:#fff}
 .reg-form .chip-loc.sem[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#233438}
 .reg-form .chip-loc:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+/* ---- v30: status compacto, igual à anterior, peso corporal, frases ---- */
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.top .sync.sync-mini{all:unset;box-sizing:border-box;margin-left:auto;display:flex;align-items:center;gap:6px;padding:0 4px 0 10px;height:32px;border-radius:999px;border:1px solid rgba(255,255,255,.18);font-size:12.5px;font-weight:600;color:var(--bar-fg);white-space:nowrap}
+.top .sync.sync-mini[hidden]{display:none}
+.top .sync.sync-mini + .tema{margin-left:0}
+.sync-mini #sync-txt{flex:none}
+.sync-mini[data-st="ok"] #sync-txt::after{content:" ✓";color:var(--brand)}
+.sync-mini .dot{width:7px;height:7px}
+.sync-mini[data-st="ok"] .dot{display:none}
+.sync-mini[data-st="err"]{border-color:var(--crit)}
+.sync-mini .acoes{margin:0}
+.sync-mini .sync-at{all:unset;cursor:pointer;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;color:var(--bar-fg);opacity:.75}
+.sync-mini .sync-at:hover{opacity:1;color:var(--brand)}
+.sync-mini .sync-at:focus-visible{outline:2px solid var(--brand)}
+.sync-mini[data-st="save"] .sync-at,.sync-mini[data-st="load"] .sync-at{display:none}
+.sync-mini[data-st="save"]{padding-right:10px}
+.sync-mini[data-st="save"] .dot{background:var(--warn);animation:pulse 1s infinite alternate}
+.top .wrap{flex-wrap:nowrap;gap:10px}
+.top .mark{min-width:0}
+@media (max-width:430px){.top .mark .wm small{display:none}}
+.ex.pc .sug{display:none}
+
+table.series .copia{all:unset;cursor:pointer;display:block;margin-top:4px;padding:3px 7px;border-radius:8px;border:1px dashed var(--brand);font-size:11px;font-weight:600;color:var(--ink-2);line-height:1.2;white-space:nowrap}
+table.series .copia[hidden]{display:none}
+table.series .copia:hover{background:color-mix(in srgb,var(--brand) 15%,var(--surface))}
+table.series .copia:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+table.series .pc-txt{display:none}
+.ex.pc table.series input[data-f="1"]{display:none}
+.ex.pc table.series .pc-txt{display:block;font-family:var(--f-mono);font-size:14px;font-weight:600;color:var(--muted);text-align:center;padding:9px 0}
+.ex .pc-sw{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);cursor:pointer;margin:-2px 0 0;width:max-content}
+.ex .pc-sw input{width:18px;height:18px;accent-color:var(--brand);margin:0}
+.kpi .fr::first-letter{text-transform:uppercase}
+.kpi .fr{display:block;margin-top:4px;font-size:13px;font-weight:600;color:var(--ink)}
+.kpis .kpi:first-child .fr{color:var(--bg)}
+.frase-ult{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--brand);border-radius:var(--r);padding:12px 16px;box-shadow:var(--shadow-sm)}
+.frase-ult[hidden]{display:none}
+.frase-ult .t{margin:0 0 8px;font-weight:800;font-family:var(--f-display);font-size:15px}
+.frase-ult .t span{display:block;font-family:var(--f-body);font-weight:400;font-size:12.5px;color:var(--muted)}
+.frase-ult ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.frase-ult li{display:flex;justify-content:space-between;gap:12px;font-size:14.5px}
+.frase-ult li b{font-weight:600}
+.frase-ult li b::first-letter{text-transform:uppercase}
+.frase-ult li span{font-family:var(--f-mono);font-size:13px;color:var(--muted);white-space:nowrap}
+/* ---- v30: escalas em botões ---- */
+.reg-form .campo-bt{display:grid;gap:7px;min-width:0}
+.reg-form .campo-bt .rot{margin:0;font-size:14px;font-weight:700;color:var(--ink);line-height:1.3}
+.reg-form .campo-bt .rot .dica{display:inline;font-size:12.5px;font-weight:400;color:var(--muted)}
+.reg-form .campo-bt .rot .dica::before{content:" · "}
+.reg-form .campo-bt .rot:has(.perg) .dica{display:block}
+.reg-form .campo-bt .rot:has(.perg) .dica::before{content:none}
+.reg-form .campo-bt .rot .perg{font-size:15.5px}
+.reg-form .bts{display:grid;gap:6px}
+.reg-form .bts.cara{grid-template-columns:repeat(5,minmax(0,1fr))}
+.reg-form .bts.num{grid-template-columns:repeat(11,minmax(0,1fr));gap:4px}
+.reg-form .bt-esc{all:unset;box-sizing:border-box;cursor:pointer;display:grid;place-items:center;gap:1px;min-height:46px;padding:6px 0;border-radius:12px;border:1px solid var(--line);background:var(--surface);-webkit-tap-highlight-color:transparent}
+.reg-form .bt-esc .e{font-size:24px;line-height:1;filter:grayscale(.55);opacity:.8}
+.reg-form .bt-esc b{font-family:var(--f-mono);font-size:12.5px;font-weight:600;color:var(--muted)}
+.reg-form .bts.num .bt-esc b{font-size:16px;color:var(--ink-2)}
+.reg-form .bt-esc:hover{border-color:var(--brand)}
+.reg-form .bt-esc.on{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 24%,var(--surface));box-shadow:inset 0 0 0 1.5px var(--brand)}
+.reg-form .bt-esc.on .e{filter:none;opacity:1}
+.reg-form .bt-esc.on b{color:var(--ink)}
+.reg-form .bt-esc:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.reg-form .campo-bt .sel-txt{margin:0;font-size:13px;color:var(--ink-2);min-height:1.25em}
+.reg-form .int-loc{display:grid;gap:7px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--pse) 12%,var(--surface))}
+.reg-form .int-loc .rot{margin:0;display:flex;justify-content:space-between;gap:8px;font-size:14px;font-weight:700}
+.reg-form .int-loc .rot .sel-txt{font-weight:400;font-size:12.5px;color:var(--ink-2);text-align:right}
+.reg-form .int-loc .bt-esc.on{border-color:var(--pse);background:color-mix(in srgb,var(--pse) 30%,var(--surface));box-shadow:inset 0 0 0 1.5px var(--pse)}
+@media (max-width:420px){.reg-form .bts.num{grid-template-columns:repeat(6,minmax(0,1fr))}.reg-form .bt-esc{min-height:44px}}
 .reg-form .ints-loc{display:grid;gap:8px}
 .reg-form .ints-loc:empty{display:none}
 .reg-form .bl label.int-loc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);align-items:center;gap:10px;padding:6px 6px 6px 12px;border-radius:12px;background:color-mix(in srgb,var(--pse) 12%,var(--surface));font-size:14px}
@@ -1130,8 +1199,21 @@ const MSG = {
 };
 const msgDe = e => (e&&e.erro==="campo"&&e.mensagem) || (e&&MSG[e.erro]) || "Algo deu errado. Tente de novo.";
 const hora = ts => new Date(ts).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
-function sync(st,txt,botao){const el=$("#sync");el.hidden=false;el.dataset.st=st;$("#sync-txt").textContent=txt;
-  const b=$("#sync-btn");b.hidden=!botao;if(botao)b.textContent=botao;}
+// v30: status compacto no cabeçalho ("salvo ✓"); o texto longo fica no title e para leitores de tela
+(function(){ const el=$("#sync"), hd=$("header.top .wrap"), tema=$("#tema"); if(!el||!hd) return;
+  const anc=document.createElement("span"); anc.id="sync-ancora"; anc.hidden=true; el.parentNode.insertBefore(anc,el);
+  hd.insertBefore(el,tema); el.classList.add("sync-mini");
+  const lg=document.createElement("span"); lg.id="sync-long"; lg.className="sr-only"; el.appendChild(lg);
+  const bt=$("#sync-btn"); bt.className="sync-at"; bt.innerHTML='<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+})();
+let SYNC_ST="ok";
+function sync(st,txt,botao){const el=$("#sync");el.hidden=false;
+  if(st==="ok"&&typeof AUTO!=="undefined"&&(AUTO.pend.size||AUTO.voo)){ st="save"; txt="Salvando suas alterações na planilha…"; }el.dataset.st=st;SYNC_ST=st;el.title=txt;
+  $("#sync-long").textContent=txt;
+  $("#sync-txt").textContent=st==="ok"?"salvo":st==="load"?"lendo…":st==="save"?"salvando…":(navigator.onLine?"erro":"sem conexão");
+  const b=$("#sync-btn");b.hidden=st==="load"||st==="save";b.setAttribute("aria-label",botao||"Atualizar da planilha");b.title=botao||"Atualizar da planilha";}
+function syncSalvando(){ if(!$("#sync").hidden) sync("save","Salvando suas alterações na planilha…"); }
+function syncFim(ok,txt){ if($("#sync").hidden) return; if(AUTO.pend.size||AUTO.voo) return; sync(ok?"ok":"err",txt||(ok?"Tudo salvo na planilha.":"Não consegui salvar. Vou tentar de novo sozinho."),ok?"Atualizar da planilha":"Tentar de novo"); }
 
 // textos vindos das planilhas entram nos gráficos e tabelas: escapa < > & "
 const esc = v => String(v).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -1401,7 +1483,7 @@ function lerLocais(txt,dorGeral){
   return m;
 }
 const optsDor=v=>`<option value=""${v==null?" selected":""}>–</option>`+ESC_DOR.map(([n,t])=>`<option value="${n}"${v===n?" selected":""}>${esc(t)}</option>`).join("");
-const linhaIntLoc=(l,v)=>`<label class="int-loc" data-l="${esc(l)}"><span>${esc(l)}</span><select aria-label="Intensidade da dor: ${esc(l)}">${optsDor(v)}</select></label>`;
+const linhaIntLoc=(l,v)=>`<div class="int-loc" data-l="${esc(l)}" data-v="${v==null?"":v}" role="group" aria-label="Intensidade da dor: ${esc(l)}"><p class="rot">${esc(l)}<span class="sel-txt">${v!=null?esc(rotEsc(ESC_DOR,v)):"dê uma nota de 0 a 10"}</span></p><div class="bts num">${ESC_DOR.map(([n,t])=>`<button type="button" class="bt-esc${v===n?" on":""}" data-v="${n}" aria-pressed="${v===n}" title="${esc(t)}"><b>${n}</b></button>`).join("")}</div></div>`;
 function campoLocais(v,dor){
   const m=lerLocais(v,dor);
   const reais=LOCAIS.filter(l=>l!=="Sem dor"&&m.has(l));
@@ -1413,13 +1495,13 @@ function campoLocais(v,dor){
 function syncLocais(box){
   const sel=[...box.querySelectorAll('.chip-loc[aria-pressed="true"]')].map(c=>c.dataset.l);
   const ints=box.querySelector(".ints-loc");
-  const atuais=new Map([...ints.querySelectorAll(".int-loc")].map(r=>[r.dataset.l,r.querySelector("select").value]));
+  const atuais=new Map([...ints.querySelectorAll(".int-loc")].map(r=>[r.dataset.l,r.dataset.v]));
   const reais=LOCAIS.filter(l=>l!=="Sem dor"&&sel.includes(l));
   ints.innerHTML=reais.map(l=>linhaIntLoc(l,atuais.has(l)&&atuais.get(l)!==""?+atuais.get(l):null)).join("");
   let local, dor;
   if(sel.includes("Sem dor")){ local="Sem dor"; dor="0"; }
   else{
-    const vals=reais.map(l=>{ const x=ints.querySelector(`.int-loc[data-l="${CSS.escape(l)}"] select`).value; return [l,x]; });
+    const vals=reais.map(l=>{ const x=ints.querySelector(`.int-loc[data-l="${CSS.escape(l)}"]`).dataset.v; return [l,x]; });
     local=vals.map(([l,x])=>x!==""?l+" "+x:l).join(", ");
     const ns=vals.map(([,x])=>x).filter(x=>x!=="").map(Number);
     dor=ns.length?String(Math.max(...ns)):"";
@@ -1427,6 +1509,22 @@ function syncLocais(box){
   $("#s-local").value=local; $("#s-dor").value=dor;
   $("#s-local").dispatchEvent(new Event("input",{bubbles:true}));
 }
+// escala em botões: "cara" = carinhas de 1 a 5, "num" = notas de 0 a 10
+function campoBot(id,rot,v,escala,tipo,dica){
+  const vv=v==null||v===""?"":String(v);
+  const bts=escala.map(([n,t])=>{ const on=String(n)===vv;
+    return `<button type="button" class="bt-esc${on?" on":""}" data-v="${n}" aria-pressed="${on}" title="${esc(t)}">${tipo==="cara"?`<span class="e" aria-hidden="true">${["😫","😟","😐","🙂","😄"][n-1]}</span>`:""}<b>${n}</b></button>`; }).join("");
+  return `<div class="campo-bt" data-id="${id}" role="group" aria-labelledby="rot-${id}"><p class="rot" id="rot-${id}">${rot}${dica?`<span class="dica">${dica}</span>`:""}</p>
+    <input type="hidden" id="${id}" value="${esc(vv)}"><div class="bts ${tipo}">${bts}</div><p class="sel-txt" aria-live="polite">${vv!==""?esc(rotEsc(escala,+vv)):""}</p></div>`;
+}
+function marcarBot(id,v){
+  const inp=$("#"+id), g=document.querySelector(`.campo-bt[data-id="${id}"]`); if(!inp||!g) return;
+  inp.value=v;
+  g.querySelectorAll(".bt-esc").forEach(x=>{ const on=x.dataset.v===String(v)&&v!==""; x.classList.toggle("on",on); x.setAttribute("aria-pressed",String(on)); });
+  const esc_={"s-psr":ESC_PSR,"s-pse":ESC_PSE,"s-qual":ESC_SONO,"s-fad":ESC_FAD,"s-dorm":ESC_DORM,"s-est":ESC_EST,"s-hum":ESC_HUM}[id];
+  g.querySelector(".sel-txt").textContent=v!==""&&esc_?rotEsc(esc_,+v):"";
+}
+const CRON_FORM_E=(t,w)=>TR_T===t&&TR_W===w;
 function campoSel(id,rot,v,opts,dica){
   // opts: lista de valores ou de [valor, texto]
   const op=opts.map(o=>Array.isArray(o)?o:[o,String(o)]);
@@ -1479,15 +1577,15 @@ function renderTreino(){
       </details>
       <div class="blocos">
         <fieldset class="bl"><legend><span class="n">1</span>Antes do treino</legend>
-          ${campoSel("s-psr",'<span class="perg">Quão recuperado você chegou?</span>',s.psr,ESC_PSR,"PSR pré-treino, de 0 a 10")}
+          ${campoBot("s-psr",'<span class="perg">Quão recuperado você chegou?</span>',s.psr,ESC_PSR,"num","PSR pré-treino: 0 = exausto, 10 = cheio de energia")}
           ${campoNum("s-sono","Horas de sono",s.sono,0,24,0.5,"na noite passada")}
-          ${campoSel("s-qual","Qualidade do sono",s.qual,ESC_SONO,"como foi a noite")}
+          ${campoBot("s-qual","Qualidade do sono",s.qual,ESC_SONO,"cara","como foi a noite")}
           <p class="bl-sub">Como você está hoje? <span>1 = pior · 3 = normal · 5 = melhor</span></p>
           <div class="col">
-            ${campoSel("s-fad","Fadiga",s.fad,ESC_FAD,"cansaço geral")}
-            ${campoSel("s-dorm","Dor muscular",s.dorm,ESC_DORM,"de treinos anteriores")}
-            ${campoSel("s-est","Estresse",s.est,ESC_EST,"no geral")}
-            ${campoSel("s-hum","Humor",s.hum,ESC_HUM,"agora")}
+            ${campoBot("s-fad","Fadiga",s.fad,ESC_FAD,"cara","cansaço geral")}
+            ${campoBot("s-dorm","Dor muscular",s.dorm,ESC_DORM,"cara","de treinos anteriores")}
+            ${campoBot("s-est","Estresse",s.est,ESC_EST,"cara","no geral")}
+            ${campoBot("s-hum","Humor",s.hum,ESC_HUM,"cara","agora")}
           </div>
           ${campoLocais(s.local,s.dor)}
           <div class="auto res" hidden><span class="r">Bem-estar total<span class="dica">soma dos 5 itens, de 5 a 25</span></span><output class="calc" id="s-bem">–</output></div>
@@ -1497,7 +1595,7 @@ function renderTreino(){
             <label for="s-data">Data<span class="dica">do treino</span><input id="s-data" type="date" value="${esc(d||s.data||hojeISO)}"></label>
             ${campoNum("s-dur","Duração",s.dur,1,400,1,"em minutos")}
           </div>
-          ${campoSel("s-pse",'<span class="perg">Quão pesado foi o treino inteiro?</span>',s.pse,ESC_PSE,"PSE da sessão, de 0 a 10")}
+          ${campoBot("s-pse",'<span class="perg">Quão pesado foi o treino inteiro?</span>',s.pse,ESC_PSE,"num","PSE da sessão: 0 = repouso, 10 = máximo")}
           <div class="auto res" hidden><span class="r">Carga da sessão<span class="dica">PSE × minutos</span></span><output class="calc" id="s-ua">–</output></div>
         </fieldset>
         <div class="cmj-off" hidden>
@@ -1515,7 +1613,7 @@ function renderTreino(){
     $("#s-cmjm").textContent=cm.length?`${num(cm.reduce((a,b)=>a+b,0)/cm.length,1)} cm`:"–";};
   $("#f-sessao").addEventListener("input",ev=>{calcS();
     const t=ev.target; if(!t||!t.id) return;
-    agendarAuto("s|"+TR_T+"|"+TR_W, t.tagName==="SELECT"||t.type==="date"?600:1200,
+    agendarAuto("s|"+TR_T+"|"+TR_W, t.tagName==="SELECT"||t.type==="date"||t.type==="hidden"?600:1200,
       {acao:"salvarSessao",token:TOKEN,nome:ALUNO,treino:TR_T,semana:TR_W,sessao:sessaoDoForm()},
       {msg:()=>$("#s-msg")});
   });
@@ -1526,9 +1624,16 @@ function renderTreino(){
     const box=b.closest(".locais"), l=b.dataset.l, on=b.getAttribute("aria-pressed")!=="true";
     box.querySelectorAll(".chip-loc").forEach(c=>{ if(c===b) c.setAttribute("aria-pressed",String(on)); else if(on&&(l==="Sem dor"||c.dataset.l==="Sem dor")) c.setAttribute("aria-pressed","false"); });
     syncLocais(box);
-    if(on&&l!=="Sem dor"){ const sl=box.querySelector(`.int-loc[data-l="${CSS.escape(l)}"] select`); if(sl) sl.focus(); }
   });
-  $("#f-sessao").addEventListener("change",ev=>{ const sl=ev.target.closest(".int-loc select"); if(sl) syncLocais(sl.closest(".locais")); });
+  // botões das escalas (carinhas 1 a 5 e notas 0 a 10): tocar de novo no mesmo desmarca
+  $("#f-sessao").addEventListener("click",ev=>{
+    const b=ev.target.closest(".bt-esc"); if(!b) return;
+    const loc=b.closest(".int-loc");
+    if(loc){ loc.dataset.v=b.classList.contains("on")?"":b.dataset.v; syncLocais(loc.closest(".locais")); return; }
+    const g=b.closest(".campo-bt"); if(!g) return;
+    marcarBot(g.dataset.id,b.classList.contains("on")?"":b.dataset.v);
+    $("#"+g.dataset.id).dispatchEvent(new Event("input",{bubbles:true}));
+  });
   const bDesm=$("#desmarcar");
   if(bDesm){ let conf=false; bDesm.addEventListener("click",async()=>{
     const msg=$("#d-msg");
@@ -1571,26 +1676,31 @@ function renderTreino(){
     const descs=descMetodo(metodo);
     const notaSem=metSem&&norm(metSem)!==norm(metodo)&&!descs.some(([,d])=>d&&norm(d)===norm(metSem))?metSem:"";
     const repsPre=primeiroNum(pw.reps);
+    const pc=ehPC(e);
     const linhas=[0,1,2].map(k=>{
       const sv=ss[k], a=ant&&ant.ss[k];
       const reps=sv?sv[0]:"", kg=sv?sv[1]:"";
       const pre=false;
-      return `<tr><td>${k+1}ª</td>
+      const copia=k>0?`<button type="button" class="copia" data-k="${k}" hidden aria-label="Repetir a ${k}ª série" title="Copiar a ${k}ª série">↑ igual</button>`:"";
+      return `<tr><td>${k+1}ª${copia}</td>
         <td><input class="in${pre?" pre":""}" data-k="${k}" data-f="0" type="number" inputmode="decimal" min="0" max="1000" step="any" value="${esc(val0(reps))}" aria-label="Repetições da ${k+1}ª série"></td>
-         <td><input class="in" data-k="${k}" data-f="1" type="number" inputmode="decimal" min="0" max="1000" step="any" value="${esc(val0(kg))}" aria-label="Carga da ${k+1}ª série em kg"></td>
+         <td><input class="in" data-k="${k}" data-f="1" type="number" inputmode="decimal" min="0" max="1000" step="any" value="${esc(val0(kg))}" aria-label="Carga da ${k+1}ª série em kg"><span class="pc-txt" aria-hidden="true">PC</span></td>
         <td class="vs">${a?`${num(a[0])} × ${fmtKg(a[1])}`:"–"}</td></tr>`;}).join("");
     const linkOk=e.link&&/^https?:\/\//i.test(e.link);
     const vl=ss.length?vlSets(ss):null;
     const sug=sugestaoCarga(e,TR_W), pr=recordeNaSemana(e,TR_W);
-    return `<article class="ex" data-i="${EXT.ex.indexOf(e)}"><header><span class="num">${rotulo||i+1}</span><div style="min-width:0"><h3>${e.ex}${pr?' <span class="pr" title="Maior carga já registrada neste exercício">🏆 Recorde</span>':""}</h3><div class="tags">${e.g.filter(g=>g!=="Não classificado").map(g=>`<span class="tag">${g}</span>`).join("")}</div></div></header>
+    const presc=[[pw.reps,"repetições"],[pw.int,"intervalo"],[vl!=null?num(vl):"","volume load"]].filter(([v])=>v!=null&&v!=="");
+    const temMet=!!(metodo||descs.some(([,d])=>d)||notaSem);
+    return `<article class="ex${pc?" pc":""}" data-i="${EXT.ex.indexOf(e)}"><header><span class="num">${rotulo||i+1}</span><div style="min-width:0"><h3>${e.ex}${pr?' <span class="pr" title="Maior carga já registrada neste exercício">🏆 Recorde</span>':""}</h3><div class="tags">${e.g.filter(g=>g!=="Não classificado").map(g=>`<span class="tag">${g}</span>`).join("")}</div></div></header>
       ${sug?`<p class="sug sug-${sug.tipo}"><b>${sug.tipo==="sobe"?"↑ Sugestão de carga":"Sugestão de carga"}:</b> ${sug.txt}</p>`:""}
-      <div class="presc"><div><b>${pw.reps?esc(pw.reps):"–"}</b><span>repetições</span></div><div><b>${pw.int?esc(pw.int):"–"}</b><span>intervalo</span></div><div><b>${vl!=null?num(vl):"–"}</b><span>volume load</span></div></div>
-      <div class="tablewrap"><table class="series"><tr><th>Série</th><th>Repetições</th><th>Carga (kg)</th><th>${ant?"Sem. "+ant.w:"Sem. anterior"}</th></tr>${linhas}</table></div>
-      ${!ss.length?`<p class="dica-pre">${ant?`O que você fez na semana ${ant.w} aparece na coluna ao lado. `:""}Preencha repetições e carga de cada série: salva sozinho. Carga 1 = peso corporal.</p>`:""}
+      ${presc.length?`<div class="presc">${presc.map(([v,r])=>`<div><b>${esc(String(v))}</b><span>${r}</span></div>`).join("")}</div>`:""}
+      <div class="tablewrap"><table class="series"><tr><th>Série</th><th>Repetições</th><th>${pc?"Carga":"Carga (kg)"}</th><th>${ant?"Sem. "+ant.w:"Sem. anterior"}</th></tr>${linhas}</table></div>
+      <label class="pc-sw"><input type="checkbox" class="in-pc"${pc?" checked":""}> Sem carga (peso corporal)</label>
+      ${!ss.length?`<p class="dica-pre">${ant?`O que você fez na semana ${ant.w} aparece na coluna ao lado. `:""}Preencha ${pc?"as repetições":"repetições e carga"} de cada série: salva sozinho.</p>`:""}
       <dl class="campos">
-        <div><dt>Link</dt><dd>${ed?`<input class="in-link" type="url" placeholder="https://… (vídeo do exercício)" value="${esc(e.link||"")}">`:(linkOk?`<a class="video" href="${esc(e.link)}" target="_blank" rel="noopener noreferrer">Ver vídeo do exercício</a>`:'<span class="dash">sem vídeo</span>')}</dd></div>
-        <div><dt>Método de treino</dt><dd>${ed?`<input class="in-met" maxlength="60" placeholder="Ex.: Drop-set, Bi-set, Isometria" value="${esc(metodo)}">`:(metodo?(descs.length===1&&descs[0][1]?"":`<b class="met-nome">${esc(metodo.replace(/\s*\n\s*/g," "))}</b>`):'<span class="dash">–</span>')}
-          ${descs.filter(([,d])=>d).map(([n,d])=>`<span class="met-desc"><b>${esc(n)}:</b> ${esc(d)}</span>`).join("")}${notaSem?`<span class="met-desc"><b>Nesta semana:</b> ${esc(notaSem)}</span>`:""}</dd></div>
+        ${ed||linkOk?`<div><dt>Link</dt><dd>${ed?`<input class="in-link" type="url" placeholder="https://… (vídeo do exercício)" value="${esc(e.link||"")}">`:(linkOk?`<a class="video" href="${esc(e.link)}" target="_blank" rel="noopener noreferrer">Ver vídeo do exercício</a>`:'<span class="dash">sem vídeo</span>')}</dd></div>`:""}
+        ${ed||temMet?`<div><dt>Método de treino</dt><dd>${ed?`<input class="in-met" maxlength="60" placeholder="Ex.: Drop-set, Bi-set, Isometria" value="${esc(metodo)}">`:(metodo?(descs.length===1&&descs[0][1]?"":`<b class="met-nome">${esc(metodo.replace(/\s*\n\s*/g," "))}</b>`):'<span class="dash">–</span>')}
+          ${descs.filter(([,d])=>d).map(([n,d])=>`<span class="met-desc"><b>${esc(n)}:</b> ${esc(d)}</span>`).join("")}${notaSem?`<span class="met-desc"><b>Nesta semana:</b> ${esc(notaSem)}</span>`:""}</dd></div>`:""}
         <div class="obs-c"><dt>Observação do aluno em relação ao exercício</dt><dd><textarea class="in-obs" rows="2" maxlength="300" placeholder="Como foi? Dor, dificuldade, ajuste de carga…">${esc(obsW)}</textarea></dd></div>
       </dl>
       <div class="actions"><button type="button" class="btn ghost salvar-ex">Salvar agora</button>${ss.length||obsW?'<button type="button" class="link-limpar">Limpar séries</button>':""}<span class="msg" role="status" aria-live="polite">${ss.length?"Registrado na planilha.":""}</span></div>
@@ -1605,6 +1715,31 @@ function renderTreino(){
     if(meia>=0){ cancelarAuto(chave); autoMsg(m,`Preencha ${corpo.sets[meia][0]===""?"as repetições":"a carga"} da ${meia+1}ª série para salvar.`,"erro"); return; }
     agendarAuto(chave, x.classList.contains("in-obs")||x.classList.contains("in-link")||x.classList.contains("in-met")?1500:1000, corpo, {msg:()=>card.isConnected?card.querySelector(".msg"):null});
   }));
+  // "igual à anterior" e "sem carga"
+  const verCopias=card=>{ const pc=card.classList.contains("pc");
+    card.querySelectorAll(".copia").forEach(b=>{ const k=+b.dataset.k, v=(kk,f)=>card.querySelector(`input[data-k="${kk}"][data-f="${f}"]`).value;
+      const antCheia=v(k-1,0)!==""&&(pc||v(k-1,1)!==""), vazia=v(k,0)===""&&(pc||v(k,1)==="");
+      b.hidden=!(antCheia&&vazia); }); };
+  $("#tr-lista").querySelectorAll(".ex").forEach(card=>{
+    verCopias(card);
+    card.addEventListener("input",()=>verCopias(card));
+    card.querySelectorAll(".copia").forEach(b=>b.addEventListener("click",()=>{
+      const k=+b.dataset.k;
+      [0,1].forEach(f=>{ const de=card.querySelector(`input[data-k="${k-1}"][data-f="${f}"]`), para=card.querySelector(`input[data-k="${k}"][data-f="${f}"]`);
+        if(f===1&&card.classList.contains("pc")) return;
+        para.value=de.value; para.classList.remove("pre"); para.dispatchEvent(new Event("input",{bubbles:true})); });
+      b.hidden=true;
+    }));
+    const sw=card.querySelector(".in-pc");
+    if(sw) sw.addEventListener("change",()=>{
+      const e=EXT.ex[+card.dataset.i]; marcarPC(e,sw.checked); card.classList.toggle("pc",sw.checked);
+      card.querySelector("table.series th:nth-child(3)").textContent=sw.checked?"Carga":"Carga (kg)";
+      if(sw.checked) card.querySelectorAll('input[data-f="1"]').forEach(c=>{ c.value=""; });
+      const dp=card.querySelector(".dica-pre"); if(dp) dp.textContent=dp.textContent.replace(/Preencha (as repetições|repetições e carga)/,"Preencha "+(sw.checked?"as repetições":"repetições e carga"));
+      const r0=card.querySelector('input[data-k="0"][data-f="0"]'); r0.dispatchEvent(new Event("input",{bubbles:true}));
+      verCopias(card);
+    });
+  });
   $("#tr-lista").querySelectorAll(".link-limpar").forEach(b=>{ let conf=false; b.addEventListener("click",async()=>{
     const card=b.closest(".ex"), e=EXT.ex[+card.dataset.i], msg=card.querySelector(".msg");
     if(!conf){ conf=true; b.textContent="Toque de novo para limpar"; msg.className="msg erro"; msg.textContent="Apaga as 3 séries e a observação deste exercício nesta semana."; return; }
@@ -1643,6 +1778,7 @@ function agendarAuto(chave,ms,payload,ui){
   it.t=setTimeout(()=>rodarAuto(chave),ms);
   AUTO.pend.set(chave,it);
   if(ui&&ui.msg) autoMsg(ui.msg(),"Alterado, salvando em instantes…","");
+  syncSalvando();
 }
 function cancelarAuto(chave){ const it=AUTO.pend.get(chave); if(it){ clearTimeout(it.t); if(!it.rodando) AUTO.pend.delete(chave); else it.cancelado=true; } }
 async function rodarAuto(chave){
@@ -1658,12 +1794,13 @@ async function rodarAuto(chave){
     it.tentativas++;
     const semNet=!navigator.onLine||!(e&&e.erro)||e.erro==="rede"||e.erro==="interno";
     autoMsg(msg(),semNet?"Sem conexão. Vou tentar de novo sozinho…":msgDe(e),"erro");
+    if($("#sync").dataset.st!=="err"&&!$("#sync").hidden) sync("err",semNet?"Sem conexão. Vou tentar de novo sozinho.":msgDe(e),"Tentar de novo");
     if(semNet||it.tentativas<3) it.t=setTimeout(()=>rodarAuto(chave),Math.min(30000,3000*it.tentativas));
     else AUTO.pend.delete(chave);
   }
   it.rodando=false; AUTO.voo--;
   if(ok){
-    if(it.cancelado||it.versao===versao){ AUTO.pend.delete(chave); if(!it.cancelado){ autoMsg(msg(),"✓ Salvo na planilha","ok"); if(it.ui&&it.ui.feito) it.ui.feito(); } refrescarQuieto(); }
+    if(it.cancelado||it.versao===versao){ AUTO.pend.delete(chave); if(!it.cancelado){ autoMsg(msg(),"✓ Salvo na planilha","ok"); if(it.ui&&it.ui.feito) it.ui.feito(); } refrescarQuieto(); syncFim(true); }
     else rodarAuto(chave); // mudou enquanto salvava: salva a versão nova
   }else if(it.denovo){ it.denovo=false; }
 }
@@ -1691,7 +1828,9 @@ function sessaoDoForm(){ const v=id=>{const x=$(id);return x?x.value:"";};
   return {data:v("#s-data")||new Date().toLocaleDateString("sv-SE"),dur:v("#s-dur"),pse:v("#s-pse"),psr:v("#s-psr"),sono:v("#s-sono"),qual:v("#s-qual"),fad:v("#s-fad"),dorm:v("#s-dorm"),est:v("#s-est"),hum:v("#s-hum"),local:v("#s-local"),dor:v("#s-dor"),cmj1:v("#s-cmj1"),cmj2:v("#s-cmj2"),cmj3:v("#s-cmj3")}; }
 function corpoExercicio(card,e){
   // repetição só sugerida (cinza, vinda da semana anterior) sem carga = série ainda não feita
+  const pc=card.classList.contains("pc");
   const sets=[0,1,2].map(k=>{ const r=card.querySelector(`input[data-k="${k}"][data-f="0"]`), c=card.querySelector(`input[data-k="${k}"][data-f="1"]`);
+    if(pc) return r.value===""?["",""]:[r.value,"1"];
     return (r.classList.contains("pre")&&c.value==="")?["",""]:[r.value,c.value]; });
   const meia=sets.findIndex(x=>(x[0]==="")!==(x[1]===""));
   const corpo={acao:"salvarExercicio",token:TOKEN,nome:ALUNO,treino:TR_T,semana:TR_W,linha:e.row,exercicio:desesc(e.ex),sets,obs:card.querySelector(".in-obs").value};
@@ -1739,6 +1878,7 @@ function abrirFimTreino(t,w,min,passo){
       <div class="fim-acoes"><button type="button" class="link" id="fim-depois">Responder depois</button></div>`;
     corpo.querySelectorAll(".pse-b").forEach(b=>b.addEventListener("click",()=>{
       const v=b.dataset.v;
+      if($("#s-pse")&&CRON_FORM_E(t,w)) marcarBot("s-pse",v);
       agendarAuto("s|"+t+"|"+w,200,{acao:"salvarSessao",token:TOKEN,nome:ALUNO,treino:t,semana:w,sessao:sessaoComo(t,w,{pse:v})},{msg:()=>$("#s-msg")});
       passoObs(v);
     }));
@@ -1798,7 +1938,7 @@ function renderCron(){
     el.innerHTML=`<div class="cron parado"><div class="info"><b>Vai treinar agora?</b><span>Toque em Iniciar treino ao começar. Ao encerrar, a duração vai sozinha para o registro da sessão.</span></div><button type="button" class="btn" id="cron-ini">Iniciar treino ${TR_T}</button></div>`;
     $("#cron-ini").addEventListener("click",()=>{
       CRON={aluno:ALUNO,treino:TR_T,semana:TR_W,inicio:Date.now()}; guardar.set("eb_cron",JSON.stringify(CRON)); renderTreino();
-      const psr=$("#s-psr"); const reg=$("details.reg"); if(reg) reg.open=true; if(psr&&psr.value===""){ psr.focus(); $("#s-msg").className="msg"; $("#s-msg").textContent="Antes de começar, responda a PSR (quão recuperado você chegou)."; }
+      const psr=$("#s-psr"); const reg=$("details.reg"); if(reg) reg.open=true; if(psr&&psr.value===""){ const b0=document.querySelector('.campo-bt[data-id="s-psr"] .bt-esc'); if(b0) b0.focus(); $("#s-msg").className="msg"; $("#s-msg").textContent="Antes de começar, responda a PSR (quão recuperado você chegou)."; }
     });
     return;
   }
@@ -1830,7 +1970,7 @@ function renderCron(){
 let avisoTick=null;
 function renderAvisoCron(){
   let el=$("#aviso-cron");
-  if(!el){ el=document.createElement("div"); el.id="aviso-cron"; el.className="aviso-cron"; el.setAttribute("role","status"); const sy=$("#sync"); sy.parentNode.insertBefore(el,sy.nextSibling); }
+  if(!el){ el=document.createElement("div"); el.id="aviso-cron"; el.className="aviso-cron"; el.setAttribute("role","status"); const sy=$("#sync-ancora")||$("#sync"); sy.parentNode.insertBefore(el,sy.nextSibling); }
   clearInterval(avisoTick); avisoTick=null;
   const meu=CRON&&CRON.aluno===ALUNO&&!NA_HOME;
   const noCartao=view==="treino"&&meu&&TR_T===CRON.treino&&TR_W===CRON.semana;
@@ -2326,7 +2466,7 @@ renderAll=function(){ _renderAll24(); marcarLinhasDet();
 
 // ---------- v25: atualização automática ----------
 // Ao abrir (ou voltar para) o app, confere se há versão nova publicada e recarrega sozinho.
-const APP_VER="20261116152036";
+const APP_VER="20261117052345";
 let VER_CHECADO=0;
 async function checarVersao(){
   if(!/^\d+$/.test(APP_VER)||Date.now()-VER_CHECADO<60000) return; VER_CHECADO=Date.now();
@@ -2392,6 +2532,16 @@ function rotSemExt(w,t){
   return ds.length?["S"+w, fmtD(ds[0])]:"S"+w;
 }
 
+// ---------- v30: exercício de peso corporal ----------
+// é "peso corporal" se a escolha foi marcada neste aparelho, ou se todas as séries já lançadas têm carga 1
+const pcChave=e=>"eb_pc_"+(ALUNO||"")+"|"+e.t+"|"+e.row;
+function ehPC(e){
+  try{ const v=guardar.get(pcChave(e)); if(v==="1") return true; if(v==="0") return false; }catch(x){}
+  const ks=Object.values(e.sets||{}).flat().map(x=>+x[1]).filter(k=>!isNaN(k)&&k>0);
+  return ks.length>0&&ks.every(k=>k<=1);
+}
+function marcarPC(e,on){ try{ guardar.set(pcChave(e),on?"1":"0"); }catch(x){} }
+
 // ---------- abas reorganizadas: Resumo e Esforço e recuperação ----------
 document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>{
   SUB=b.dataset.sub;
@@ -2400,6 +2550,26 @@ document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",(
 }));
 const _atualizarModoBase=atualizarModo;
 atualizarModo=function(){ _atualizarModoBase(); document.body.classList.toggle("visao-aluno", !(EU&&EU.treinador) || MODO_ALUNO); };
+// ---- v30: frases simples para o aluno (os números continuam) ----
+const fraseTreinoPSE=p=>p<=2?"treino leve":p<=4?"treino moderado":p<=6?"treino puxado":p<=8?"treino muito puxado":"treino no limite";
+const fraseSemPSE=p=>p<=2?"semana leve":p<=4?"semana moderada":p<=6?"semana puxada":p<=8?"semana muito puxada":"semana no limite";
+const frasePSR=p=>p>=8?"chegou bem recuperado":p>=6?"chegou razoavelmente recuperado":p>=4?"chegou pouco recuperado":"chegou cansado, pouco recuperado";
+const fraseBem=b=>b>=20?"bem-estar ótimo":b>=15?"bem-estar bom":b>=12?"bem-estar um pouco abaixo do normal":"bem-estar baixo";
+const fraseSono=h=>h>=7?"dormiu bem":h>=6?"dormiu um pouco menos":"dormiu pouco";
+function renderFraseUltima(){
+  const sec=$('section[data-view="esforco"][data-sub="sessao"] > div'); if(!sec) return;
+  let el=$("#frase-ult"); if(!el){ el=document.createElement("div"); el.id="frase-ult"; el.className="frase-ult"; const ref=sec.querySelector(".int-empty"); sec.insertBefore(el,ref?ref.nextSibling:sec.firstChild); }
+  const ss=sorted(), l=ss[ss.length-1];
+  if(!l||(l.pse==null&&l.psr==null&&bem(l)==null)){ el.hidden=true; return; }
+  const p=[];
+  if(l.pse!=null) p.push(`<li><b>${fraseTreinoPSE(l.pse)}</b> <span>PSE ${num(l.pse,l.pse%1?1:0)}</span></li>`);
+  if(l.psr!=null) p.push(`<li><b>${frasePSR(l.psr)}</b> <span>PSR ${num(l.psr,l.psr%1?1:0)}</span></li>`);
+  const b=bem(l); if(b!=null) p.push(`<li><b>${fraseBem(b)}</b> <span>${num(b)}/25</span></li>`);
+  if(l.sono!=null) p.push(`<li><b>${fraseSono(l.sono)}</b> <span>${num(l.sono,l.sono%1?1:0)} h</span></li>`);
+  if(l.dor!=null) p.push(`<li><b>${l.dor>=4?"com dor"+(l.local?" ("+esc(l.local)+")":""):l.dor>0?"dor leve":"sem dor"}</b> <span>${num(l.dor)}/10</span></li>`);
+  el.hidden=false;
+  el.innerHTML=`<p class="t">Último treino em palavras <span>${l.cardio?"Cardio · ":l.treino?"Treino "+esc(l.treino)+" · ":""}${l.semana!=null?"semana "+l.semana+" · ":""}${fmtDL(l.data)}</span></p><ul>${p.join("")}</ul>`;
+}
 function renderResumo(){
   const W=semanas().filter(o=>o.n), u=W[W.length-1], a=W[W.length-2];
   const pct=(x,y)=>x!=null&&y?Math.round((x/y-1)*100):null;
@@ -2408,11 +2578,12 @@ function renderResumo(){
     const vu=vlSemana(u.w), va=a?vlSemana(a.w):null;
     $("#res-sem-sub").textContent=`semana ${u.w}${a?` comparada com a semana ${a.w}`:""}`;
     $("#res-sem").innerHTML=`
-      <div class="kpi"><div class="l">Esforço da semana</div><div class="v">${num(u.carga)}<small>UA</small></div>${a?seta(pct(u.carga,a.carga)):'<span class="d">carga interna (PSE × minutos)</span>'}</div>
+      <div class="kpi"><div class="l">Esforço da semana</div><div class="v">${num(u.carga)}<small>UA</small></div>${u.pse!=null?`<span class="fr">${fraseSemPSE(u.pse)}</span>`:""}${a?seta(pct(u.carga,a.carga)):'<span class="d">carga interna (PSE × minutos)</span>'}</div>
       <div class="kpi"><div class="l">Volume load</div><div class="v">${num(vu)}<small>kg</small></div>${a?seta(pct(vu,va)):'<span class="d">repetições × carga</span>'}</div>
       <div class="kpi"><div class="l">Treinos na semana</div><div class="v">${u.n}</div><span class="d">${a?`${a.n} na semana ${a.w}`:"sessões registradas"}</span></div>
-      <div class="kpi"><div class="l">Bem-estar médio</div><div class="v">${num(u.bem,u.bem%1?1:0)}<small>/25</small></div>${a&&u.bem!=null&&a.bem!=null?`<span class="d">${num(a.bem,a.bem%1?1:0)} na semana ${a.w}</span>`:'<span class="d">sono, fadiga, dor muscular, estresse e humor</span>'}</div>`;
+      <div class="kpi"><div class="l">Bem-estar médio</div><div class="v">${num(u.bem,u.bem%1?1:0)}<small>/25</small></div>${u.bem!=null?`<span class="fr">${fraseBem(u.bem)}</span>`:""}${a&&u.bem!=null&&a.bem!=null?`<span class="d">${num(a.bem,a.bem%1?1:0)} na semana ${a.w}</span>`:'<span class="d">sono, fadiga, dor muscular, estresse e humor</span>'}</div>`;
   } else { $("#res-sem-sub").textContent=""; $("#res-sem").innerHTML='<p class="sub">Nenhuma semana registrada ainda.</p>'; }
+  renderFraseUltima();
   // pontos de atenção
   const ss=sorted(), l=ss[ss.length-1], al=[];
   if(l){
