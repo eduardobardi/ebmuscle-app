@@ -584,7 +584,12 @@ table.series .pc-txt{display:none}
 .reg-form .campo-bt .rot:has(.perg) .dica::before{content:none}
 .reg-form .campo-bt .rot .perg{font-size:15.5px}
 .reg-form .bts{display:grid;gap:6px}
-.reg-form .bts.cara{grid-template-columns:repeat(5,minmax(0,1fr))}
+.reg-form .bts.cara{grid-template-columns:1fr;gap:6px}
+.reg-form .bts.cara .bt-esc{display:flex;align-items:center;justify-content:flex-start;gap:12px;min-height:44px;padding:8px 12px;text-align:left}
+.reg-form .bts.cara .bt-esc b{display:grid;place-items:center;flex:none;width:26px;height:26px;border-radius:50%;background:var(--surface-2);font-size:13.5px;color:var(--ink-2)}
+.reg-form .bts.cara .bt-esc .tx{font-size:14.5px;font-weight:500;color:var(--ink-2);line-height:1.25}
+.reg-form .bts.cara .bt-esc.on b{background:var(--brand);color:#233438}
+.reg-form .bts.cara .bt-esc.on .tx{color:var(--ink);font-weight:700}
 .reg-form .bts.num{grid-template-columns:repeat(11,minmax(0,1fr));gap:4px}
 .reg-form .bt-esc{all:unset;box-sizing:border-box;cursor:pointer;display:grid;place-items:center;gap:1px;min-height:46px;padding:6px 0;border-radius:12px;border:1px solid var(--line);background:var(--surface);-webkit-tap-highlight-color:transparent}
 .reg-form .bt-esc .e{font-size:24px;line-height:1;filter:grayscale(.55);opacity:.8}
@@ -1513,16 +1518,16 @@ function syncLocais(box){
 function campoBot(id,rot,v,escala,tipo,dica){
   const vv=v==null||v===""?"":String(v);
   const bts=escala.map(([n,t])=>{ const on=String(n)===vv;
-    return `<button type="button" class="bt-esc${on?" on":""}" data-v="${n}" aria-pressed="${on}" title="${esc(t)}">${tipo==="cara"?`<span class="e" aria-hidden="true">${["😫","😟","😐","🙂","😄"][n-1]}</span>`:""}<b>${n}</b></button>`; }).join("");
+    return `<button type="button" class="bt-esc${on?" on":""}" data-v="${n}" aria-pressed="${on}" title="${esc(t)}"><b>${n}</b>${tipo==="cara"?`<span class="tx">${esc(t.replace(/^\d+ · /,""))}</span>`:""}</button>`; }).join("");
   return `<div class="campo-bt" data-id="${id}" role="group" aria-labelledby="rot-${id}"><p class="rot" id="rot-${id}">${rot}${dica?`<span class="dica">${dica}</span>`:""}</p>
-    <input type="hidden" id="${id}" value="${esc(vv)}"><div class="bts ${tipo}">${bts}</div><p class="sel-txt" aria-live="polite">${vv!==""?esc(rotEsc(escala,+vv)):""}</p></div>`;
+    <input type="hidden" id="${id}" value="${esc(vv)}"><div class="bts ${tipo}">${bts}</div>${tipo==="cara"?"":`<p class="sel-txt" aria-live="polite">${vv!==""?esc(rotEsc(escala,+vv)):""}</p>`}</div>`;
 }
 function marcarBot(id,v){
   const inp=$("#"+id), g=document.querySelector(`.campo-bt[data-id="${id}"]`); if(!inp||!g) return;
   inp.value=v;
   g.querySelectorAll(".bt-esc").forEach(x=>{ const on=x.dataset.v===String(v)&&v!==""; x.classList.toggle("on",on); x.setAttribute("aria-pressed",String(on)); });
   const esc_={"s-psr":ESC_PSR,"s-pse":ESC_PSE,"s-qual":ESC_SONO,"s-fad":ESC_FAD,"s-dorm":ESC_DORM,"s-est":ESC_EST,"s-hum":ESC_HUM}[id];
-  g.querySelector(".sel-txt").textContent=v!==""&&esc_?rotEsc(esc_,+v):"";
+  const st=g.querySelector(".sel-txt"); if(st) st.textContent=v!==""&&esc_?rotEsc(esc_,+v):"";
 }
 const CRON_FORM_E=(t,w)=>TR_T===t&&TR_W===w;
 function campoSel(id,rot,v,opts,dica){
@@ -2466,7 +2471,7 @@ renderAll=function(){ _renderAll24(); marcarLinhasDet();
 
 // ---------- v25: atualização automática ----------
 // Ao abrir (ou voltar para) o app, confere se há versão nova publicada e recarrega sozinho.
-const APP_VER="20261117052345";
+const APP_VER="20261117060406";
 let VER_CHECADO=0;
 async function checarVersao(){
   if(!/^\d+$/.test(APP_VER)||Date.now()-VER_CHECADO<60000) return; VER_CHECADO=Date.now();
