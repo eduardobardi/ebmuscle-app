@@ -2509,7 +2509,7 @@ renderAll=function(){ _renderAll24(); marcarLinhasDet();
 
 // ---------- v25: atualização automática ----------
 // Ao abrir (ou voltar para) o app, confere se há versão nova publicada e recarrega sozinho.
-const APP_VER="20261118134935";
+const APP_VER="20261118135659";
 let VER_CHECADO=0;
 async function checarVersao(){
   if(!/^\d+$/.test(APP_VER)||Date.now()-VER_CHECADO<60000) return; VER_CHECADO=Date.now();
@@ -2594,7 +2594,7 @@ function infoFotoTreino(t,w,min){
   const rec=exs.filter(e=>{ try{ return recordeNaSemana(e,w); }catch(x){ return false; } }).length;
   const dur=min||s.dur||null, pse=s.pse!=null?s.pse:null;
   const data=s.data||(typeof dataDe==="function"&&dataDe(t,w))||new Date().toLocaleDateString("sv-SE");
-  return {t,w,dur,pse,vol,series,nEx:exs.length,rec,data};
+  return {t,w,dur,pse,vol,series,nEx:exs.length,rec,data,carga:s.carga||null};
 }
 const carregarImg=src=>new Promise((ok,erro)=>{ const i=new Image(); i.onload=()=>ok(i); i.onerror=erro; i.src=src; });
 async function desenharInfoFoto(info,W,H){
@@ -2613,11 +2613,12 @@ async function desenharInfoFoto(info,W,H){
   const X=64, L=W-128; g.textBaseline="alphabetic";
   const dataTxt=new Date(info.data+"T12:00:00").toLocaleDateString("pt-BR",{day:"numeric",month:"long",year:"numeric"});
   const cols=[]; if(info.dur) cols.push([String(Math.round(info.dur)),"min","DURAÇÃO"]);
-  if(info.pse!=null) cols.push([String(info.pse),"/10","ESFORÇO (PSE)"]);
+  const ci=info.pse!=null&&info.dur?info.pse*info.dur:info.carga;
+  if(ci) cols.push([Math.round(ci).toLocaleString("pt-BR"),"UA","CARGA INTERNA"]);
   if(info.vol>0) cols.push([Math.round(info.vol).toLocaleString("pt-BR"),"kg","VOLUME"]);
   let y=H-(cols.length?380:150);
-  const sub=[info.nEx?info.nEx+(info.nEx===1?" exercício":" exercícios"):"",info.series?info.series+(info.series===1?" série":" séries"):"",info.pse!=null&&typeof fraseTreinoPSE==="function"?fraseTreinoPSE(info.pse):""].filter(Boolean).join("  ·  ");
-  if(sub){ g.fillStyle="rgba(255,255,255,.85)"; caber(sub,500,38,fB,L); g.fillText(sub,X,y); y-=78; }
+  y+=40; const sub=[info.nEx?info.nEx+(info.nEx===1?" exercício":" exercícios"):"",info.series?info.series+(info.series===1?" série":" séries"):"",info.pse!=null&&typeof fraseTreinoPSE==="function"?fraseTreinoPSE(info.pse):""].filter(Boolean).join("  ·  ");
+
   g.fillStyle="rgba(255,255,255,.75)"; g.font=`500 40px ${fB}`; g.fillText(dataTxt,X,y); y-=62;
   g.fillStyle="#fff"; caber("Treino concluído",800,96,fD,L); g.fillText("Treino concluído",X,y); y-=104;
   g.fillStyle=brand; esp("6px"); g.font=`700 36px ${fB}`; g.fillText(`TREINO ${String(info.t).toUpperCase()}  ·  SEMANA ${info.w}`,X,y); esp("0px");
