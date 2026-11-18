@@ -2509,7 +2509,7 @@ renderAll=function(){ _renderAll24(); marcarLinhasDet();
 
 // ---------- v25: atualização automática ----------
 // Ao abrir (ou voltar para) o app, confere se há versão nova publicada e recarrega sozinho.
-const APP_VER="20261118135659";
+const APP_VER="20261118140149";
 let VER_CHECADO=0;
 async function checarVersao(){
   if(!/^\d+$/.test(APP_VER)||Date.now()-VER_CHECADO<60000) return; VER_CHECADO=Date.now();
@@ -2597,46 +2597,72 @@ function infoFotoTreino(t,w,min){
   return {t,w,dur,pse,vol,series,nEx:exs.length,rec,data,carga:s.carga||null};
 }
 const carregarImg=src=>new Promise((ok,erro)=>{ const i=new Image(); i.onload=()=>ok(i); i.onerror=erro; i.src=src; });
-async function desenharInfoFoto(info,W,H){
+// layout da foto: 1 = faixa embaixo, 2 = cartão, 3 = centralizado
+const FOTO_LAYOUT=1;
+async function desenharInfoFoto(info,W,H,lay){
+  lay=lay||FOTO_LAYOUT;
   const c=document.createElement("canvas"); c.width=W; c.height=H; const g=c.getContext("2d");
   const cs=getComputedStyle(document.documentElement), v=(k,d)=>(cs.getPropertyValue(k)||"").trim()||d;
   const brand=v("--brand","#A9CF6E"), fD=v("--f-display","sans-serif"), fB=v("--f-body","sans-serif");
   try{ await document.fonts.ready; }catch(e){}
   const esp=px=>{ if("letterSpacing" in g) g.letterSpacing=px; };
   const caber=(txt,peso,tam,fam,max)=>{ let t=tam; do{ g.font=`${peso} ${t}px ${fam}`; t-=2; }while(g.measureText(txt).width>max&&t>16); };
-  // faixa de cima com a logo
-  let gr=g.createLinearGradient(0,0,0,320); gr.addColorStop(0,"rgba(0,0,0,.6)"); gr.addColorStop(1,"rgba(0,0,0,0)"); g.fillStyle=gr; g.fillRect(0,0,W,320);
-  try{ const logo=await carregarImg($(".mark img").src); const lh=92, lw=logo.naturalWidth*lh/logo.naturalHeight; g.drawImage(logo,64,70,lw,lh);
-    g.fillStyle="#fff"; g.textBaseline="middle"; esp("2px"); g.font=`800 54px ${fD}`; g.fillText("EB MUSCLE",64+lw+24,70+lh/2+2); esp("0px"); }catch(e){}
-  // faixa de baixo com o resumo
-  gr=g.createLinearGradient(0,H*.5,0,H); gr.addColorStop(0,"rgba(0,0,0,0)"); gr.addColorStop(.42,"rgba(0,0,0,.62)"); gr.addColorStop(1,"rgba(0,0,0,.88)"); g.fillStyle=gr; g.fillRect(0,H*.5,W,H*.5);
-  const X=64, L=W-128; g.textBaseline="alphabetic";
+  let logo=null; try{ logo=await carregarImg($(".mark img").src); }catch(e){}
   const dataTxt=new Date(info.data+"T12:00:00").toLocaleDateString("pt-BR",{day:"numeric",month:"long",year:"numeric"});
+  const dataCurta=new Date(info.data+"T12:00:00").toLocaleDateString("pt-BR");
   const cols=[]; if(info.dur) cols.push([String(Math.round(info.dur)),"min","DURAÇÃO"]);
-  const ci=info.pse!=null&&info.dur?info.pse*info.dur:info.carga;
-  if(ci) cols.push([Math.round(ci).toLocaleString("pt-BR"),"UA","CARGA INTERNA"]);
   if(info.vol>0) cols.push([Math.round(info.vol).toLocaleString("pt-BR"),"kg","VOLUME"]);
-  let y=H-(cols.length?380:150);
-  y+=40; const sub=[info.nEx?info.nEx+(info.nEx===1?" exercício":" exercícios"):"",info.series?info.series+(info.series===1?" série":" séries"):"",info.pse!=null&&typeof fraseTreinoPSE==="function"?fraseTreinoPSE(info.pse):""].filter(Boolean).join("  ·  ");
+  const recTxt=info.rec?(info.rec===1?"1 RECORDE DE CARGA HOJE":info.rec+" RECORDES DE CARGA HOJE"):"";
+  const kick=`TREINO ${String(info.t).toUpperCase()}  ·  SEMANA ${info.w}`;
+  const grad=(y0,y1,a0,a1)=>{ const gr=g.createLinearGradient(0,y0,0,y1); gr.addColorStop(0,`rgba(0,0,0,${a0})`); gr.addColorStop(1,`rgba(0,0,0,${a1})`); g.fillStyle=gr; g.fillRect(0,Math.min(y0,y1),W,Math.abs(y1-y0)); };
+  const pilula=(txt,x,y,centro)=>{ esp("3px"); g.font=`800 32px ${fB}`; const tw=g.measureText(txt).width, bw=tw+56, bx=centro?x-bw/2:x;
+    g.fillStyle=brand; g.beginPath(); if(g.roundRect) g.roundRect(bx,y-44,bw,62,31); else g.rect(bx,y-44,bw,62); g.fill();
+    g.fillStyle="#1d2b2e"; g.textAlign="left"; g.fillText(txt,bx+28,y); esp("0px"); };
+  // números: valor grande + unidade pequena + rótulo
+  const numero=(val,un,rot,x,y,tam,centro)=>{
+    g.font=`800 ${tam}px ${fD}`; const vw=g.measureText(val).width; g.font=`600 ${Math.round(tam*.42)}px ${fB}`; const uw=g.measureText(" "+un).width;
+    const x0=centro?x-(vw+uw)/2:x;
+    g.textAlign="left"; g.fillStyle="#fff"; g.font=`800 ${tam}px ${fD}`; g.fillText(val,x0,y);
+    g.fillStyle="rgba(255,255,255,.8)"; g.font=`600 ${Math.round(tam*.42)}px ${fB}`; g.fillText(" "+un,x0+vw,y);
+    g.fillStyle="rgba(255,255,255,.7)"; esp("3px"); g.font=`600 27px ${fB}`; const rw=g.measureText(rot).width; g.fillText(rot,centro?x-rw/2:x,y+54); esp("0px"); };
+  g.textBaseline="alphabetic"; g.textAlign="left";
 
-  g.fillStyle="rgba(255,255,255,.75)"; g.font=`500 40px ${fB}`; g.fillText(dataTxt,X,y); y-=62;
-  g.fillStyle="#fff"; caber("Treino concluído",800,96,fD,L); g.fillText("Treino concluído",X,y); y-=104;
-  g.fillStyle=brand; esp("6px"); g.font=`700 36px ${fB}`; g.fillText(`TREINO ${String(info.t).toUpperCase()}  ·  SEMANA ${info.w}`,X,y); esp("0px");
-  if(info.rec){ y-=100; const txt=info.rec===1?"1 RECORDE DE CARGA HOJE":info.rec+" RECORDES DE CARGA HOJE"; esp("3px"); g.font=`800 32px ${fB}`;
-    const tw=g.measureText(txt).width; g.fillStyle=brand; const r=30; g.beginPath(); if(g.roundRect) g.roundRect(X,y-44,tw+56,62,r); else g.rect(X,y-44,tw+56,62); g.fill();
-    g.fillStyle="#1d2b2e"; g.fillText(txt,X+28,y); esp("0px"); }
-  if(cols.length){
-    const top=H-290, cw=L/cols.length;
-    g.fillStyle="rgba(255,255,255,.28)"; g.fillRect(X,top,L,2);
-    cols.forEach(([val,un,rot],i)=>{ const cx=X+i*cw;
-      if(i) { g.fillStyle="rgba(255,255,255,.22)"; g.fillRect(cx,top+44,2,150); }
-      const px=cx+(i?36:0), max=cw-(i?52:16);
-      g.fillStyle="#fff"; let tam=86; g.font=`800 ${tam}px ${fD}`; const unW=()=>{ const f=g.font; g.font=`600 ${Math.round(tam*.42)}px ${fB}`; const w_=g.measureText(" "+un).width; g.font=f; return w_; };
-      while(g.measureText(val).width+unW()>max&&tam>40){ tam-=4; g.font=`800 ${tam}px ${fD}`; }
-      g.fillText(val,px,top+138); const vw_=g.measureText(val).width;
-      g.font=`600 ${Math.round(tam*.42)}px ${fB}`; g.fillStyle="rgba(255,255,255,.8)"; g.fillText(" "+un,px+vw_,top+138);
-      g.fillStyle="rgba(255,255,255,.7)"; esp("3px"); g.font=`600 27px ${fB}`; g.fillText(rot,px,top+192); esp("0px");
-    });
+  if(lay===2){ // cartão
+    const M=56, CW=W-2*M, CH=(cols.length?600:420), CY=H-M-CH-40;
+    grad(H*.55,H,0,.35);
+    g.fillStyle="rgba(22,32,35,.78)"; g.beginPath(); if(g.roundRect) g.roundRect(M,CY,CW,CH,40); else g.rect(M,CY,CW,CH); g.fill();
+    g.fillStyle=brand; g.fillRect(M,CY+40,8,CH-80);
+    const X=M+64, R=M+CW-56;
+    if(logo){ const lh=64, lw=logo.naturalWidth*lh/logo.naturalHeight; g.drawImage(logo,X,CY+52,lw,lh); g.fillStyle="#fff"; esp("2px"); g.font=`800 38px ${fD}`; g.textBaseline="middle"; g.fillText("EB MUSCLE",X+lw+18,CY+52+lh/2+2); esp("0px"); g.textBaseline="alphabetic"; }
+    g.fillStyle="rgba(255,255,255,.7)"; g.font=`500 34px ${fB}`; g.textAlign="right"; g.fillText(dataCurta,R,CY+96); g.textAlign="left";
+    g.fillStyle="rgba(255,255,255,.18)"; g.fillRect(X,CY+150,R-X,2);
+    g.fillStyle=brand; esp("5px"); g.font=`700 32px ${fB}`; g.fillText(kick,X,CY+222); esp("0px");
+    g.fillStyle="#fff"; caber("Treino concluído",800,84,fD,R-X); g.fillText("Treino concluído",X,CY+312);
+    if(cols.length){ const cw=(R-X)/cols.length; cols.forEach(([a,b,r],i)=>{ if(i){ g.fillStyle="rgba(255,255,255,.2)"; g.fillRect(X+i*cw-24,CY+380,2,140); } numero(a,b,r,X+i*cw,CY+470,84,false); }); }
+    if(recTxt) pilula(recTxt,W/2,CY-40,true);
+  }else if(lay===3){ // centralizado
+    grad(0,380,.55,0); grad(H*.45,H,0,.85);
+    if(logo){ const lh=110, lw=logo.naturalWidth*lh/logo.naturalHeight; g.drawImage(logo,(W-lw)/2,90,lw,lh); }
+    g.textAlign="center";
+    let y=H-120;
+    g.textAlign="left"; g.fillStyle="rgba(255,255,255,.65)"; esp("8px"); g.font=`800 30px ${fD}`; { const tw=g.measureText("EB MUSCLE").width-8; g.fillText("EB MUSCLE",(W-tw)/2,y); } esp("0px"); g.textAlign="center"; y-=90;
+    g.fillStyle="rgba(255,255,255,.8)"; g.font=`500 36px ${fB}`; g.fillText(`Treino ${info.t}  ·  Semana ${info.w}  ·  ${dataCurta}`,W/2,y); y-=70;
+    g.fillStyle="rgba(255,255,255,.25)"; g.fillRect(W/2-180,y,360,2); y-=90;
+    if(cols.length){ if(cols.length===1) numero(...cols[0],W/2,y-40,130,true); else { numero(...cols[0],W*.29,y-40,120,true); numero(...cols[1],W*.71,y-40,120,true); g.fillStyle="rgba(255,255,255,.22)"; g.fillRect(W/2-1,y-170,2,190); } y-=250; }
+    g.textAlign="left"; g.fillStyle=brand; esp("10px"); g.font=`800 44px ${fD}`; { const tw=g.measureText("TREINO CONCLUÍDO").width-10; g.fillText("TREINO CONCLUÍDO",(W-tw)/2,y); } esp("0px"); g.textAlign="center";
+    if(recTxt) pilula(recTxt,W/2,y-100,true);
+    g.textAlign="left";
+  }else{ // 1: faixa embaixo
+    grad(0,320,.6,0); grad(H*.5,H,0,.88);
+    if(logo){ const lh=92, lw=logo.naturalWidth*lh/logo.naturalHeight; g.drawImage(logo,64,70,lw,lh); g.fillStyle="#fff"; g.textBaseline="middle"; esp("2px"); g.font=`800 54px ${fD}`; g.fillText("EB MUSCLE",64+lw+24,70+lh/2+2); esp("0px"); g.textBaseline="alphabetic"; }
+    const X=64, L=W-128;
+    let y=H-(cols.length?340:150);
+    g.fillStyle="rgba(255,255,255,.75)"; g.font=`500 40px ${fB}`; g.fillText(dataTxt,X,y); y-=62;
+    g.fillStyle="#fff"; caber("Treino concluído",800,96,fD,L); g.fillText("Treino concluído",X,y); y-=104;
+    g.fillStyle=brand; esp("6px"); g.font=`700 36px ${fB}`; g.fillText(kick,X,y); esp("0px");
+    if(recTxt) pilula(recTxt,X,y-100,false);
+    if(cols.length){ const top=H-290, cw=L/cols.length; g.fillStyle="rgba(255,255,255,.28)"; g.fillRect(X,top,L,2);
+      cols.forEach(([a,b,r],i)=>{ if(i){ g.fillStyle="rgba(255,255,255,.22)"; g.fillRect(X+i*cw,top+44,2,150); } numero(a,b,r,X+i*cw+(i?40:0),top+138,92,false); }); }
   }
   return c;
 }
