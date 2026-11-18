@@ -2509,7 +2509,7 @@ renderAll=function(){ _renderAll24(); marcarLinhasDet();
 
 // ---------- v25: atualização automática ----------
 // Ao abrir (ou voltar para) o app, confere se há versão nova publicada e recarrega sozinho.
-const APP_VER="20261118140149";
+const APP_VER="20261118140950";
 let VER_CHECADO=0;
 async function checarVersao(){
   if(!/^\d+$/.test(APP_VER)||Date.now()-VER_CHECADO<60000) return; VER_CHECADO=Date.now();
@@ -2598,7 +2598,7 @@ function infoFotoTreino(t,w,min){
 }
 const carregarImg=src=>new Promise((ok,erro)=>{ const i=new Image(); i.onload=()=>ok(i); i.onerror=erro; i.src=src; });
 // layout da foto: 1 = faixa embaixo, 2 = cartão, 3 = centralizado
-const FOTO_LAYOUT=1;
+const FOTO_LAYOUT=3;
 async function desenharInfoFoto(info,W,H,lay){
   lay=lay||FOTO_LAYOUT;
   const c=document.createElement("canvas"); c.width=W; c.height=H; const g=c.getContext("2d");
