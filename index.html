@@ -575,6 +575,24 @@ table.series .pc-txt{display:none}
 .frase-ult li b{font-weight:600}
 .frase-ult li b::first-letter{text-transform:uppercase}
 .frase-ult li span{font-family:var(--f-mono);font-size:13px;color:var(--muted);white-space:nowrap}
+/* ---- v33: câmera da foto do treino ---- */
+.cam-ov{position:fixed;inset:0;z-index:2000;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:env(safe-area-inset-top) 0 calc(10px + env(safe-area-inset-bottom))}
+.cam-palco{position:relative;width:min(100vw,calc((100dvh - 120px) * 9 / 16));aspect-ratio:9/16;overflow:hidden;background:#111;border-radius:14px}
+.cam-palco video,.cam-palco .cam-res,.cam-palco .cam-camada{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cam-palco video.espelho{transform:scaleX(-1)}
+.cam-palco [hidden]{display:none}
+.cam-aviso{position:absolute;left:20px;right:20px;top:38%;margin:0;color:#fff;font-size:15px;line-height:1.45;text-align:center;background:rgba(0,0,0,.55);padding:14px;border-radius:12px}
+.cam-barra{display:flex;align-items:center;justify-content:space-between;gap:12px;width:min(100vw,440px);padding:0 22px;box-sizing:border-box}
+.cam-barra[hidden]{display:none}
+.cam-barra[data-modo="res"],.cam-barra[data-modo="arq"]{justify-content:center}
+.cam-barra .btn{min-height:46px}
+.cam-barra .btn:not(.ghost){background:var(--brand);border-color:var(--brand);color:#1d2b2e}
+.cam-barra .btn.ghost{color:#fff;border-color:rgba(255,255,255,.4);background:transparent}
+.cam-bt{all:unset;cursor:pointer;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;font-size:20px}
+.cam-disparo{all:unset;cursor:pointer;width:72px;height:72px;border-radius:50%;background:#fff;box-shadow:0 0 0 5px #000,0 0 0 9px #fff}
+.cam-disparo:active{transform:scale(.94)}
+.cam-bt:focus-visible,.cam-disparo:focus-visible{outline:3px solid var(--brand);outline-offset:4px}
+.cam-escolher{cursor:pointer}
 /* ---- v31: método em destaque acima das séries ---- */
 .ex .met-box{border:1px solid color-mix(in srgb,var(--brand) 55%,var(--line));border-left:4px solid var(--brand);background:color-mix(in srgb,var(--brand) 10%,var(--surface));border-radius:12px;padding:11px 14px;display:grid;gap:6px}
 .ex .met-box p{margin:0;font-size:14px;line-height:1.45;color:var(--ink-2)}
@@ -1895,7 +1913,7 @@ function abrirFimTreino(t,w,min,passo){
       const v=b.dataset.v;
       if($("#s-pse")&&CRON_FORM_E(t,w)) marcarBot("s-pse",v);
       agendarAuto("s|"+t+"|"+w,200,{acao:"salvarSessao",token:TOKEN,nome:ALUNO,treino:t,semana:w,sessao:sessaoComo(t,w,{pse:v})},{msg:()=>$("#s-msg")});
-      passoObs(v);
+      PSE_FIM=+v; passoObs(v);
     }));
     $("#fim-depois").addEventListener("click",fechar);
     const tit=$("#fim-tit"); tit.setAttribute("tabindex","-1"); tit.focus({preventScroll:true});
@@ -1911,10 +1929,20 @@ function abrirFimTreino(t,w,min,passo){
       const texto=$("#fim-obs").value.trim(); if(!texto){ $("#fim-obs").focus(); return; }
       const s=sessaoDe(t,w)||{};
       agendarAuto("o|"+t+"|"+w,0,{acao:"salvarObsTreino",token:TOKEN,nome:ALUNO,treino:t,semana:w,data:s.data||new Date().toLocaleDateString("sv-SE"),texto},{msg:()=>$("#obs-msg")});
-      fechar();
+      passoFoto();
     });
-    $("#fim-nao").addEventListener("click",fechar);
+    $("#fim-nao").addEventListener("click",passoFoto);
     $("#fim-obs").focus();
+  };
+  let PSE_FIM=null;
+  const passoFoto=()=>{
+    corpo.innerHTML=`<p class="fim-ok">✓ Tudo salvo</p>
+      <h2 id="fim-tit" tabindex="-1">Quer tirar uma foto para registrar o treino de hoje?</h2>
+      <p class="fim-sub">A câmera abre com o resumo do treino e a logo da EB Muscle. A foto fica só no seu celular, para você guardar ou postar.</p>
+      <div class="fim-acoes"><button type="button" class="btn" id="fim-foto">Abrir câmera</button><button type="button" class="btn ghost" id="fim-semfoto">Agora não</button></div>`;
+    $("#fim-foto").addEventListener("click",()=>{ fechar(); abrirCameraTreino(t,w,min,PSE_FIM); });
+    $("#fim-semfoto").addEventListener("click",fechar);
+    $("#fim-tit").focus({preventScroll:true});
   };
   if(passo==="obs") passoObs((sessaoDe(t,w)||{}).pse); else passoPSE();
 }
@@ -2481,7 +2509,7 @@ renderAll=function(){ _renderAll24(); marcarLinhasDet();
 
 // ---------- v25: atualização automática ----------
 // Ao abrir (ou voltar para) o app, confere se há versão nova publicada e recarrega sozinho.
-const APP_VER="20261117161936";
+const APP_VER="20261118134935";
 let VER_CHECADO=0;
 async function checarVersao(){
   if(!/^\d+$/.test(APP_VER)||Date.now()-VER_CHECADO<60000) return; VER_CHECADO=Date.now();
@@ -2556,6 +2584,111 @@ function ehPC(e){
   return ks.length>0&&ks.every(k=>k<=1);
 }
 function marcarPC(e,on){ try{ guardar.set(pcChave(e),on?"1":"0"); }catch(x){} }
+
+// ---------- v33: foto do treino (câmera com o resumo do treino e a logo) ----------
+function infoFotoTreino(t,w,min){
+  const s=sessaoDe(t,w)||{};
+  const exs=(EXT.ex||[]).filter(e=>e.t===t&&e.sets&&e.sets[w]&&e.sets[w].length);
+  const series=exs.reduce((n,e)=>n+e.sets[w].length,0);
+  const vol=exs.reduce((n,e)=>n+(ehPC(e)?0:vlSets(e.sets[w])),0);
+  const rec=exs.filter(e=>{ try{ return recordeNaSemana(e,w); }catch(x){ return false; } }).length;
+  const dur=min||s.dur||null, pse=s.pse!=null?s.pse:null;
+  const data=s.data||(typeof dataDe==="function"&&dataDe(t,w))||new Date().toLocaleDateString("sv-SE");
+  return {t,w,dur,pse,vol,series,nEx:exs.length,rec,data};
+}
+const carregarImg=src=>new Promise((ok,erro)=>{ const i=new Image(); i.onload=()=>ok(i); i.onerror=erro; i.src=src; });
+async function desenharInfoFoto(info,W,H){
+  const c=document.createElement("canvas"); c.width=W; c.height=H; const g=c.getContext("2d");
+  const cs=getComputedStyle(document.documentElement), v=(k,d)=>(cs.getPropertyValue(k)||"").trim()||d;
+  const brand=v("--brand","#A9CF6E"), fD=v("--f-display","sans-serif"), fB=v("--f-body","sans-serif");
+  try{ await document.fonts.ready; }catch(e){}
+  const esp=px=>{ if("letterSpacing" in g) g.letterSpacing=px; };
+  const caber=(txt,peso,tam,fam,max)=>{ let t=tam; do{ g.font=`${peso} ${t}px ${fam}`; t-=2; }while(g.measureText(txt).width>max&&t>16); };
+  // faixa de cima com a logo
+  let gr=g.createLinearGradient(0,0,0,320); gr.addColorStop(0,"rgba(0,0,0,.6)"); gr.addColorStop(1,"rgba(0,0,0,0)"); g.fillStyle=gr; g.fillRect(0,0,W,320);
+  try{ const logo=await carregarImg($(".mark img").src); const lh=92, lw=logo.naturalWidth*lh/logo.naturalHeight; g.drawImage(logo,64,70,lw,lh);
+    g.fillStyle="#fff"; g.textBaseline="middle"; esp("2px"); g.font=`800 54px ${fD}`; g.fillText("EB MUSCLE",64+lw+24,70+lh/2+2); esp("0px"); }catch(e){}
+  // faixa de baixo com o resumo
+  gr=g.createLinearGradient(0,H*.5,0,H); gr.addColorStop(0,"rgba(0,0,0,0)"); gr.addColorStop(.42,"rgba(0,0,0,.62)"); gr.addColorStop(1,"rgba(0,0,0,.88)"); g.fillStyle=gr; g.fillRect(0,H*.5,W,H*.5);
+  const X=64, L=W-128; g.textBaseline="alphabetic";
+  const dataTxt=new Date(info.data+"T12:00:00").toLocaleDateString("pt-BR",{day:"numeric",month:"long",year:"numeric"});
+  const cols=[]; if(info.dur) cols.push([String(Math.round(info.dur)),"min","DURAÇÃO"]);
+  if(info.pse!=null) cols.push([String(info.pse),"/10","ESFORÇO (PSE)"]);
+  if(info.vol>0) cols.push([Math.round(info.vol).toLocaleString("pt-BR"),"kg","VOLUME"]);
+  let y=H-(cols.length?380:150);
+  const sub=[info.nEx?info.nEx+(info.nEx===1?" exercício":" exercícios"):"",info.series?info.series+(info.series===1?" série":" séries"):"",info.pse!=null&&typeof fraseTreinoPSE==="function"?fraseTreinoPSE(info.pse):""].filter(Boolean).join("  ·  ");
+  if(sub){ g.fillStyle="rgba(255,255,255,.85)"; caber(sub,500,38,fB,L); g.fillText(sub,X,y); y-=78; }
+  g.fillStyle="rgba(255,255,255,.75)"; g.font=`500 40px ${fB}`; g.fillText(dataTxt,X,y); y-=62;
+  g.fillStyle="#fff"; caber("Treino concluído",800,96,fD,L); g.fillText("Treino concluído",X,y); y-=104;
+  g.fillStyle=brand; esp("6px"); g.font=`700 36px ${fB}`; g.fillText(`TREINO ${String(info.t).toUpperCase()}  ·  SEMANA ${info.w}`,X,y); esp("0px");
+  if(info.rec){ y-=100; const txt=info.rec===1?"1 RECORDE DE CARGA HOJE":info.rec+" RECORDES DE CARGA HOJE"; esp("3px"); g.font=`800 32px ${fB}`;
+    const tw=g.measureText(txt).width; g.fillStyle=brand; const r=30; g.beginPath(); if(g.roundRect) g.roundRect(X,y-44,tw+56,62,r); else g.rect(X,y-44,tw+56,62); g.fill();
+    g.fillStyle="#1d2b2e"; g.fillText(txt,X+28,y); esp("0px"); }
+  if(cols.length){
+    const top=H-290, cw=L/cols.length;
+    g.fillStyle="rgba(255,255,255,.28)"; g.fillRect(X,top,L,2);
+    cols.forEach(([val,un,rot],i)=>{ const cx=X+i*cw;
+      if(i) { g.fillStyle="rgba(255,255,255,.22)"; g.fillRect(cx,top+44,2,150); }
+      const px=cx+(i?36:0), max=cw-(i?52:16);
+      g.fillStyle="#fff"; let tam=86; g.font=`800 ${tam}px ${fD}`; const unW=()=>{ const f=g.font; g.font=`600 ${Math.round(tam*.42)}px ${fB}`; const w_=g.measureText(" "+un).width; g.font=f; return w_; };
+      while(g.measureText(val).width+unW()>max&&tam>40){ tam-=4; g.font=`800 ${tam}px ${fD}`; }
+      g.fillText(val,px,top+138); const vw_=g.measureText(val).width;
+      g.font=`600 ${Math.round(tam*.42)}px ${fB}`; g.fillStyle="rgba(255,255,255,.8)"; g.fillText(" "+un,px+vw_,top+138);
+      g.fillStyle="rgba(255,255,255,.7)"; esp("3px"); g.font=`600 27px ${fB}`; g.fillText(rot,px,top+192); esp("0px");
+    });
+  }
+  return c;
+}
+async function abrirCameraTreino(t,w,min,pse){
+  const info=infoFotoTreino(t,w,min), W=1080, H=1920; if(pse!=null&&!isNaN(pse)) info.pse=pse;
+  const ov=document.createElement("div"); ov.className="cam-ov"; ov.setAttribute("role","dialog"); ov.setAttribute("aria-modal","true"); ov.setAttribute("aria-label","Foto do treino");
+  ov.innerHTML=`<div class="cam-palco"><video playsinline autoplay muted></video><img class="cam-res" alt="Foto do treino com o resumo" hidden><p class="cam-aviso" hidden></p></div>
+    <div class="cam-barra" data-modo="cam"><button type="button" class="cam-bt cam-x" aria-label="Fechar câmera">✕</button><button type="button" class="cam-disparo" aria-label="Tirar foto"></button><button type="button" class="cam-bt cam-virar" aria-label="Trocar câmera"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 9a8 8 0 0 1 14.3-3.3L20 8M20 15a8 8 0 0 1-14.3 3.3L4 16M20 3v5h-5M4 21v-5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+    <div class="cam-barra" data-modo="res" hidden><button type="button" class="btn ghost cam-outra">Tirar outra</button><button type="button" class="btn cam-salvar">Salvar ou compartilhar</button></div>
+    <div class="cam-barra" data-modo="arq" hidden><button type="button" class="btn ghost cam-x2">Fechar</button><label class="btn cam-escolher">Tirar ou escolher foto<input type="file" accept="image/*" capture="user" hidden></label></div>`;
+  document.body.appendChild(ov); document.body.classList.add("com-modal");
+  const palco=ov.querySelector(".cam-palco"), video=ov.querySelector("video"), res=ov.querySelector(".cam-res"), aviso=ov.querySelector(".cam-aviso");
+  const camada=await desenharInfoFoto(info,W,H); camada.className="cam-camada"; palco.insertBefore(camada,res);
+  let stream=null, frente=true, blob=null, urlRes=null;
+  const modo=m=>{ ov.querySelectorAll(".cam-barra").forEach(b=>b.hidden=b.dataset.modo!==m); };
+  const parar=()=>{ if(stream){ stream.getTracks().forEach(x=>x.stop()); stream=null; } };
+  const fechar=()=>{ parar(); if(urlRes) URL.revokeObjectURL(urlRes); ov.remove(); document.body.classList.remove("com-modal"); document.removeEventListener("keydown",tecla); };
+  const tecla=ev=>{ if(ev.key==="Escape") fechar(); }; document.addEventListener("keydown",tecla);
+  const semCamera=msg=>{ parar(); video.hidden=true; aviso.hidden=false; aviso.textContent=msg; modo("arq"); };
+  const ligar=async()=>{
+    parar();
+    if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)) return semCamera("Não consegui abrir a câmera aqui dentro. Toque no botão abaixo para tirar ou escolher a foto.");
+    try{
+      stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:frente?"user":"environment",width:{ideal:1920},height:{ideal:1920}}});
+      video.srcObject=stream; video.classList.toggle("espelho",frente); video.hidden=false; aviso.hidden=true; await video.play().catch(()=>{}); modo("cam");
+    }catch(e){ semCamera(e&&e.name==="NotAllowedError"?"A câmera não foi liberada. Você pode liberar nas configurações do navegador ou tirar a foto pelo botão abaixo.":"Não consegui abrir a câmera. Toque no botão abaixo para tirar ou escolher a foto."); }
+  };
+  const compor=(fonte,fw,fh,espelhar)=>{
+    const c=document.createElement("canvas"); c.width=W; c.height=H; const g=c.getContext("2d");
+    const k=Math.max(W/fw,H/fh), dw=fw*k, dh=fh*k;
+    g.save(); if(espelhar){ g.translate(W,0); g.scale(-1,1); } g.drawImage(fonte,(W-dw)/2,(H-dh)/2,dw,dh); g.restore();
+    g.drawImage(camada,0,0);
+    return new Promise(ok=>c.toBlob(b=>ok(b),"image/jpeg",.92));
+  };
+  const mostrar=async b=>{ blob=b; if(urlRes) URL.revokeObjectURL(urlRes); urlRes=URL.createObjectURL(b); res.src=urlRes; res.hidden=false; video.hidden=true; camada.hidden=true; aviso.hidden=true; modo("res"); ov.querySelector(".cam-salvar").focus(); };
+  ov.querySelector(".cam-disparo").addEventListener("click",async()=>{ if(!video.videoWidth) return; const b=await compor(video,video.videoWidth,video.videoHeight,frente); parar(); mostrar(b); });
+  ov.querySelector(".cam-virar").addEventListener("click",()=>{ frente=!frente; ligar(); });
+  ov.querySelector(".cam-x").addEventListener("click",fechar);
+  ov.querySelector(".cam-x2").addEventListener("click",fechar);
+  ov.querySelector(".cam-outra").addEventListener("click",()=>{ res.hidden=true; camada.hidden=false; if(video.hidden&&!stream&&!aviso.hidden) modo("arq"); ligar(); });
+  ov.querySelector('input[type="file"]').addEventListener("change",async ev=>{
+    const f=ev.target.files&&ev.target.files[0]; ev.target.value=""; if(!f) return;
+    const u=URL.createObjectURL(f); try{ const im=await carregarImg(u); mostrar(await compor(im,im.naturalWidth,im.naturalHeight,false)); }catch(e){ aviso.hidden=false; aviso.textContent="Não consegui abrir essa foto. Tente outra."; } finally{ URL.revokeObjectURL(u); }
+  });
+  ov.querySelector(".cam-salvar").addEventListener("click",async()=>{
+    if(!blob) return;
+    const nome=`treino-${String(info.t).toLowerCase()}-semana-${info.w}-${info.data}.jpg`, arq=new File([blob],nome,{type:"image/jpeg"});
+    try{ if(navigator.canShare&&navigator.canShare({files:[arq]})){ await navigator.share({files:[arq],title:"Treino concluído"}); return; } }catch(e){ if(e&&e.name==="AbortError") return; }
+    const a=document.createElement("a"); a.href=urlRes; a.download=nome; document.body.appendChild(a); a.click(); a.remove();
+  });
+  ov.querySelector(".cam-disparo").focus();
+  ligar();
+}
 
 // ---------- abas reorganizadas: Resumo e Esforço e recuperação ----------
 document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>{
