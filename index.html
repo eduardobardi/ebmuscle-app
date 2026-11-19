@@ -584,7 +584,10 @@ table.series .pc-txt{display:none}
 .cam-aviso{position:absolute;left:20px;right:20px;top:38%;margin:0;color:#fff;font-size:15px;line-height:1.45;text-align:center;background:rgba(0,0,0,.55);padding:14px;border-radius:12px}
 .cam-barra{display:flex;align-items:center;justify-content:space-between;gap:12px;width:min(100vw,440px);padding:0 22px;box-sizing:border-box}
 .cam-barra[hidden]{display:none}
-.cam-barra[data-modo="res"],.cam-barra[data-modo="arq"]{justify-content:center}
+.cam-barra[data-modo="arq"]{justify-content:center}
+.cam-barra[data-modo="res"]{justify-content:space-between;gap:10px;padding:0 14px}
+.cam-barra[data-modo="res"] .btn{padding-left:16px;padding-right:16px}
+.cam-barra .cam-bt{flex:none}
 .cam-barra .btn{min-height:46px}
 .cam-barra .btn:not(.ghost){background:var(--brand);border-color:var(--brand);color:#1d2b2e}
 .cam-barra .btn.ghost{color:#fff;border-color:rgba(255,255,255,.4);background:transparent}
@@ -2509,7 +2512,7 @@ renderAll=function(){ _renderAll24(); marcarLinhasDet();
 
 // ---------- v25: atualização automática ----------
 // Ao abrir (ou voltar para) o app, confere se há versão nova publicada e recarrega sozinho.
-const APP_VER="20261118140950";
+const APP_VER="20261119075335";
 let VER_CHECADO=0;
 async function checarVersao(){
   if(!/^\d+$/.test(APP_VER)||Date.now()-VER_CHECADO<60000) return; VER_CHECADO=Date.now();
@@ -2671,7 +2674,7 @@ async function abrirCameraTreino(t,w,min,pse){
   const ov=document.createElement("div"); ov.className="cam-ov"; ov.setAttribute("role","dialog"); ov.setAttribute("aria-modal","true"); ov.setAttribute("aria-label","Foto do treino");
   ov.innerHTML=`<div class="cam-palco"><video playsinline autoplay muted></video><img class="cam-res" alt="Foto do treino com o resumo" hidden><p class="cam-aviso" hidden></p></div>
     <div class="cam-barra" data-modo="cam"><button type="button" class="cam-bt cam-x" aria-label="Fechar câmera">✕</button><button type="button" class="cam-disparo" aria-label="Tirar foto"></button><button type="button" class="cam-bt cam-virar" aria-label="Trocar câmera"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 9a8 8 0 0 1 14.3-3.3L20 8M20 15a8 8 0 0 1-14.3 3.3L4 16M20 3v5h-5M4 21v-5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-    <div class="cam-barra" data-modo="res" hidden><button type="button" class="btn ghost cam-outra">Tirar outra</button><button type="button" class="btn cam-salvar">Salvar ou compartilhar</button></div>
+    <div class="cam-barra" data-modo="res" hidden><button type="button" class="cam-bt cam-x3" aria-label="Fechar e voltar ao app">✕</button><button type="button" class="btn ghost cam-outra">Tirar outra</button><button type="button" class="btn cam-salvar">Salvar ou compartilhar</button></div>
     <div class="cam-barra" data-modo="arq" hidden><button type="button" class="btn ghost cam-x2">Fechar</button><label class="btn cam-escolher">Tirar ou escolher foto<input type="file" accept="image/*" capture="user" hidden></label></div>`;
   document.body.appendChild(ov); document.body.classList.add("com-modal");
   const palco=ov.querySelector(".cam-palco"), video=ov.querySelector("video"), res=ov.querySelector(".cam-res"), aviso=ov.querySelector(".cam-aviso");
@@ -2702,6 +2705,7 @@ async function abrirCameraTreino(t,w,min,pse){
   ov.querySelector(".cam-virar").addEventListener("click",()=>{ frente=!frente; ligar(); });
   ov.querySelector(".cam-x").addEventListener("click",fechar);
   ov.querySelector(".cam-x2").addEventListener("click",fechar);
+  ov.querySelector(".cam-x3").addEventListener("click",fechar);
   ov.querySelector(".cam-outra").addEventListener("click",()=>{ res.hidden=true; camada.hidden=false; if(video.hidden&&!stream&&!aviso.hidden) modo("arq"); ligar(); });
   ov.querySelector('input[type="file"]').addEventListener("change",async ev=>{
     const f=ev.target.files&&ev.target.files[0]; ev.target.value=""; if(!f) return;
