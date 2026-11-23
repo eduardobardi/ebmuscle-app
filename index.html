@@ -577,7 +577,7 @@ table.series .pc-txt{display:none}
 .frase-ult li span{font-family:var(--f-mono);font-size:13px;color:var(--muted);white-space:nowrap}
 /* ---- v33: câmera da foto do treino ---- */
 .cam-ov{position:fixed;inset:0;z-index:2000;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:env(safe-area-inset-top) 0 calc(10px + env(safe-area-inset-bottom))}
-.cam-palco{position:relative;width:min(100vw,calc((100dvh - 120px) * 9 / 16));aspect-ratio:9/16;overflow:hidden;background:#111;border-radius:14px}
+.cam-palco{position:relative;width:min(100vw,calc((100dvh - 120px) * 3 / 4));aspect-ratio:3/4;overflow:hidden;background:#111;border-radius:14px}
 .cam-palco video,.cam-palco .cam-res,.cam-palco .cam-camada{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .cam-palco video.espelho{transform:scaleX(-1)}
 .cam-palco [hidden]{display:none}
@@ -592,6 +592,8 @@ table.series .pc-txt{display:none}
 .cam-barra .btn:not(.ghost){background:var(--brand);border-color:var(--brand);color:#1d2b2e}
 .cam-barra .btn.ghost{color:#fff;border-color:rgba(255,255,255,.4);background:transparent}
 .cam-bt{all:unset;cursor:pointer;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;font-size:20px}
+.cam-zoom{all:unset;cursor:pointer;position:absolute;top:14px;right:14px;z-index:2;min-width:44px;height:30px;padding:0 8px;box-sizing:border-box;border-radius:15px;background:rgba(255,255,255,.18);color:#fff;font-size:13px;font-weight:700;text-align:center;line-height:30px}
+.cam-zoom[hidden]{display:none}
 .cam-disparo{all:unset;cursor:pointer;width:72px;height:72px;border-radius:50%;background:#fff;box-shadow:0 0 0 5px #000,0 0 0 9px #fff}
 .cam-disparo:active{transform:scale(.94)}
 .cam-bt:focus-visible,.cam-disparo:focus-visible{outline:3px solid var(--brand);outline-offset:4px}
@@ -2512,7 +2514,7 @@ renderAll=function(){ _renderAll24(); marcarLinhasDet();
 
 // ---------- v25: atualização automática ----------
 // Ao abrir (ou voltar para) o app, confere se há versão nova publicada e recarrega sozinho.
-const APP_VER="20261119075335";
+const APP_VER="20261123110620";
 let VER_CHECADO=0;
 async function checarVersao(){
   if(!/^\d+$/.test(APP_VER)||Date.now()-VER_CHECADO<60000) return; VER_CHECADO=Date.now();
@@ -2670,16 +2672,19 @@ async function desenharInfoFoto(info,W,H,lay){
   return c;
 }
 async function abrirCameraTreino(t,w,min,pse){
-  const info=infoFotoTreino(t,w,min), W=1080, H=1920; if(pse!=null&&!isNaN(pse)) info.pse=pse;
+  const info=infoFotoTreino(t,w,min), W=1080, H=1440; if(pse!=null&&!isNaN(pse)) info.pse=pse;
   const ov=document.createElement("div"); ov.className="cam-ov"; ov.setAttribute("role","dialog"); ov.setAttribute("aria-modal","true"); ov.setAttribute("aria-label","Foto do treino");
-  ov.innerHTML=`<div class="cam-palco"><video playsinline autoplay muted></video><img class="cam-res" alt="Foto do treino com o resumo" hidden><p class="cam-aviso" hidden></p></div>
+  ov.innerHTML=`<div class="cam-palco"><video playsinline autoplay muted></video><img class="cam-res" alt="Foto do treino com o resumo" hidden><p class="cam-aviso" hidden></p><button type="button" class="cam-zoom" hidden aria-label="Trocar para lente grande angular">0,5x</button></div>
     <div class="cam-barra" data-modo="cam"><button type="button" class="cam-bt cam-x" aria-label="Fechar câmera">✕</button><button type="button" class="cam-disparo" aria-label="Tirar foto"></button><button type="button" class="cam-bt cam-virar" aria-label="Trocar câmera"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 9a8 8 0 0 1 14.3-3.3L20 8M20 15a8 8 0 0 1-14.3 3.3L4 16M20 3v5h-5M4 21v-5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
     <div class="cam-barra" data-modo="res" hidden><button type="button" class="cam-bt cam-x3" aria-label="Fechar e voltar ao app">✕</button><button type="button" class="btn ghost cam-outra">Tirar outra</button><button type="button" class="btn cam-salvar">Salvar ou compartilhar</button></div>
     <div class="cam-barra" data-modo="arq" hidden><button type="button" class="btn ghost cam-x2">Fechar</button><label class="btn cam-escolher">Tirar ou escolher foto<input type="file" accept="image/*" capture="user" hidden></label></div>`;
   document.body.appendChild(ov); document.body.classList.add("com-modal");
   const palco=ov.querySelector(".cam-palco"), video=ov.querySelector("video"), res=ov.querySelector(".cam-res"), aviso=ov.querySelector(".cam-aviso");
   const camada=await desenharInfoFoto(info,W,H); camada.className="cam-camada"; palco.insertBefore(camada,res);
-  let stream=null, frente=true, blob=null, urlRes=null;
+  let stream=null, frente=true, blob=null, urlRes=null, ultra=null, usarUltra=false;
+  const btZoom=ov.querySelector(".cam-zoom");
+  const acharUltra=async()=>{ try{ const ds=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==="videoinput");
+    ultra=ds.find(d=>/ultra|grande[- ]angular|0[.,]5/i.test(d.label||""))||null; }catch(e){ ultra=null; } };
   const modo=m=>{ ov.querySelectorAll(".cam-barra").forEach(b=>b.hidden=b.dataset.modo!==m); };
   const parar=()=>{ if(stream){ stream.getTracks().forEach(x=>x.stop()); stream=null; } };
   const fechar=()=>{ parar(); if(urlRes) URL.revokeObjectURL(urlRes); ov.remove(); document.body.classList.remove("com-modal"); document.removeEventListener("keydown",tecla); };
@@ -2689,7 +2694,12 @@ async function abrirCameraTreino(t,w,min,pse){
     parar();
     if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)) return semCamera("Não consegui abrir a câmera aqui dentro. Toque no botão abaixo para tirar ou escolher a foto.");
     try{
-      stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:frente?"user":"environment",width:{ideal:1920},height:{ideal:1920}}});
+      const vid=(!frente&&usarUltra&&ultra)?{deviceId:{exact:ultra.deviceId}}:{facingMode:frente?"user":"environment"};
+      stream=await navigator.mediaDevices.getUserMedia({audio:false,video:Object.assign(vid,{width:{ideal:1920},height:{ideal:1440}})});
+      // sem zoom: usa o menor zoom que a câmera aceitar (Android)
+      try{ const tr=stream.getVideoTracks()[0], cap=tr.getCapabilities&&tr.getCapabilities(); if(cap&&cap.zoom&&cap.zoom.min!=null) await tr.applyConstraints({advanced:[{zoom:cap.zoom.min}]}); }catch(e){}
+      if(ultra===null) await acharUltra();
+      btZoom.hidden=frente||!ultra; btZoom.textContent=usarUltra?"1x":"0,5x"; btZoom.setAttribute("aria-label",usarUltra?"Voltar para a lente normal":"Trocar para lente grande angular");
       video.srcObject=stream; video.classList.toggle("espelho",frente); video.hidden=false; aviso.hidden=true; await video.play().catch(()=>{}); modo("cam");
     }catch(e){ semCamera(e&&e.name==="NotAllowedError"?"A câmera não foi liberada. Você pode liberar nas configurações do navegador ou tirar a foto pelo botão abaixo.":"Não consegui abrir a câmera. Toque no botão abaixo para tirar ou escolher a foto."); }
   };
@@ -2703,6 +2713,7 @@ async function abrirCameraTreino(t,w,min,pse){
   const mostrar=async b=>{ blob=b; if(urlRes) URL.revokeObjectURL(urlRes); urlRes=URL.createObjectURL(b); res.src=urlRes; res.hidden=false; video.hidden=true; camada.hidden=true; aviso.hidden=true; modo("res"); ov.querySelector(".cam-salvar").focus(); };
   ov.querySelector(".cam-disparo").addEventListener("click",async()=>{ if(!video.videoWidth) return; const b=await compor(video,video.videoWidth,video.videoHeight,frente); parar(); mostrar(b); });
   ov.querySelector(".cam-virar").addEventListener("click",()=>{ frente=!frente; ligar(); });
+  btZoom.addEventListener("click",()=>{ usarUltra=!usarUltra; ligar(); });
   ov.querySelector(".cam-x").addEventListener("click",fechar);
   ov.querySelector(".cam-x2").addEventListener("click",fechar);
   ov.querySelector(".cam-x3").addEventListener("click",fechar);
