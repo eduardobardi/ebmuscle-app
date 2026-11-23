@@ -592,6 +592,8 @@ table.series .pc-txt{display:none}
 .cam-barra .btn:not(.ghost){background:var(--brand);border-color:var(--brand);color:#1d2b2e}
 .cam-barra .btn.ghost{color:#fff;border-color:rgba(255,255,255,.4);background:transparent}
 .cam-bt{all:unset;cursor:pointer;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;font-size:20px}
+.cron.concluido{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 14%,var(--surface))}
+.cron.concluido .info b{color:var(--ink)}
 .cam-zoom{all:unset;cursor:pointer;position:absolute;top:14px;right:14px;z-index:2;min-width:44px;height:30px;padding:0 8px;box-sizing:border-box;border-radius:15px;background:rgba(255,255,255,.18);color:#fff;font-size:13px;font-weight:700;text-align:center;line-height:30px}
 .cam-zoom[hidden]{display:none}
 .cam-disparo{all:unset;cursor:pointer;width:72px;height:72px;border-radius:50%;background:#fff;box-shadow:0 0 0 5px #000,0 0 0 9px #fff}
@@ -1903,7 +1905,7 @@ function abrirFimTreino(t,w,min,passo){
   ov=document.createElement("div"); ov.id="fim-modal"; ov.className="fim-ov";
   ov.innerHTML=`<div class="fim-box" role="dialog" aria-modal="true" aria-labelledby="fim-tit"><div id="fim-corpo"></div></div>`;
   document.body.appendChild(ov); document.body.classList.add("com-modal");
-  const fechar=()=>{ ov.remove(); document.body.classList.remove("com-modal"); document.removeEventListener("keydown",esc_); if(view==="treino") renderTreino(); };
+  const fechar=()=>{ ov.remove(); document.body.classList.remove("com-modal"); document.removeEventListener("keydown",esc_); if(view==="treino"){ renderTreino(); const rg=$("details.reg"); if(rg) rg.open=false; window.scrollTo({top:0}); } };
   const esc_=ev=>{ if(ev.key==="Escape") fechar(); };
   document.addEventListener("keydown",esc_);
   const corpo=$("#fim-corpo");
@@ -1970,7 +1972,7 @@ function renderCron(){
   let fim=null; try{ fim=JSON.parse(guardar.get("eb_fim")||"null"); }catch(e){}
   if(fim&&(Date.now()-fim.ts>3*3600e3||fim.aluno!==ALUNO)) { if(Date.now()-fim.ts>3*3600e3) guardar.del("eb_fim"); fim=null; }
   if(!meu&&fim&&fim.treino===TR_T&&fim.semana===TR_W&&treinoFeito(TR_T,TR_W)){
-    el.innerHTML=`<div class="cron parado"><div class="info"><b>Treino ${esc(fim.treino)} encerrado às ${new Date(fim.ts).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})} · ${fim.min} min</b><span>Encerrou sem querer? Volte ao treino: o cronômetro continua de onde parou e o treino deixa de contar como concluído até você encerrar de novo.</span><span class="msg" id="fim-msg" role="status" aria-live="polite"></span></div><button type="button" class="btn" id="cron-volta">Voltar ao treino</button><button type="button" class="link" id="fim-ok">Está certo, fechar</button></div>`;
+    el.innerHTML=`<div class="cron parado concluido"><div class="info"><b>✓ Treino ${esc(fim.treino)} concluído · ${fim.min} min</b><span>Encerrado às ${new Date(fim.ts).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}. Tudo salvo, bom descanso!</span><span class="msg" id="fim-msg" role="status" aria-live="polite"></span></div><button type="button" class="btn" id="fim-ok">Ok</button><button type="button" class="link" id="cron-volta">Encerrei sem querer, voltar ao treino</button></div>`;
     $("#fim-ok").addEventListener("click",()=>{ guardar.del("eb_fim"); renderTreino(); });
     $("#cron-volta").addEventListener("click",async ev=>{
       const b=ev.currentTarget, m=$("#fim-msg"); b.disabled=true; m.className="msg"; m.textContent="Voltando ao treino…";
@@ -2514,7 +2516,7 @@ renderAll=function(){ _renderAll24(); marcarLinhasDet();
 
 // ---------- v25: atualização automática ----------
 // Ao abrir (ou voltar para) o app, confere se há versão nova publicada e recarrega sozinho.
-const APP_VER="20261123110620";
+const APP_VER="20261123111013";
 let VER_CHECADO=0;
 async function checarVersao(){
   if(!/^\d+$/.test(APP_VER)||Date.now()-VER_CHECADO<60000) return; VER_CHECADO=Date.now();
@@ -2687,7 +2689,7 @@ async function abrirCameraTreino(t,w,min,pse){
     ultra=ds.find(d=>/ultra|grande[- ]angular|0[.,]5/i.test(d.label||""))||null; }catch(e){ ultra=null; } };
   const modo=m=>{ ov.querySelectorAll(".cam-barra").forEach(b=>b.hidden=b.dataset.modo!==m); };
   const parar=()=>{ if(stream){ stream.getTracks().forEach(x=>x.stop()); stream=null; } };
-  const fechar=()=>{ parar(); if(urlRes) URL.revokeObjectURL(urlRes); ov.remove(); document.body.classList.remove("com-modal"); document.removeEventListener("keydown",tecla); };
+  const fechar=()=>{ parar(); if(urlRes) URL.revokeObjectURL(urlRes); ov.remove(); document.body.classList.remove("com-modal"); document.removeEventListener("keydown",tecla); window.scrollTo({top:0}); };
   const tecla=ev=>{ if(ev.key==="Escape") fechar(); }; document.addEventListener("keydown",tecla);
   const semCamera=msg=>{ parar(); video.hidden=true; aviso.hidden=false; aviso.textContent=msg; modo("arq"); };
   const ligar=async()=>{
