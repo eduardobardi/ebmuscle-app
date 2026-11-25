@@ -594,6 +594,17 @@ table.series .pc-txt{display:none}
 .cam-bt{all:unset;cursor:pointer;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;font-size:20px}
 .cron.concluido{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 14%,var(--surface))}
 .cron.concluido .info b{color:var(--ink)}
+.cam-palco{touch-action:none}
+.cam-palco video{transform-origin:center center}
+.cam-zooms{position:absolute;left:12px;top:12px;z-index:2;display:flex;gap:4px;padding:3px;border-radius:18px;background:rgba(0,0,0,.35)}
+.cam-zooms[hidden]{display:none}
+.cam-zooms button{all:unset;cursor:pointer;min-width:34px;height:28px;padding:0 6px;box-sizing:border-box;border-radius:14px;color:#fff;font-size:12.5px;font-weight:700;text-align:center;line-height:28px}
+.cam-zooms button[aria-pressed="true"]{background:#fff;color:#111}
+.cam-zooms button:focus-visible{outline:2px solid var(--brand)}
+.tr-cron2:empty{display:none}
+.tr-cron2{margin-top:18px}
+.cron.cron-baixo .info b{font-size:15px}
+.reg-form .reg-ok{justify-self:start;margin-top:4px}
 .cam-zoom{all:unset;cursor:pointer;position:absolute;top:14px;right:14px;z-index:2;min-width:44px;height:30px;padding:0 8px;box-sizing:border-box;border-radius:15px;background:rgba(255,255,255,.18);color:#fff;font-size:13px;font-weight:700;text-align:center;line-height:30px}
 .cam-zoom[hidden]{display:none}
 .cam-disparo{all:unset;cursor:pointer;width:72px;height:72px;border-radius:50%;background:#fff;box-shadow:0 0 0 5px #000,0 0 0 9px #fff}
@@ -1488,6 +1499,16 @@ const fmtKg=k=>k<=1?"peso corporal":`${num(k,k%1?1:0)} kg`;
 // treino concluído = sessão encerrada/registrada (duração ou PSE) naquele treino e semana
 function sessaoComo(t,w,muda){ const s=sessaoDe(t,w)||{}, cm=s.cmj||[], z=v=>v==null?"":v;
   return Object.assign({data:s.data||dataDe(t,w)||new Date().toLocaleDateString("sv-SE"),dur:z(s.dur),pse:z(s.pse),psr:z(s.psr),sono:z(s.sono),qual:z(s.qual),fad:z(s.fad),dorm:z(s.dorm),est:z(s.est),hum:z(s.hum),local:s.local||"",dor:z(s.dor),cmj1:z(cm[0]),cmj2:z(cm[1]),cmj3:z(cm[2])},muda); }
+// v35: estado do registro da sessão (aberto/fechado) guardado por aluno, treino e semana
+const regChave=()=>"eb_reg_"+(ALUNO||"")+"|"+TR_T+"|"+TR_W;
+function regEstado(){ try{ const v=guardar.get(regChave()); return v==="1"?true:v==="0"?false:null; }catch(e){ return null; } }
+function regGuardar(ab){ try{ guardar.set(regChave(),ab?"1":"0"); }catch(e){} }
+const preRespondido=s=>!!s&&s.psr!=null&&["qual","fad","dorm","est","hum"].every(k=>s[k]!=null);
+function preFormCompleto(){ const v=id=>{ const e=document.getElementById(id); return e?e.value:""; };
+  const ok=["s-psr","s-qual","s-fad","s-dorm","s-est","s-hum"].every(id=>v(id)!=="");
+  const loc=String(v("s-local")||""); const dor=loc==="Sem dor"||(loc!==""&&loc.split(",").every(p=>/\d/.test(p)));
+  return ok&&dor; }
+function cron2(){ let c=document.getElementById("tr-cron2"); if(!c){ const l=document.getElementById("tr-lista"); if(!l) return null; c=document.createElement("div"); c.id="tr-cron2"; c.className="tr-cron2"; l.after(c); } return c; }
 function treinoFeito(t,w){ const s=sessaoDe(t,w); return !!(s&&(s.dur!=null||s.pse!=null)); }
 // semana concluída = todos os treinos previstos para a semana foram feitos
 // (usa "Treinos por semana" do cadastro quando existe, ex.: Douglas faz 2 por semana alternando A/B e A2/B2)
@@ -1597,10 +1618,11 @@ function renderTreino(){
   renderCron();
   // ---- registro da sessão (como no topo da planilha) ----
   const s=sessaoDe(TR_T,TR_W)||{}, d=dataDe(TR_T,TR_W);
-  const preenchida=s.pse!=null;
+  const preenchida=s.pse!=null, preOk=preRespondido(s), regEst=regEstado();
+  const regAberto=regEst!=null?regEst:!(preenchida||preOk);
   const hojeISO=new Date().toLocaleDateString("sv-SE");
-  $("#tr-sessao").innerHTML=`<details class="reg"${preenchida?"":" open"}><summary><span class="t">Registro da sessão · semana ${TR_W}</span>
-      <span class="resumo">${preenchida||s.dur!=null?`${d?fmtDL(d)+" · ":""}${s.dur!=null?num(s.dur)+" min · ":""}PSE ${s.pse!=null?num(s.pse,s.pse%1?1:0):"–"}${carga(s)!=null?" · "+num(carga(s))+" UA":""}${bem(s)!=null?" · bem-estar "+num(bem(s),bem(s)%1?1:0)+"/25":""}`:"ainda não preenchido"}</span></summary>
+  $("#tr-sessao").innerHTML=`<details class="reg"${regAberto?" open":""}><summary><span class="t">Registro da sessão · semana ${TR_W}</span>
+      <span class="resumo">${preenchida||s.dur!=null?`${d?fmtDL(d)+" · ":""}${s.dur!=null?num(s.dur)+" min · ":""}PSE ${s.pse!=null?num(s.pse,s.pse%1?1:0):"–"}${carga(s)!=null?" · "+num(carga(s))+" UA":""}${bem(s)!=null?" · bem-estar "+num(bem(s),bem(s)%1?1:0)+"/25":""}`:preOk?`✓ antes do treino respondido · PSR ${num(s.psr)}${bem(s)!=null?" · bem-estar "+num(bem(s))+"/25":""} · toque para ver`:"ainda não preenchido"}</span></summary>
     <form class="reg-form" id="f-sessao" novalidate>
       <details class="guia"><summary>Como preencher? Entenda a PSE e a PSR</summary>
         <div class="guia-c">
@@ -1626,6 +1648,7 @@ function renderTreino(){
           </div>
           ${campoLocais(s.local,s.dor)}
           <div class="auto res" hidden><span class="r">Bem-estar total<span class="dica">soma dos 5 itens, de 5 a 25</span></span><output class="calc" id="s-bem">–</output></div>
+          <button type="button" class="btn ghost reg-ok" id="reg-ok">Pronto, esconder e ir para o treino</button>
         </fieldset>
         <fieldset class="bl"><legend><span class="n">2</span>Depois do treino</legend>
           <div class="par">
@@ -1655,6 +1678,15 @@ function renderTreino(){
       {msg:()=>$("#s-msg")});
   });
   calcS();
+  // v35: o registro fica do jeito que a pessoa deixou; fecha sozinho quando o "antes do treino" é completado
+  { const rg=$("details.reg"), sm=rg.querySelector("summary");
+    sm.addEventListener("click",()=>setTimeout(()=>regGuardar(rg.open),0));
+    const esconder=()=>{ rg.open=false; regGuardar(false); const l=$("#tr-lista"); if(l) l.scrollIntoView({behavior:"smooth",block:"start"}); };
+    $("#reg-ok").addEventListener("click",esconder);
+    let antes=preFormCompleto();
+    $("#f-sessao").addEventListener("click",ev=>{ if(!ev.target.closest(".bl")||ev.target.closest("#reg-ok")) return;
+      setTimeout(()=>{ const agora=preFormCompleto(); if(agora&&!antes){ const m=$("#s-msg"); if(m){ m.className="msg ok"; m.textContent="✓ Antes do treino respondido. Escondendo o registro…"; } setTimeout(()=>{ if(rg.isConnected&&rg.open) esconder(); },1100); } antes=agora; },0); });
+  }
   // locais da dor: pode marcar mais de um; "Sem dor" desmarca os outros
   $("#f-sessao").addEventListener("click",ev=>{
     const b=ev.target.closest(".chip-loc"); if(!b) return;
@@ -1967,6 +1999,7 @@ const fmtTempo=ms=>{const t=Math.max(0,Math.floor(ms/1000)),h=Math.floor(t/3600)
 function renderCron(){
   const el=$("#tr-cron"); if(!el) return;
   clearInterval(cronTick); cronTick=null;
+  { const c2=cron2(); if(c2) c2.innerHTML=""; }
   renderAvisoCron(); renderObsTreino();
   const meu=CRON&&CRON.aluno===ALUNO;
   let fim=null; try{ fim=JSON.parse(guardar.get("eb_fim")||"null"); }catch(e){}
@@ -1987,16 +2020,21 @@ function renderCron(){
   if(!meu){
     el.innerHTML=`<div class="cron parado"><div class="info"><b>Vai treinar agora?</b><span>Toque em Iniciar treino ao começar. Ao encerrar, a duração vai sozinha para o registro da sessão.</span></div><button type="button" class="btn" id="cron-ini">Iniciar treino ${TR_T}</button></div>`;
     $("#cron-ini").addEventListener("click",()=>{
-      CRON={aluno:ALUNO,treino:TR_T,semana:TR_W,inicio:Date.now()}; guardar.set("eb_cron",JSON.stringify(CRON)); renderTreino();
+      CRON={aluno:ALUNO,treino:TR_T,semana:TR_W,inicio:Date.now()}; guardar.set("eb_cron",JSON.stringify(CRON));
+      { const s0=sessaoDe(TR_T,TR_W)||{}; if(!s0.data){ const hj=new Date().toLocaleDateString("sv-SE"); agendarAuto("s|"+TR_T+"|"+TR_W,0,{acao:"salvarSessao",token:TOKEN,nome:ALUNO,treino:TR_T,semana:TR_W,sessao:sessaoComo(TR_T,TR_W,{data:hj})},{msg:()=>$("#s-msg")}); } }
+      renderTreino();
       const psr=$("#s-psr"); const reg=$("details.reg"); if(reg) reg.open=true; if(psr&&psr.value===""){ const b0=document.querySelector('.campo-bt[data-id="s-psr"] .bt-esc'); if(b0) b0.focus(); $("#s-msg").className="msg"; $("#s-msg").textContent="Antes de começar, responda a PSR (quão recuperado você chegou)."; }
     });
     return;
   }
   const outro=CRON.treino!==TR_T||CRON.semana!==TR_W;
+  const c2=cron2();
+  if(c2&&!outro){ c2.innerHTML=`<div class="cron cron-baixo"><span class="rel" id="cron-rel2" aria-live="off">${fmtTempo(Date.now()-CRON.inicio)}</span><div class="info"><b>Terminou o último exercício?</b><span>Treino ${esc(CRON.treino)} em andamento</span></div><button type="button" class="btn" id="cron-fim2">Encerrar treino</button></div>`;
+    $("#cron-fim2").addEventListener("click",()=>{ const b=$("#cron-fim"); if(b){ window.scrollTo({top:0}); b.click(); } }); }
   el.innerHTML=`<div class="cron"><span class="rel" id="cron-rel" aria-live="off">${fmtTempo(Date.now()-CRON.inicio)}</span>
     <div class="info"><b>Treino ${esc(CRON.treino)} em andamento</b><span>Semana ${CRON.semana} · começou às ${new Date(CRON.inicio).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}${outro?" · você está vendo outro treino":""}</span></div>
     <button type="button" class="btn" id="cron-fim">Encerrar treino</button><button type="button" class="link" id="cron-cancel">Iniciei sem querer, cancelar</button></div>`;
-  cronTick=setInterval(()=>{const r=$("#cron-rel"); if(r&&CRON) r.textContent=fmtTempo(Date.now()-CRON.inicio); else {clearInterval(cronTick);cronTick=null;}},1000);
+  cronTick=setInterval(()=>{const r=$("#cron-rel"); if(r&&CRON){ r.textContent=fmtTempo(Date.now()-CRON.inicio); const r2=$("#cron-rel2"); if(r2) r2.textContent=r.textContent; } else {clearInterval(cronTick);cronTick=null;}},1000);
   $("#cron-cancel").addEventListener("click",()=>{ CRON=null; guardar.del("eb_cron"); renderTreino(); });
   $("#cron-fim").addEventListener("click",async()=>{
     const c=CRON, min=Math.max(1,Math.round((Date.now()-c.inicio)/60000));
@@ -2516,7 +2554,7 @@ renderAll=function(){ _renderAll24(); marcarLinhasDet();
 
 // ---------- v25: atualização automática ----------
 // Ao abrir (ou voltar para) o app, confere se há versão nova publicada e recarrega sozinho.
-const APP_VER="20261123111013";
+const APP_VER="20261125151327";
 let VER_CHECADO=0;
 async function checarVersao(){
   if(!/^\d+$/.test(APP_VER)||Date.now()-VER_CHECADO<60000) return; VER_CHECADO=Date.now();
@@ -2647,17 +2685,24 @@ async function desenharInfoFoto(info,W,H,lay){
     g.fillStyle="#fff"; caber("Treino concluído",800,84,fD,R-X); g.fillText("Treino concluído",X,CY+312);
     if(cols.length){ const cw=(R-X)/cols.length; cols.forEach(([a,b,r],i)=>{ if(i){ g.fillStyle="rgba(255,255,255,.2)"; g.fillRect(X+i*cw-24,CY+380,2,140); } numero(a,b,r,X+i*cw,CY+470,84,false); }); }
     if(recTxt) pilula(recTxt,W/2,CY-40,true);
-  }else if(lay===3){ // centralizado
-    grad(0,380,.55,0); grad(H*.45,H,0,.85);
-    if(logo){ const lh=110, lw=logo.naturalWidth*lh/logo.naturalHeight; g.drawImage(logo,(W-lw)/2,90,lw,lh); }
-    g.textAlign="center";
-    let y=H-120;
-    g.textAlign="left"; g.fillStyle="rgba(255,255,255,.65)"; esp("8px"); g.font=`800 30px ${fD}`; { const tw=g.measureText("EB MUSCLE").width-8; g.fillText("EB MUSCLE",(W-tw)/2,y); } esp("0px"); g.textAlign="center"; y-=90;
-    g.fillStyle="rgba(255,255,255,.8)"; g.font=`500 36px ${fB}`; g.fillText(`Treino ${info.t}  ·  Semana ${info.w}  ·  ${dataCurta}`,W/2,y); y-=70;
-    g.fillStyle="rgba(255,255,255,.25)"; g.fillRect(W/2-180,y,360,2); y-=90;
-    if(cols.length){ if(cols.length===1) numero(...cols[0],W/2,y-40,130,true); else { numero(...cols[0],W*.29,y-40,120,true); numero(...cols[1],W*.71,y-40,120,true); g.fillStyle="rgba(255,255,255,.22)"; g.fillRect(W/2-1,y-170,2,190); } y-=250; }
-    g.textAlign="left"; g.fillStyle=brand; esp("10px"); g.font=`800 44px ${fD}`; { const tw=g.measureText("TREINO CONCLUÍDO").width-10; g.fillText("TREINO CONCLUÍDO",(W-tw)/2,y); } esp("0px"); g.textAlign="center";
-    if(recTxt) pilula(recTxt,W/2,y-100,true);
+  }else if(lay===3){ // centralizado, compacto (v35)
+    grad(0,190,.45,0); grad(H*.64,H,0,.8);
+    if(logo){ const lh=62, lw=logo.naturalWidth*lh/logo.naturalHeight; g.drawImage(logo,(W-lw)/2,48,lw,lh); }
+    const centro=(txt,y)=>{ const tw=g.measureText(txt).width; g.textAlign="left"; g.fillText(txt,(W-tw)/2,y); };
+    const num2=(val,un,rot,x,y,tam)=>{ g.textAlign="left";
+      g.font=`800 ${tam}px ${fD}`; const vw=g.measureText(val).width; g.font=`600 ${Math.round(tam*.42)}px ${fB}`; const uw=g.measureText(" "+un).width;
+      const x0=x-(vw+uw)/2; g.fillStyle="#fff"; g.font=`800 ${tam}px ${fD}`; g.fillText(val,x0,y);
+      g.fillStyle="rgba(255,255,255,.8)"; g.font=`600 ${Math.round(tam*.42)}px ${fB}`; g.fillText(" "+un,x0+vw,y);
+      g.fillStyle="rgba(255,255,255,.7)"; esp("3px"); g.font=`600 21px ${fB}`; const rw=g.measureText(rot).width; g.fillText(rot,x-rw/2,y+36); esp("0px"); };
+    let y=H-54;
+    g.fillStyle="rgba(255,255,255,.6)"; esp("6px"); g.font=`800 22px ${fD}`; centro("EB MUSCLE",y); esp("0px"); y-=46;
+    g.fillStyle="rgba(255,255,255,.82)"; g.font=`500 26px ${fB}`; centro(`Treino ${info.t}  ·  Semana ${info.w}  ·  ${dataCurta}`,y); y-=34;
+    g.fillStyle="rgba(255,255,255,.25)"; g.fillRect(W/2-130,y,260,2); y-=60;
+    if(cols.length){ if(cols.length===1) num2(...cols[0],W/2,y,84); else { num2(...cols[0],W*.32,y,78); num2(...cols[1],W*.68,y,78); g.fillStyle="rgba(255,255,255,.22)"; g.fillRect(W/2-1,y-62,2,104); } y-=104; }
+    g.fillStyle=brand; esp("7px"); g.font=`800 30px ${fD}`; centro("TREINO CONCLUÍDO",y); esp("0px");
+    if(recTxt){ y-=64; esp("2px"); g.font=`800 22px ${fB}`; const tw=g.measureText(recTxt).width, bw=tw+40, bx=(W-bw)/2;
+      g.fillStyle=brand; g.beginPath(); if(g.roundRect) g.roundRect(bx,y-31,bw,44,22); else g.rect(bx,y-31,bw,44); g.fill();
+      g.fillStyle="#1d2b2e"; g.textAlign="left"; g.fillText(recTxt,bx+20,y); esp("0px"); }
     g.textAlign="left";
   }else{ // 1: faixa embaixo
     grad(0,320,.6,0); grad(H*.5,H,0,.88);
@@ -2676,14 +2721,23 @@ async function desenharInfoFoto(info,W,H,lay){
 async function abrirCameraTreino(t,w,min,pse){
   const info=infoFotoTreino(t,w,min), W=1080, H=1440; if(pse!=null&&!isNaN(pse)) info.pse=pse;
   const ov=document.createElement("div"); ov.className="cam-ov"; ov.setAttribute("role","dialog"); ov.setAttribute("aria-modal","true"); ov.setAttribute("aria-label","Foto do treino");
-  ov.innerHTML=`<div class="cam-palco"><video playsinline autoplay muted></video><img class="cam-res" alt="Foto do treino com o resumo" hidden><p class="cam-aviso" hidden></p><button type="button" class="cam-zoom" hidden aria-label="Trocar para lente grande angular">0,5x</button></div>
+  ov.innerHTML=`<div class="cam-palco"><video playsinline autoplay muted></video><img class="cam-res" alt="Foto do treino com o resumo" hidden><p class="cam-aviso" hidden></p><button type="button" class="cam-zoom" hidden aria-label="Trocar para lente grande angular">0,5x</button><div class="cam-zooms" role="group" aria-label="Zoom"><button type="button" data-z="1" aria-pressed="true">1x</button><button type="button" data-z="1.5" aria-pressed="false">1,5x</button><button type="button" data-z="2" aria-pressed="false">2x</button><button type="button" data-z="3" aria-pressed="false">3x</button></div></div>
     <div class="cam-barra" data-modo="cam"><button type="button" class="cam-bt cam-x" aria-label="Fechar câmera">✕</button><button type="button" class="cam-disparo" aria-label="Tirar foto"></button><button type="button" class="cam-bt cam-virar" aria-label="Trocar câmera"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 9a8 8 0 0 1 14.3-3.3L20 8M20 15a8 8 0 0 1-14.3 3.3L4 16M20 3v5h-5M4 21v-5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
     <div class="cam-barra" data-modo="res" hidden><button type="button" class="cam-bt cam-x3" aria-label="Fechar e voltar ao app">✕</button><button type="button" class="btn ghost cam-outra">Tirar outra</button><button type="button" class="btn cam-salvar">Salvar ou compartilhar</button></div>
     <div class="cam-barra" data-modo="arq" hidden><button type="button" class="btn ghost cam-x2">Fechar</button><label class="btn cam-escolher">Tirar ou escolher foto<input type="file" accept="image/*" capture="user" hidden></label></div>`;
   document.body.appendChild(ov); document.body.classList.add("com-modal");
   const palco=ov.querySelector(".cam-palco"), video=ov.querySelector("video"), res=ov.querySelector(".cam-res"), aviso=ov.querySelector(".cam-aviso");
   const camada=await desenharInfoFoto(info,W,H); camada.className="cam-camada"; palco.insertBefore(camada,res);
-  let stream=null, frente=true, blob=null, urlRes=null, ultra=null, usarUltra=false;
+  let stream=null, frente=true, blob=null, urlRes=null, ultra=null, usarUltra=false, zoom=1;
+  const zooms=ov.querySelector(".cam-zooms");
+  const aplicarZoom=z=>{ zoom=Math.min(4,Math.max(1,z)); video.style.transform=(frente?"scaleX(-1) ":"")+`scale(${zoom})`;
+    zooms.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(Math.abs(+b.dataset.z-zoom)<0.13))); };
+  zooms.addEventListener("click",ev=>{ const b=ev.target.closest("button[data-z]"); if(b) aplicarZoom(+b.dataset.z); });
+  // pinça para aproximar e afastar
+  { let d0=0, z0=1; const dist=t=>Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);
+    palco.addEventListener("touchstart",ev=>{ if(ev.touches.length===2){ d0=dist(ev.touches); z0=zoom; } },{passive:true});
+    palco.addEventListener("touchmove",ev=>{ if(ev.touches.length===2&&d0){ ev.preventDefault(); aplicarZoom(z0*dist(ev.touches)/d0); } },{passive:false});
+    palco.addEventListener("touchend",()=>{ d0=0; }); }
   const btZoom=ov.querySelector(".cam-zoom");
   const acharUltra=async()=>{ try{ const ds=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==="videoinput");
     ultra=ds.find(d=>/ultra|grande[- ]angular|0[.,]5/i.test(d.label||""))||null; }catch(e){ ultra=null; } };
@@ -2702,24 +2756,24 @@ async function abrirCameraTreino(t,w,min,pse){
       try{ const tr=stream.getVideoTracks()[0], cap=tr.getCapabilities&&tr.getCapabilities(); if(cap&&cap.zoom&&cap.zoom.min!=null) await tr.applyConstraints({advanced:[{zoom:cap.zoom.min}]}); }catch(e){}
       if(ultra===null) await acharUltra();
       btZoom.hidden=frente||!ultra; btZoom.textContent=usarUltra?"1x":"0,5x"; btZoom.setAttribute("aria-label",usarUltra?"Voltar para a lente normal":"Trocar para lente grande angular");
-      video.srcObject=stream; video.classList.toggle("espelho",frente); video.hidden=false; aviso.hidden=true; await video.play().catch(()=>{}); modo("cam");
+      video.srcObject=stream; video.classList.toggle("espelho",frente); aplicarZoom(zoom); video.hidden=false; aviso.hidden=true; await video.play().catch(()=>{}); modo("cam");
     }catch(e){ semCamera(e&&e.name==="NotAllowedError"?"A câmera não foi liberada. Você pode liberar nas configurações do navegador ou tirar a foto pelo botão abaixo.":"Não consegui abrir a câmera. Toque no botão abaixo para tirar ou escolher a foto."); }
   };
-  const compor=(fonte,fw,fh,espelhar)=>{
+  const compor=(fonte,fw,fh,espelhar,zz)=>{
     const c=document.createElement("canvas"); c.width=W; c.height=H; const g=c.getContext("2d");
-    const k=Math.max(W/fw,H/fh), dw=fw*k, dh=fh*k;
+    const k=Math.max(W/fw,H/fh)*(zz||1), dw=fw*k, dh=fh*k;
     g.save(); if(espelhar){ g.translate(W,0); g.scale(-1,1); } g.drawImage(fonte,(W-dw)/2,(H-dh)/2,dw,dh); g.restore();
     g.drawImage(camada,0,0);
     return new Promise(ok=>c.toBlob(b=>ok(b),"image/jpeg",.92));
   };
-  const mostrar=async b=>{ blob=b; if(urlRes) URL.revokeObjectURL(urlRes); urlRes=URL.createObjectURL(b); res.src=urlRes; res.hidden=false; video.hidden=true; camada.hidden=true; aviso.hidden=true; modo("res"); ov.querySelector(".cam-salvar").focus(); };
-  ov.querySelector(".cam-disparo").addEventListener("click",async()=>{ if(!video.videoWidth) return; const b=await compor(video,video.videoWidth,video.videoHeight,frente); parar(); mostrar(b); });
+  const mostrar=async b=>{ blob=b; zooms.hidden=true; if(urlRes) URL.revokeObjectURL(urlRes); urlRes=URL.createObjectURL(b); res.src=urlRes; res.hidden=false; video.hidden=true; camada.hidden=true; aviso.hidden=true; modo("res"); ov.querySelector(".cam-salvar").focus(); };
+  ov.querySelector(".cam-disparo").addEventListener("click",async()=>{ if(!video.videoWidth) return; const b=await compor(video,video.videoWidth,video.videoHeight,frente,zoom); parar(); mostrar(b); });
   ov.querySelector(".cam-virar").addEventListener("click",()=>{ frente=!frente; ligar(); });
   btZoom.addEventListener("click",()=>{ usarUltra=!usarUltra; ligar(); });
   ov.querySelector(".cam-x").addEventListener("click",fechar);
   ov.querySelector(".cam-x2").addEventListener("click",fechar);
   ov.querySelector(".cam-x3").addEventListener("click",fechar);
-  ov.querySelector(".cam-outra").addEventListener("click",()=>{ res.hidden=true; camada.hidden=false; if(video.hidden&&!stream&&!aviso.hidden) modo("arq"); ligar(); });
+  ov.querySelector(".cam-outra").addEventListener("click",()=>{ res.hidden=true; zooms.hidden=false; camada.hidden=false; if(video.hidden&&!stream&&!aviso.hidden) modo("arq"); ligar(); });
   ov.querySelector('input[type="file"]').addEventListener("change",async ev=>{
     const f=ev.target.files&&ev.target.files[0]; ev.target.value=""; if(!f) return;
     const u=URL.createObjectURL(f); try{ const im=await carregarImg(u); mostrar(await compor(im,im.naturalWidth,im.naturalHeight,false)); }catch(e){ aviso.hidden=false; aviso.textContent="Não consegui abrir essa foto. Tente outra."; } finally{ URL.revokeObjectURL(u); }
