@@ -594,6 +594,20 @@ table.series .pc-txt{display:none}
 .cam-bt{all:unset;cursor:pointer;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;font-size:20px}
 .cron.concluido{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 14%,var(--surface))}
 .cron.concluido .info b{color:var(--ink)}
+.reg-form .desf{display:flex;flex-wrap:wrap;gap:6px 16px;padding-top:10px;border-top:1px dashed var(--line);font-size:13px}
+dl.campos > .obs-abre{display:block;margin:2px 0 0}
+.ex .obs-abre .link{all:unset;cursor:pointer;font-size:13.5px;color:var(--ink-2);text-decoration:underline;text-underline-offset:3px}
+.ex .obs-abre .link:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.ex .obs-c[hidden]{display:none}
+.reg-form .bl[hidden],.chips-loc[hidden]{display:none}
+.reg-form .depois-abre{margin:0}
+.chip-tenho{all:unset;box-sizing:border-box;cursor:pointer;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:14px}
+.chip-tenho[aria-pressed="true"]{border-color:var(--pse);background:color-mix(in srgb,var(--pse) 18%,var(--surface));font-weight:600}
+.chip-tenho:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.lista-loc{margin-top:8px}
+.sel-par{display:flex;flex-wrap:wrap;gap:10px}
+.sel-par label{min-width:140px;flex:1}
+#sel-exm{max-width:100%}
 .mini-link{margin:4px 2px 0;font-size:14px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline}
 .mini-link .link{all:unset;cursor:pointer;color:var(--ink-2);text-decoration:underline;text-underline-offset:3px;font-weight:600}
 .mini-link .link:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
@@ -778,26 +792,26 @@ table.series .pc-txt{display:none}
 
 <section data-view="resumo" hidden>
   <div style="display:grid;gap:16px">
-    <div><h1>Resumo</h1><p class="sub">Como você está: a última sessão, esta semana e o que merece atenção.</p></div>
+    <div><h1>Resumo</h1><p class="sub">A última sessão, esta semana e o que merece atenção.</p></div>
     <div id="res-alertas"></div>
     <p class="note int-empty">Ainda não há sessão com PSE e duração registradas. Comece pela aba Treino: ao encerrar o treino e responder a PSE, o resumo aparece aqui.</p>
     <div class="int-has" style="display:grid;gap:12px"><h2 id="ultimaSub"></h2><div class="kpis" id="kpis"></div></div>
     <div class="panel"><div class="head"><h2>Esta semana x semana anterior</h2><span class="sub" id="res-sem-sub"></span></div><div class="kpis" id="res-sem"></div></div>
     <div class="panel"><div class="head"><h2>Carga por semana</h2><span class="sub">esforço da semana (UA) e volume load</span></div><div class="chartbox"><canvas id="c-res" aria-label="Carga por semana"></canvas></div></div>
     <div class="panel"><div class="head"><h2>Dor por região</h2><span class="sub">intensidade (0-10) em cada sessão registrada</span></div><div id="dor-box"></div></div>
-    <div class="panel"><div class="head"><h2>Observações dos treinos</h2><span class="sub">o que o aluno escreveu no fim de cada treino</span></div><div id="obs-box"></div></div>
+    <div class="panel"><div class="head"><h2>Observações dos treinos</h2><span class="sub" id="obs-box-sub">o que o aluno escreveu no fim de cada treino</span></div><div id="obs-box"></div></div>
   </div>
 </section>
 <section data-view="cargas" hidden>
   <div style="display:grid;gap:16px">
-    <div><h1>Cargas</h1><p class="sub">Carga externa: o que você levantou. Volume load = repetições × carga, somado por série (peso corporal conta como carga 1).</p></div>
+    <div><h1>Cargas</h1><p class="sub">O que você levantou: volume load = repetições × carga.</p></div>
     <p class="note ext-empty">Nenhum exercício carregado. Quando a planilha de treino do aluno for integrada, aqui aparecem o volume load por semana, por treino, por exercício e as séries por grupo muscular.</p>
     <div class="ext-has" style="display:contents">
     <h2 class="sec">Por exercício</h2>
     <div class="panel">
       <div class="head"><h2>Carga de cada série, semana a semana</h2>
-        <label for="sel-tr" style="min-width:160px">Treino<select id="sel-tr"></select></label></div>
-      <p class="sub" style="margin:-4px 0 12px">Cada gráfico mostra a carga (kg) da 1ª, 2ª e 3ª série em cada semana. Exercícios com peso corporal mostram as repetições.</p>
+        <div class="sel-par"><label for="sel-tr">Treino<select id="sel-tr"></select></label><label for="sel-exm">Exercício<select id="sel-exm"></select></label></div></div>
+      <p class="sub" style="margin:-4px 0 12px">Carga de cada série por semana (peso corporal: repetições).</p>
       <div class="multi" id="multi-ex"></div>
     </div>
     <h2 class="sec">Por grupo muscular</h2>
@@ -838,7 +852,7 @@ table.series .pc-txt{display:none}
 </section>
 <section data-view="esforco" hidden>
   <div style="display:grid;gap:12px">
-    <div><h1>Esforço e recuperação</h1><p class="sub">Carga interna: como o corpo respondeu aos treinos, com PSE, PSR, sono, bem-estar e dor.</p></div>
+    <div><h1>Esforço e recuperação</h1><p class="sub">Como o seu corpo respondeu aos treinos.</p></div>
     <div class="seg" role="group" aria-label="Ver por">
       <button type="button" data-sub="sessao" aria-pressed="true">Por sessão</button>
       <button type="button" data-sub="semana" aria-pressed="false">Por semana</button>
@@ -848,7 +862,7 @@ table.series .pc-txt{display:none}
 </section>
 <section data-view="esforco" data-sub="sessao" hidden>
   <div style="display:grid;gap:16px">
-    <p class="sub">Sessão a sessão, nas últimas 30 sessões.</p>
+    <p class="sub">Últimas 30 sessões.</p>
     <p class="note int-empty">Nenhuma sessão registrada ainda. Os gráficos aparecem quando houver sessões com PSE, PSR e bem-estar.</p>
     <div class="panel">
       <div class="head"><h2>Carga diária (UA) com PSE e PSR</h2><span class="sub">barras: PSE × minutos · linhas: escala 0 a 10</span></div>
@@ -865,7 +879,7 @@ table.series .pc-txt{display:none}
   </div>
 </section><section data-view="esforco" data-sub="semana" hidden>
   <div style="display:grid;gap:16px">
-    <p class="sub">Semana a semana: os mesmos cálculos do Painel de carga interna da planilha.</p>
+    <p class="sub">Semana a semana.</p>
     <p class="note int-empty">Nenhuma sessão registrada ainda. A tabela e os gráficos se preenchem conforme as sessões entram.</p>
     <div class="panel">
       <div class="head"><h2>Resumo por semana</h2></div>
@@ -1172,7 +1186,11 @@ function renderMulti(){
   sel.innerHTML=TREINOS.map(t=>`<option value="${t}">Treino ${t}</option>`).join("")+'<option value="*">Todos</option>';
   sel.value=TREINOS.includes(atual)||atual==="*"?atual:(TREINOS[0]||"*");
   multiIds.forEach(id=>{if(charts[id]){charts[id].destroy();delete charts[id];}}); multiIds=[];
-  const lista=EXT.ex.map((e,i)=>({e,i})).filter(x=>sel.value==="*"||x.e.t===sel.value);
+  const lista0=EXT.ex.map((e,i)=>({e,i})).filter(x=>sel.value==="*"||x.e.t===sel.value);
+  const se=$("#sel-exm"), atualE=se.value;
+  se.innerHTML=lista0.map(({e,i})=>`<option value="${i}"></option>`).join(""); se.querySelectorAll("option").forEach((o,k)=>o.textContent=desesc(lista0[k].e.ex));
+  const okE=lista0.some(x=>String(x.i)===atualE); se.value=okE?atualE:String((lista0.find(x=>Object.keys(x.e.sets).length)||lista0[0]||{i:""}).i);
+  const lista=lista0.filter(x=>String(x.i)===se.value);
   const cores=[css("--wb1"),css("--load"),css("--brand")];
   $("#multi-ex").innerHTML=lista.map(({e,i})=>{
     const tem=Object.keys(e.sets).length>0;
@@ -1190,6 +1208,7 @@ function renderMulti(){
   });
 }
 $("#sel-tr").addEventListener("change",renderMulti);
+$("#sel-exm").addEventListener("change",renderMulti);
 
 let view="treino"; let SUB="sessao";
 function renderAll(){
@@ -1551,7 +1570,8 @@ function campoLocais(v,dor){
   const reais=LOCAIS.filter(l=>l!=="Sem dor"&&m.has(l));
   return `<div class="locais" role="group" aria-labelledby="loc-rot"><p class="bl-sub" id="loc-rot">Está com alguma dor? <span>toque em todos os lugares que doem e dê uma nota de 0 a 10 para cada um</span></p>
     <input type="hidden" id="s-local" value="${esc(String(v||"").replace(/&amp;/g,"&"))}"><input type="hidden" id="s-dor" value="${dor!=null?esc(String(dor)):""}">
-    <div class="chips-loc">${LOCAIS.map(l=>`<button type="button" class="chip-loc${l==="Sem dor"?" sem":""}" aria-pressed="${m.has(l)}" data-l="${esc(l)}">${esc(l)}</button>`).join("")}</div>
+    <div class="chips-loc"><button type="button" class="chip-loc sem" aria-pressed="${m.has("Sem dor")}" data-l="Sem dor">Sem dor</button><button type="button" class="chip-tenho" aria-expanded="${reais.length>0}" aria-pressed="${reais.length>0}">Tenho dor</button></div>
+    <div class="chips-loc lista-loc"${reais.length?"":" hidden"}>${LOCAIS.filter(l=>l!=="Sem dor").map(l=>`<button type="button" class="chip-loc" aria-pressed="${m.has(l)}" data-l="${esc(l)}">${esc(l)}</button>`).join("")}</div>
     <div class="ints-loc">${reais.map(l=>linhaIntLoc(l,m.get(l))).join("")}</div></div>`;
 }
 function syncLocais(box){
@@ -1654,7 +1674,8 @@ function renderTreino(){
           <div class="auto res" hidden><span class="r">Bem-estar total<span class="dica">soma dos 5 itens, de 5 a 25</span></span><output class="calc" id="s-bem">–</output></div>
           <button type="button" class="btn ghost reg-ok" id="reg-ok">Pronto, esconder e ir para o treino</button>
         </fieldset>
-        <fieldset class="bl"><legend><span class="n">2</span>Depois do treino</legend>
+        ${s.dur!=null||s.pse!=null?"":`<p class="mini-link depois-abre"><button type="button" class="link" id="depois-abrir">Não usou o cronômetro? Preencher data, duração e PSE</button></p>`}
+        <fieldset class="bl" id="bl-depois"${s.dur!=null||s.pse!=null?"":" hidden"}><legend><span class="n">2</span>Depois do treino</legend>
           <div class="par">
             <label for="s-data">Data<span class="dica">do treino</span><input id="s-data" type="date" value="${esc(d||s.data||hojeISO)}"></label>
             ${campoNum("s-dur","Duração",s.dur,1,400,1,"em minutos")}
@@ -1668,8 +1689,9 @@ function renderTreino(){
         ${campoNum("s-cmj3","CMJ 3 (cm)",s.cmj&&s.cmj[2],0,150,0.1)}
         <div class="auto"><span class="r">CMJ média (cm)</span><output class="calc" id="s-cmjm">–</output></div></div>
       </div>
-      <div class="actions"><button type="submit" class="btn ghost">Salvar agora</button><span class="msg" id="s-msg" role="status" aria-live="polite"></span></div>
-    </form></details>${temAlgo(TR_T,TR_W)?`<div class="desf">${treinoFeito(TR_T,TR_W)?`<button type="button" class="link-limpar" id="desmarcar">Desmarcar Treino ${TR_T} como concluído</button>`:""}<button type="button" class="link-limpar" id="desfazer">Desfazer registro do Treino ${TR_T} na semana ${TR_W}</button><span class="msg" id="d-msg" role="status" aria-live="polite"></span></div>`:""}`;
+      <div class="actions"><span class="msg" id="s-msg" role="status" aria-live="polite"></span></div>
+      ${temAlgo(TR_T,TR_W)?`<div class="desf">${treinoFeito(TR_T,TR_W)?`<button type="button" class="link-limpar" id="desmarcar">Desmarcar Treino ${TR_T} como concluído</button>`:""}<button type="button" class="link-limpar" id="desfazer">Desfazer registro do Treino ${TR_T} na semana ${TR_W}</button><span class="msg" id="d-msg" role="status" aria-live="polite"></span></div>`:""}
+    </form></details>`;
   const calcS=()=>{const du=+$("#s-dur").value, p=$("#s-pse").value, it=["#s-qual","#s-fad","#s-dorm","#s-est","#s-hum"].map(x=>$(x).value);
     const cm=["#s-cmj1","#s-cmj2","#s-cmj3"].map(x=>$(x).value).filter(v=>v!=="").map(Number);
     $("#s-ua").textContent=du&&p!==""?`${num(du*+p)} UA`:"–";
@@ -1682,6 +1704,7 @@ function renderTreino(){
       {msg:()=>$("#s-msg")});
   });
   calcS();
+  { const da=$("#depois-abrir"); if(da) da.addEventListener("click",()=>{ $("#bl-depois").hidden=false; da.parentNode.remove(); }); }
   // v35: o registro fica do jeito que a pessoa deixou; fecha sozinho quando o "antes do treino" é completado
   { const rg=$("details.reg"), sm=rg.querySelector("summary");
     sm.addEventListener("click",()=>setTimeout(()=>regGuardar(rg.open),0));
@@ -1691,6 +1714,12 @@ function renderTreino(){
     $("#f-sessao").addEventListener("click",ev=>{ if(!ev.target.closest(".bl")||ev.target.closest("#reg-ok")) return;
       setTimeout(()=>{ const agora=preFormCompleto(); if(agora&&!antes){ const m=$("#s-msg"); if(m){ m.className="msg ok"; m.textContent="✓ Antes do treino respondido. Escondendo o registro…"; } setTimeout(()=>{ if(rg.isConnected&&rg.open) esconder(); },1100); } antes=agora; },0); });
   }
+  $("#f-sessao").addEventListener("click",ev=>{
+    const tn=ev.target.closest(".chip-tenho"), sd=ev.target.closest('.chip-loc[data-l="Sem dor"]');
+    const box=ev.target.closest(".locais"); if(!box) return; const lista=box.querySelector(".lista-loc"), bt=box.querySelector(".chip-tenho");
+    if(tn){ const abrir=lista.hidden; lista.hidden=!abrir; bt.setAttribute("aria-expanded",String(abrir)); bt.setAttribute("aria-pressed",String(abrir||!!box.querySelector('.lista-loc .chip-loc[aria-pressed="true"]'))); }
+    if(sd){ setTimeout(()=>{ if(sd.getAttribute("aria-pressed")==="true"){ lista.hidden=true; bt.setAttribute("aria-expanded","false"); bt.setAttribute("aria-pressed","false"); } },0); }
+  });
   // locais da dor: pode marcar mais de um; "Sem dor" desmarca os outros
   $("#f-sessao").addEventListener("click",ev=>{
     const b=ev.target.closest(".chip-loc"); if(!b) return;
@@ -1761,11 +1790,11 @@ function renderTreino(){
         <td class="vs">${a?`${num(a[0])} × ${fmtKg(a[1])}`:"–"}</td></tr>`;}).join("");
     const linkOk=e.link&&/^https?:\/\//i.test(e.link);
     const vl=ss.length?vlSets(ss):null;
-    const sug=sugestaoCarga(e,TR_W), pr=recordeNaSemana(e,TR_W);
+    const sug=sugestaoCarga(e,TR_W), pr=recordeNaSemana(e,TR_W), semFeita=treinoFeito(TR_T,TR_W)&&!(CRON&&CRON.aluno===ALUNO&&CRON.treino===TR_T&&CRON.semana===TR_W);
     const presc=[[pw.reps,"repetições"],[pw.int,"intervalo"],[vl!=null?num(vl):"","volume load"]].filter(([v])=>v!=null&&v!=="");
     const temMet=!!(metodo||descs.some(([,d])=>d)||notaSem);
     return `<article class="ex${pc?" pc":""}" data-i="${EXT.ex.indexOf(e)}"><header><span class="num">${rotulo||i+1}</span><div style="min-width:0"><h3>${e.ex}${pr?' <span class="pr" title="Maior carga já registrada neste exercício">🏆 Recorde</span>':""}</h3><div class="tags">${e.g.filter(g=>g!=="Não classificado").map(g=>`<span class="tag">${g}</span>`).join("")}</div></div></header>
-      ${sug?`<p class="sug sug-${sug.tipo}"><b>${sug.tipo==="sobe"?"↑ Sugestão de carga":"Sugestão de carga"}:</b> ${sug.txt}</p>`:""}
+      ${sug&&!semFeita?`<p class="sug sug-${sug.tipo}"><b>${sug.tipo==="sobe"?"↑ Sugestão de carga":"Sugestão de carga"}:</b> ${sug.txt}</p>`:""}
       ${presc.length?`<div class="presc">${presc.map(([v,r])=>`<div><b>${esc(String(v))}</b><span>${r}</span></div>`).join("")}</div>`:""}
       ${!ed&&temMet?`<div class="met-box"><p class="mb-t">Método de treino${metodo?`: <b>${esc(metodo.replace(/\s*\n\s*/g," "))}</b>`:""}</p>
         ${descs.filter(([,d])=>d).map(([n,d])=>`<p class="mb-d">${descs.length>1?`<b>${esc(n)}:</b> `:""}${esc(d)}</p>`).join("")}
@@ -1777,9 +1806,10 @@ function renderTreino(){
         ${ed||linkOk?`<div><dt>Link</dt><dd>${ed?`<input class="in-link" type="url" placeholder="https://… (vídeo do exercício)" value="${esc(e.link||"")}">`:(linkOk?`<a class="video" href="${esc(e.link)}" target="_blank" rel="noopener noreferrer">Ver vídeo do exercício</a>`:'<span class="dash">sem vídeo</span>')}</dd></div>`:""}
         ${ed?`<div><dt>Método de treino</dt><dd>${ed?`<input class="in-met" maxlength="60" placeholder="Ex.: Drop-set, Bi-set, Isometria" value="${esc(metodo)}">`:(metodo?(descs.length===1&&descs[0][1]?"":`<b class="met-nome">${esc(metodo.replace(/\s*\n\s*/g," "))}</b>`):'<span class="dash">–</span>')}
           ${descs.filter(([,d])=>d).map(([n,d])=>`<span class="met-desc"><b>${esc(n)}:</b> ${esc(d)}</span>`).join("")}${notaSem?`<span class="met-desc"><b>Observação desta semana:</b> ${esc(notaSem)}</span>`:""}</dd></div>`:""}
-        <div class="obs-c"><dt>Observação do aluno em relação ao exercício</dt><dd><textarea class="in-obs" rows="2" maxlength="300" placeholder="Como foi? Dor, dificuldade, ajuste de carga…">${esc(obsW)}</textarea></dd></div>
+        ${obsW?"":`<div class="obs-abre"><button type="button" class="link obs-ex-abrir">+ observação sobre este exercício</button></div>`}
+        <div class="obs-c"${obsW?"":" hidden"}><dt>Observação sobre o exercício</dt><dd><textarea class="in-obs" rows="2" maxlength="300" placeholder="Como foi? Dor, dificuldade, ajuste de carga…">${esc(obsW)}</textarea></dd></div>
       </dl>
-      <div class="actions"><button type="button" class="btn ghost salvar-ex">Salvar agora</button>${ss.length||obsW?'<button type="button" class="link-limpar">Limpar séries</button>':""}<span class="msg" role="status" aria-live="polite">${ss.length?"Registrado na planilha.":""}</span></div>
+      <div class="actions">${ss.length||obsW?'<button type="button" class="link-limpar">Limpar séries</button>':""}<span class="msg" role="status" aria-live="polite"></span></div>
     </article>`;
   };
   $("#tr-lista").innerHTML = montarGrupos(lista,cardHtml)||'<p class="sub">Nenhum exercício neste treino.</p>';
@@ -1824,6 +1854,7 @@ function renderTreino(){
     try{ await api({acao:"salvarExercicio",token:TOKEN,nome:ALUNO,treino:TR_T,semana:TR_W,linha:e.row,exercicio:desesc(e.ex),sets:[[],[],[]],obs:""}); SUJO=false; await recarregarAluno("Séries apagadas."); }
     catch(err){ if(err&&err.erro==="sessao"){sairDoApp();return;} msg.className="msg erro"; msg.textContent=msgDe(err); }
   }); });
+  $("#tr-lista").querySelectorAll(".obs-ex-abrir").forEach(b=>b.addEventListener("click",()=>{ const card=b.closest(".ex"), c=card.querySelector(".obs-c"); c.hidden=false; b.parentNode.remove(); const t=c.querySelector("textarea"); if(t) t.focus(); }));
   $("#tr-lista").querySelectorAll(".salvar-ex").forEach(b=>b.addEventListener("click",async()=>{
     const card=b.closest(".ex"), e=EXT.ex[+card.dataset.i], msg=card.querySelector(".msg");
     const {corpo,meia}=corpoExercicio(card,e);
@@ -1834,7 +1865,7 @@ function renderTreino(){
     catch(err){ if(err&&err.erro==="sessao"){sairDoApp();return;} msg.className="msg erro"; msg.textContent=msgDe(err); b.disabled=false; }
   }));
   $("#tr-legenda").hidden=false;
-  $("#tr-legenda").textContent="Escolha o treino e a semana e preencha: tudo é salvo sozinho na planilha, segundos depois de você digitar. A bolinha verde marca as semanas já registradas.";
+  $("#tr-legenda").textContent=""; $("#tr-legenda").hidden=true;
 }
 // ---------- salvamento automático ----------
 // Cada alteração entra numa fila por chave (exercício, sessão, observação) e vai para a planilha
@@ -2129,6 +2160,7 @@ function lembretePSE(el){
 }
 function renderObsLista(){
   const box=$("#obs-box"); if(!box) return;
+  { const sb=$("#obs-box-sub"); if(sb) sb.textContent=(MODO_ALUNO||!podeEditarTreinador())?"o que você escreveu no fim de cada treino":"o que o aluno escreveu no fim de cada treino"; }
   const l=[...(ALUNOS[ALUNO].obsTreino||[])].sort((a,b)=>(b.data||"")<(a.data||"")?-1:(b.data||"")>(a.data||"")?1:b.linha-a.linha).slice(0,10);
   box.innerHTML=l.length?`<ul class="obs-lista">${l.map(o=>`<li><span class="q">${o.data?fmtD(o.data):"–"} · Treino ${esc(o.treino)} · S${num(o.semana)}</span><p>${esc(o.texto)}</p></li>`).join("")}</ul>`:'<p class="sub" style="margin:0">Nenhuma observação ainda. Ela aparece aqui quando o aluno escreve no fim do treino.</p>';
 }
@@ -2532,7 +2564,7 @@ const abrirCargas=(id,alvo)=>abrirPagina({grupo:"c",id,html:()=>detCabeca("c",id
   const CH_E={"c-carga":"carga","c-dur":"dur","c-wb":"wb","c-semc":"carga","c-semm":"mono","c-semp":"pse","c-sems":"sono","c-semb":"wb","c-semd":"dor"};
   const SESS_E={"c-carga":()=>last30(),"c-dur":()=>last30(),"c-wb":()=>last30().filter(s=>!s.cardio)};
   const CH_C={"c-ext-sem":"vsem","c-ext-grp-tot":"vgrp","c-ext-grp":"vgrp"};
-  const botao=(el,dp,txt)=>{ const head=el&&el.closest(".panel")&&el.closest(".panel").querySelector(".head"); if(!head||head.querySelector(".det-btn")) return;
+  const botao=(el,dp,txt)=>{ return; const head=el&&el.closest(".panel")&&el.closest(".panel").querySelector(".head"); if(!head||head.querySelector(".det-btn")) return;
     const b=document.createElement("button"); b.type="button"; b.className="det-btn"; b.textContent=txt||"Ver detalhes ›"; b.dataset.dp=dp; head.appendChild(b); };
   Object.entries(CH_E).forEach(([id,t])=>botao(document.getElementById(id),"e:"+t));
   Object.entries(CH_C).forEach(([id,t])=>botao(document.getElementById(id),"c:"+t));
@@ -2540,7 +2572,7 @@ const abrirCargas=(id,alvo)=>abrirPagina({grupo:"c",id,html:()=>detCabeca("c",id
   // botões "tudo junto"
   const seg=$('section[data-view="esforco"] .seg'); if(seg&&!$("#dp-tudo-e")){ const b=document.createElement("button"); b.type="button"; b.id="dp-tudo-e"; b.className="dp-tudo"; b.dataset.dp="e:tudo"; b.textContent="📋 Ver tudo junto"; seg.insertAdjacentElement("afterend",b); }
   const kc=$('section[data-view="cargas"] > div > div:first-child'); if(kc&&!$("#dp-tudo-c")){ const b=document.createElement("button"); b.type="button"; b.id="dp-tudo-c"; b.className="dp-tudo"; b.dataset.dp="c:tudo"; b.textContent="📋 Ver tudo junto"; kc.insertAdjacentElement("afterend",b); }
-  document.querySelectorAll('section[data-view="esforco"][data-sub="sessao"] > div > p.sub, section[data-view="esforco"][data-sub="semana"] > div > p.sub, section[data-view="cargas"] > div > div > p.sub').forEach(p=>{ if(!p.dataset.det){ p.dataset.det="1"; p.textContent+=" Toque em qualquer gráfico ou tabela para ver os detalhes."; } });
+  document.querySelectorAll('section[data-view="esforco"][data-sub="sessao"] > div > p.sub, section[data-view="esforco"][data-sub="semana"] > div > p.sub, section[data-view="cargas"] > div > div > p.sub').forEach(p=>{ if(!p.dataset.det){ p.dataset.det="1"; p.textContent+=" Toque em um gráfico para ver os detalhes."; } });
   const idxDe=(id,ev)=>{ const ch=charts[id]; if(!ch) return null; const el=ch.getElementsAtEventForMode(ev,"index",{intersect:false},false); return el&&el.length?el[0].index:null; };
   document.addEventListener("click",ev=>{
     const d=ev.target.closest("[data-dp]");
@@ -2573,7 +2605,7 @@ renderAll=function(){ _renderAll24(); marcarLinhasDet();
 
 // ---------- v25: atualização automática ----------
 // Ao abrir (ou voltar para) o app, confere se há versão nova publicada e recarrega sozinho.
-const APP_VER="20261126095841";
+const APP_VER="20261126100527";
 let VER_CHECADO=0;
 async function checarVersao(){
   if(!/^\d+$/.test(APP_VER)||Date.now()-VER_CHECADO<60000) return; VER_CHECADO=Date.now();
