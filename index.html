@@ -594,6 +594,10 @@ table.series .pc-txt{display:none}
 .cam-bt{all:unset;cursor:pointer;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;font-size:20px}
 .cron.concluido{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 14%,var(--surface))}
 .cron.concluido .info b{color:var(--ink)}
+.mini-link{margin:4px 2px 0;font-size:14px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline}
+.mini-link .link{all:unset;cursor:pointer;color:var(--ink-2);text-decoration:underline;text-underline-offset:3px;font-weight:600}
+.mini-link .link:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.obs-mini b{color:var(--ink-2)}
 .cam-palco{touch-action:none}
 .cam-palco video{transform-origin:center center}
 .cam-zooms{position:absolute;left:12px;top:12px;z-index:2;display:flex;gap:4px;padding:3px;border-radius:18px;background:rgba(0,0,0,.35)}
@@ -2018,7 +2022,9 @@ function renderCron(){
     return;
   }
   if(!meu){
-    el.innerHTML=`<div class="cron parado"><div class="info"><b>Vai treinar agora?</b><span>Toque em Iniciar treino ao começar. Ao encerrar, a duração vai sozinha para o registro da sessão.</span></div><button type="button" class="btn" id="cron-ini">Iniciar treino ${TR_T}</button></div>`;
+    el.innerHTML=treinoFeito(TR_T,TR_W)
+      ? `<p class="mini-link"><span>✓ Treino ${esc(TR_T)} da semana ${TR_W} já foi feito.</span> <button type="button" class="link" id="cron-ini">Fazer de novo</button></p>`
+      : `<div class="cron parado"><div class="info"><b>Vai treinar agora?</b><span>Toque em Iniciar treino ao começar. Ao encerrar, a duração vai sozinha para o registro da sessão.</span></div><button type="button" class="btn" id="cron-ini">Iniciar treino ${TR_T}</button></div>`;
     $("#cron-ini").addEventListener("click",()=>{
       CRON={aluno:ALUNO,treino:TR_T,semana:TR_W,inicio:Date.now()}; guardar.set("eb_cron",JSON.stringify(CRON));
       { const s0=sessaoDe(TR_T,TR_W)||{}; if(!s0.data){ const hj=new Date().toLocaleDateString("sv-SE"); agendarAuto("s|"+TR_T+"|"+TR_W,0,{acao:"salvarSessao",token:TOKEN,nome:ALUNO,treino:TR_T,semana:TR_W,sessao:sessaoComo(TR_T,TR_W,{data:hj})},{msg:()=>$("#s-msg")}); } }
@@ -2077,9 +2083,18 @@ function renderObsTreino(){
   const cron=$("#tr-cron"); if(!cron) return;
   let el=$("#tr-obs"); if(!el){ el=document.createElement("div"); el.id="tr-obs"; cron.parentNode.insertBefore(el,cron.nextSibling); }
   const o=obsDe(TR_T,TR_W), feito=treinoFeito(TR_T,TR_W), rodando=CRON&&CRON.aluno===ALUNO&&CRON.treino===TR_T&&CRON.semana===TR_W;
-  if(!o&&!feito&&!rodando){ el.hidden=true; el.innerHTML=""; return; }
+  if(!o&&!feito){ el.hidden=true; el.innerHTML=""; return; }
   el.hidden=false;
-  const pede=feito&&!o, comoAluno=MODO_ALUNO||!podeEditarTreinador();
+  const pede=false, comoAluno=MODO_ALUNO||!podeEditarTreinador();
+  const chaveO=ALUNO+"|"+TR_T+"|"+TR_W;
+  if(OBS_ABERTA!==chaveO){
+    // v36: versão compacta; o campo completo só abre quando a pessoa toca
+    el.innerHTML=o
+      ? `<p class="mini-link obs-mini"><span><b>${comoAluno?"Sua observação":"Observação do aluno"}:</b> ${esc(o.texto.length>90?o.texto.slice(0,90)+"…":o.texto)}</span> <button type="button" class="link" id="obs-abrir">editar</button></p>`
+      : `<p class="mini-link obs-mini"><button type="button" class="link" id="obs-abrir">+ ${comoAluno?"Adicionar uma observação sobre este treino":"Adicionar observação sobre este treino"}</button></p>`;
+    $("#obs-abrir").addEventListener("click",()=>{ OBS_ABERTA=chaveO; renderObsTreino(); const t=$("#obs-txt"); if(t) t.focus(); });
+    lembretePSE(el); return;
+  }
   el.innerHTML=`<div class="obs-t${pede?" pede":""}">
     <label for="obs-txt"><b>${comoAluno?"Como foi o treino? Conte pro Eduardo":"Observação do aluno sobre o treino"}</b>
     <span>Treino ${esc(TR_T)}, semana ${TR_W}. Qualquer coisa: desconforto em algum exercício, troca ou exercício que ficou de fora, como você se sentiu, se gostou…</span></label>
@@ -2097,10 +2112,14 @@ function renderObsTreino(){
     cancelarAuto("o|"+TR_T+"|"+TR_W);
     b.disabled=true; m.className="msg"; m.textContent="Enviando…";
     const s=sessaoDe(TR_T,TR_W)||{};
-    try{ await api({acao:"salvarObsTreino",token:TOKEN,nome:ALUNO,treino:TR_T,semana:TR_W,data:s.data||dataDe(TR_T,TR_W)||new Date().toLocaleDateString("sv-SE"),texto}); SUJO=false; await recarregarAluno(texto?"Observação enviada para o Eduardo.":"Observação apagada."); }
+    try{ await api({acao:"salvarObsTreino",token:TOKEN,nome:ALUNO,treino:TR_T,semana:TR_W,data:s.data||dataDe(TR_T,TR_W)||new Date().toLocaleDateString("sv-SE"),texto}); SUJO=false; OBS_ABERTA=null; await recarregarAluno(texto?"Observação enviada para o Eduardo.":"Observação apagada."); }
     catch(e){ if(e&&e.erro==="sessao"){sairDoApp();return;} m.className="msg erro"; m.textContent=msgDe(e); b.disabled=false; }
   });
   PEDIR_OBS=false;
+  lembretePSE(el);
+}
+let OBS_ABERTA=null;
+function lembretePSE(el){
   const s0=sessaoDe(TR_T,TR_W)||{};
   if(s0.dur!=null&&s0.pse==null){
     const lem=document.createElement("div"); lem.className="lembra-pse";
@@ -2554,7 +2573,7 @@ renderAll=function(){ _renderAll24(); marcarLinhasDet();
 
 // ---------- v25: atualização automática ----------
 // Ao abrir (ou voltar para) o app, confere se há versão nova publicada e recarrega sozinho.
-const APP_VER="20261125151327";
+const APP_VER="20261126095841";
 let VER_CHECADO=0;
 async function checarVersao(){
   if(!/^\d+$/.test(APP_VER)||Date.now()-VER_CHECADO<60000) return; VER_CHECADO=Date.now();
