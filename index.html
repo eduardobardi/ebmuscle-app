@@ -1672,7 +1672,6 @@ function renderTreino(){
           </div>
           ${campoLocais(s.local,s.dor)}
           <div class="auto res" hidden><span class="r">Bem-estar total<span class="dica">soma dos 5 itens, de 5 a 25</span></span><output class="calc" id="s-bem">–</output></div>
-          <button type="button" class="btn ghost reg-ok" id="reg-ok">Pronto, esconder e ir para o treino</button>
         </fieldset>
         ${s.dur!=null||s.pse!=null?"":`<p class="mini-link depois-abre"><button type="button" class="link" id="depois-abrir">Não usou o cronômetro? Preencher data, duração e PSE</button></p>`}
         <fieldset class="bl" id="bl-depois"${s.dur!=null||s.pse!=null?"":" hidden"}><legend><span class="n">2</span>Depois do treino</legend>
@@ -1709,7 +1708,7 @@ function renderTreino(){
   { const rg=$("details.reg"), sm=rg.querySelector("summary");
     sm.addEventListener("click",()=>setTimeout(()=>regGuardar(rg.open),0));
     const esconder=()=>{ rg.open=false; regGuardar(false); const l=$("#tr-lista"); if(l) l.scrollIntoView({behavior:"smooth",block:"start"}); };
-    $("#reg-ok").addEventListener("click",esconder);
+
     let antes=preFormCompleto();
     $("#f-sessao").addEventListener("click",ev=>{ if(!ev.target.closest(".bl")||ev.target.closest("#reg-ok")) return;
       setTimeout(()=>{ const agora=preFormCompleto(); if(agora&&!antes){ const m=$("#s-msg"); if(m){ m.className="msg ok"; m.textContent="✓ Antes do treino respondido. Escondendo o registro…"; } setTimeout(()=>{ if(rg.isConnected&&rg.open) esconder(); },1100); } antes=agora; },0); });
@@ -2605,7 +2604,7 @@ renderAll=function(){ _renderAll24(); marcarLinhasDet();
 
 // ---------- v25: atualização automática ----------
 // Ao abrir (ou voltar para) o app, confere se há versão nova publicada e recarrega sozinho.
-const APP_VER="20261126100527";
+const APP_VER="20261126182335";
 let VER_CHECADO=0;
 async function checarVersao(){
   if(!/^\d+$/.test(APP_VER)||Date.now()-VER_CHECADO<60000) return; VER_CHECADO=Date.now();
