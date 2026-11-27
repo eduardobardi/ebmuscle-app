@@ -1785,7 +1785,7 @@ function renderTreino(){
       const copia=k>0?`<button type="button" class="copia" data-k="${k}" hidden aria-label="Repetir a ${k}ª série" title="Copiar a ${k}ª série">↑ igual</button>`:"";
       return `<tr><td>${k+1}ª${copia}</td>
         <td><input class="in${pre?" pre":""}" data-k="${k}" data-f="0" type="number" inputmode="decimal" min="0" max="1000" step="any" value="${esc(val0(reps))}" aria-label="Repetições da ${k+1}ª série"></td>
-         <td><input class="in" data-k="${k}" data-f="1" type="number" inputmode="decimal" min="0" max="1000" step="any" value="${esc(val0(kg))}" aria-label="Carga da ${k+1}ª série em kg"><span class="pc-txt" aria-hidden="true">PC</span></td>
+         <td><input class="in" data-k="${k}" data-f="1" type="text" inputmode="decimal" autocomplete="off" maxlength="7" value="${esc(val0(kg))}" aria-label="Carga da ${k+1}ª série em kg"><span class="pc-txt" aria-hidden="true">PC</span></td>
         <td class="vs">${a?`${num(a[0])} × ${fmtKg(a[1])}`:"–"}</td></tr>`;}).join("");
     const linkOk=e.link&&/^https?:\/\//i.test(e.link);
     const vl=ss.length?vlSets(ss):null;
@@ -1813,6 +1813,9 @@ function renderTreino(){
   };
   $("#tr-lista").innerHTML = montarGrupos(lista,cardHtml)||'<p class="sub">Nenhum exercício neste treino.</p>';
   $("#tr-lista").querySelectorAll("input,textarea").forEach(x=>x.addEventListener("input",()=>{
+    if(x.dataset.f==="1"){ // v38: carga aceita vírgula ou ponto em qualquer teclado (Android e iPhone)
+      const v0=x.value; let v=v0.replace(/,/g,".").replace(/[^0-9.]/g,""); const i=v.indexOf("."); if(i>=0) v=v.slice(0,i+1)+v.slice(i+1).replace(/\./g,"");
+      if(v!==v0){ const pos=x.selectionStart; x.value=v; try{ x.setSelectionRange(pos,pos); }catch(e){} } }
     x.classList.remove("pre"); guardarRasc(x);
     const card=x.closest(".ex"); if(!card) return; const e=EXT.ex[+card.dataset.i], m=card.querySelector(".msg");
     const {corpo,meia}=corpoExercicio(card,e);
@@ -2604,7 +2607,7 @@ renderAll=function(){ _renderAll24(); marcarLinhasDet();
 
 // ---------- v25: atualização automática ----------
 // Ao abrir (ou voltar para) o app, confere se há versão nova publicada e recarrega sozinho.
-const APP_VER="20261126182335";
+const APP_VER="20261127142834";
 let VER_CHECADO=0;
 async function checarVersao(){
   if(!/^\d+$/.test(APP_VER)||Date.now()-VER_CHECADO<60000) return; VER_CHECADO=Date.now();
